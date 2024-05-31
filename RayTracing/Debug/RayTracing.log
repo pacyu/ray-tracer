@@ -1,0 +1,17 @@
+﻿  main.cpp
+D:\source\repos\RayTracing\RayTracing\main.cpp(79,22): warning C4244: “参数”: 从“double”转换到“_Tp”，可能丢失数据
+          with
+          [
+              _Tp=uchar
+          ]
+D:\source\repos\RayTracing\RayTracing\main.cpp(78,22): warning C4244: “参数”: 从“double”转换到“_Tp”，可能丢失数据
+          with
+          [
+              _Tp=uchar
+          ]
+D:\source\repos\RayTracing\RayTracing\main.cpp(77,54): warning C4244: “参数”: 从“double”转换到“_Tp”，可能丢失数据
+          with
+          [
+              _Tp=uchar
+          ]
+opencv_world420d.lib(opencv_world420d.dll) : fatal error LNK1112: 模块计算机类型“x64”与目标计算机类型“x86”冲突

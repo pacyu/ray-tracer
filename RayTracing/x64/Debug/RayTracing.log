@@ -1,0 +1,87 @@
+﻿  main.cpp
+D:\source\repos\RayTracing\RayTracing\vec.h(71,22): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\vec.h(135,13): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\vec.h(159,35): warning C4305: “参数”: 从“double”到“float”截断
+D:\source\repos\RayTracing\RayTracing\aabb.h(14,15): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\hittable_list.h(31,10): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\sphere.h(15,17): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\sphere.h(15,14): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\sphere.h(28,1): warning C4305: “参数”: 从“double”到“float”截断
+D:\source\repos\RayTracing\RayTracing\sphere.h(34,13): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\sphere.h(54,8): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\sphere.h(55,25): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\camera.h(15,15): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\camera.h(16,11): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\camera.h(17,25): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\pdf.h(23,18): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\pdf.h(23,15): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\pdf.h(32,20): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\pdf.h(51,41): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\material.h(56,17): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\material.h(88,24): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\material.h(94,11): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\material.h(96,12): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\material.h(108,24): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\material.h(111,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\aarect.h(15,38): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\aarect.h(16,26): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\aarect.h(47,34): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\aarect.h(48,17): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\aarect.h(54,1): warning C4305: “参数”: 从“double”到“float”截断
+D:\source\repos\RayTracing\RayTracing\aarect.h(96,30): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\aarect.h(97,13): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\rotate.h(25,16): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\source\repos\RayTracing\RayTracing\main.cpp(31,6): warning C4305: “参数”: 从“double”到“float”截断
+D:\source\repos\RayTracing\RayTracing\main.cpp(61,64): warning C4305: “参数”: 从“double”到“float”截断
+D:\source\repos\RayTracing\RayTracing\main.cpp(62,66): warning C4305: “参数”: 从“double”到“float”截断
+D:\source\repos\RayTracing\RayTracing\main.cpp(63,66): warning C4305: “参数”: 从“double”到“float”截断
+D:\source\repos\RayTracing\RayTracing\main.cpp(109,42): warning C4305: “参数”: 从“double”到“float”截断
+D:\source\repos\RayTracing\RayTracing\main.cpp(110,42): warning C4305: “参数”: 从“double”到“float”截断
+D:\source\repos\RayTracing\RayTracing\main.cpp(111,42): warning C4305: “参数”: 从“double”到“float”截断
+D:\source\repos\RayTracing\RayTracing\main.cpp(111,22): warning C4244: “参数”: 从“float”转换到“_Tp”，可能丢失数据
+          with
+          [
+              _Tp=uchar
+          ]
+D:\source\repos\RayTracing\RayTracing\main.cpp(110,22): warning C4244: “参数”: 从“float”转换到“_Tp”，可能丢失数据
+          with
+          [
+              _Tp=uchar
+          ]
+D:\source\repos\RayTracing\RayTracing\main.cpp(109,22): warning C4244: “参数”: 从“float”转换到“_Tp”，可能丢失数据
+          with
+          [
+              _Tp=uchar
+          ]
+D:\source\repos\RayTracing\RayTracing\heart.h(90,11): warning C4244: “初始化”: 从“double”转换到“T”，可能丢失数据
+          with
+          [
+              T=float
+          ]
+D:\source\repos\RayTracing\RayTracing\heart.h(126): message : 查看对正在编译的函数 模板 实例化“T cbrt_noderiv<float>(T,const Ray &,const Point3 &)”的引用
+          with
+          [
+              T=float
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include\xutility(158,77): warning C4244: “参数”: 从“_Ty”转换到“float”，可能丢失数据
+          with
+          [
+              _Ty=int
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include\memory(2021): message : 查看对正在编译的函数 模板 实例化“void std::_Construct_in_place<_Ty,int,int,int,int,int,std::shared_ptr<Lambertian>&>(_Ty &,int &&,int &&,int &&,int &&,int &&,std::shared_ptr<Lambertian> &) noexcept(false)”的引用
+          with
+          [
+              _Ty=YZRect
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include\memory(2747): message : 查看对正在编译的函数 模板 实例化“std::_Ref_count_obj2<_Ty>::_Ref_count_obj2<int,int,int,int,int,std::shared_ptr<Lambertian>&>(int &&,int &&,int &&,int &&,int &&,std::shared_ptr<Lambertian> &)”的引用
+          with
+          [
+              _Ty=YZRect
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include\memory(2748): message : 查看对正在编译的函数 模板 实例化“std::_Ref_count_obj2<_Ty>::_Ref_count_obj2<int,int,int,int,int,std::shared_ptr<Lambertian>&>(int &&,int &&,int &&,int &&,int &&,std::shared_ptr<Lambertian> &)”的引用
+          with
+          [
+              _Ty=YZRect
+          ]
+D:\source\repos\RayTracing\RayTracing\main.cpp(66): message : 查看对正在编译的函数 模板 实例化“std::shared_ptr<YZRect> std::make_shared<YZRect,int,int,int,int,int,std::shared_ptr<Lambertian>&>(int &&,int &&,int &&,int &&,int &&,std::shared_ptr<Lambertian> &)”的引用
+  RayTracing.vcxproj -> D:\source\repos\RayTracing\x64\Debug\RayTracing.exe
