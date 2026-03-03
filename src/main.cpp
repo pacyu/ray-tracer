@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
     world.add(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));
     world.add(std::make_shared<flip_face>(std::make_shared<XZRect>(113, 443, 127, 432, 554, light)));
     world.add(std::make_shared<Heart>(Point3(278, 278, 278), 150.f, red));
-    world.add(std::make_shared<Sphere>(Point3(265., 265., 325.), 150., std::make_shared<Lambertian>(Color(.2, .5, 1.))));
+    //world.add(std::make_shared<Sphere>(Point3(265., 265., 325.), 150., std::make_shared<Lambertian>(Color(.2, .5, 1.))));
     //world.add(std::make_shared<Sphere>(Point3(260., 150., 45.), 100., std::make_shared<Dielectric>(Color(1., 1., 1.), 1.5)));
     //auto box_angle = std::make_shared<RotateY>(std::make_shared<Box>(Point3(0., 0., 0.), Point3(160., 160., 160.), std::make_shared<Dielectric>(Color(.9, .9, .9), 1.5)), 45);
     //world.add(box_angle);

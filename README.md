@@ -95,6 +95,17 @@ A physically-based RayTracer built from scratch as a hobbyist project. Originall
    cmake --build . --config Release
    ```
 
+4. **Example**:
+
+   ```bash
+   cd bin
+   ./raytracer
+   ```
+
+   then, you will get an image like this:
+
+   ![taubin's heart](/examples/image.png)
+
 ## 📄 Credits
 
 Originally based on Ray Tracing in One Weekend.
