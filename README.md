@@ -102,7 +102,7 @@ A physically-based RayTracer built from scratch as a hobbyist project. Originall
    ./raytracer
    ```
 
-   then, you will get an image like this:
+   Then, after a short while, you will get an image like this:
 
    ![taubin's heart](/examples/image.png)
 
