@@ -1,6 +1,6 @@
 #pragma once
 #include "hittable.h"
-#include "tracer/utils/math.h"
+#include "tracer/utils/drand48.h"
 #include <tuple>
 
 namespace tracer {
@@ -35,6 +35,10 @@ public:
   virtual bool hit(const Ray &r, float t_min, float t_max,
                    hit_record &rec) const;
   virtual bool bounding_box(float t0, float t1, AABB &output_box) const;
+
+  virtual float pdf_value(const Point3 &o, const Vec3 &v) const;
+
+  virtual Vec3 random(const Point3 &o) const;
 
   Point3 center;
   float rho;

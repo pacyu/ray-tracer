@@ -44,7 +44,7 @@ void Camera::render(const hittable_list &world,
     std::uniform_real_distribution<float> dist(0.0, 1.0);
     auto local_rand = [&]() { return dist(gen); };
 
-#pragma omp for schedule(dynamic)
+#pragma omp for schedule(dynamic, 1)
     for (int j = image_height - 1; j >= 0; --j) {
       for (int i = 0; i < image_width; ++i) {
         Color pixel(0., 0., 0.);

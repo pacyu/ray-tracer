@@ -26,9 +26,18 @@ public:
   }
 
   virtual bool hit(const Ray &r, float t0, float t1, hit_record &rec) const;
+
   virtual bool bounding_box(float t0, float t1, AABB &output_box) const {
     output_box = AABB(box_min, box_max);
     return true;
+  }
+
+  virtual float pdf_value(const Point3 &o, const Vec3 &v) const override {
+    return sides.pdf_value(o, v);
+  }
+
+  virtual Vec3 random(const Point3 &o) const override {
+    return sides.random(o);
   }
 
   Point3 box_min;

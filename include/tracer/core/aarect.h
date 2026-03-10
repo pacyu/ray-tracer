@@ -6,7 +6,6 @@
 #include "tracer/utils/drand48.h"
 #include "tracer/utils/math.h"
 
-
 namespace tracer {
 
 class XYRect : public hittable {
@@ -36,7 +35,7 @@ public:
 
   virtual Vec3 random(const Point3 &origin) const override {
     auto random_point =
-        Point3(utils::random_float(x0, x1), k, utils::random_float(y0, y1));
+        Point3(utils::random_float(x0, x1), utils::random_float(y0, y1), k);
     return random_point - origin;
   }
 
@@ -106,7 +105,7 @@ public:
 
   virtual Vec3 random(const Point3 &origin) const override {
     auto random_point =
-        Point3(utils::random_float(y0, y1), k, utils::random_float(z0, z1));
+        Point3(k, utils::random_float(y0, y1), utils::random_float(z0, z1));
     return random_point - origin;
   }
 

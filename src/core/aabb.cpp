@@ -7,10 +7,8 @@ bool AABB::hit(const Ray &r, float tmin, float tmax) const {
     float invD = 1. / r.direction()[i];
     float t0 = (min[i] - r.origin()[i]) * invD,
           t1 = (max[i] - r.origin()[i]) * invD;
-    if (invD < 0.)
-      std::swap(t0, t1);
-    tmin = std::max(t0, tmin);
-    tmax = std::min(t1, tmax);
+    tmin = fmax(tmin, fmin(t0, t1));
+    tmax = fmin(tmax, fmax(t0, t1));
     if (tmax <= tmin)
       return false;
   }

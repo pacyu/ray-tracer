@@ -47,6 +47,16 @@ add_executable(test_tracer tests/test_tracer.cpp)
 target_include_directories(test_tracer PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(test_tracer PRIVATE tracer_lib)
 
+set(ALL_TARGETS ${PROJECT_NAME} tracer_lib test_parser test_tracer)
+foreach(target ${ALL_TARGETS})
+    if(MSVC)
+        # /Ox /Ot /fp:fast /arch:AVX2 针对光追计算密度进行优化
+        target_compile_options(${target} PRIVATE /Ox /Ot /fp:fast /arch:AVX2)
+    else()
+        target_compile_options(${target} PRIVATE -O3 -march=native -ffast-math)
+    endif()
+endforeach()
+
 # 启用 IPO（Interprocedural Optimization）以提高性能
 include(CheckIPOSupported)
 check_ipo_supported(RESULT result OUTPUT error)

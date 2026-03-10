@@ -73,7 +73,10 @@ inline Vec3 operator*(const Vec3 &v, float t) { return t * v; }
 inline Vec3 operator/(const Vec3 &v, float t) { return (1. / t) * v; }
 
 inline float dot(const Vec3 &u, const Vec3 &v) {
-  return u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2];
+  __m128 m1 = _mm_set_ps(0, u.e[2], u.e[1], u.e[0]);
+  __m128 m2 = _mm_set_ps(0, v.e[2], v.e[1], v.e[0]);
+  __m128 res = _mm_dp_ps(m1, m2, 0x71);
+  return _mm_cvtss_f32(res);
 }
 
 inline Vec3 cross(const Vec3 &u, const Vec3 &v) {
@@ -88,6 +91,18 @@ inline Vec3 random_unit_vector() {
   float a = utils::random_float(0., 2 * utils::M_PI),
         z = utils::random_float(-1., 1.), r = std::sqrt(1 - z * z);
   return Vec3(r * std::cos(a), r * std::sin(a), z);
+}
+
+inline Vec3 random_to_sphere(float radius, float distance_squared) {
+  float r1 = utils::random_float();
+  float r2 = utils::random_float();
+  float z = 1 + r2 * (sqrt(1 - radius * radius / distance_squared) - 1);
+
+  float phi = 2 * utils::M_PI * r1;
+  float x = cos(phi) * sqrt(1 - z * z);
+  auto y = sin(phi) * sqrt(1 - z * z);
+
+  return Vec3(x, y, z);
 }
 
 using Point3 = Vec3;

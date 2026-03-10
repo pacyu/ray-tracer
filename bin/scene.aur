@@ -1,5 +1,5 @@
 Camera {
-  image_size: (800, 600)
+  image_size: (600, 600)
   samples_per_pixel: 128
   max_depth: 8
   background: (0.0, 0.0, 0.0)
