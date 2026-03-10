@@ -1,1 +1,6 @@
+.vscode/*
 build/*
+bin/*.exe
+bin/*.png
+bin/*.pbd
+lib/*

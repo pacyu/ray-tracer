@@ -1,0 +1,74 @@
+Camera {
+  image_size: (800, 600)
+  samples_per_pixel: 128
+  max_depth: 8
+  background: (0.0, 0.0, 0.0)
+  
+  lookfrom: (278.0, 278.0, -800.0)
+  lookat: (278.0, 278.0, 0.0)
+  vup: (0.0, 1.0, 0.0)
+  fov: 40.0
+}
+
+DiffuseLight {
+  albedo: (4, 4, 4)
+}
+
+Lambertian-red {
+  albedo: (0.65, 0.05, 0.05)
+}
+
+Lambertian-green {
+  albedo: (0.12, 0.45, 0.15)
+}
+
+Lambertian-grey {
+  albedo: (0.73, 0.73, 0.73)
+}
+
+XZRect {
+  quaternion: (113, 443, 127, 432)
+  k: 554.0
+  material: DiffuseLight
+}
+
+XZRect2 {
+  quaternion: (0, 555, 0, 555)
+  k: 0.0
+  material: Lambertian-grey
+}
+
+XZRect3 {
+  quaternion: (0, 555, 0, 555)
+  k: 555.0
+  material: Lambertian-grey
+}
+
+YZRect {
+  quaternion: (0, 555, 0, 555)
+  k: 0.0
+  material: Lambertian-red
+}
+
+YZRect2 {
+  quaternion: (0, 555, 0, 555)
+  k: 555.0
+  material: Lambertian-green
+}
+
+XYRect {
+  quaternion: (0, 555, 0, 555)
+  k: 555.0
+  material: Lambertian-grey
+}
+
+Light {
+  object: XZRect
+}
+
+Heart {
+  center: (278, 278, 278)
+  radius: 150.0
+  material: Lambertian-red
+}
+
