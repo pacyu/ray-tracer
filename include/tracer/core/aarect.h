@@ -5,6 +5,7 @@
 #include "tracer/core/ray.h"
 #include "tracer/utils/drand48.h"
 #include "tracer/utils/math.h"
+#include <memory>
 
 namespace tracer {
 

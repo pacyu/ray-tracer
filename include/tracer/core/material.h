@@ -57,7 +57,7 @@ public:
   float scattering_pdf(const Ray &r_in, const hit_record &rec,
                        const Ray &scattered) const {
     auto cosine = dot(rec.normal, unit_vector(scattered.direction()));
-    return cosine < 0 ? 0 : cosine / utils::M_PI;
+    return cosine < 0 ? 0 : cosine / utils::TRACER_PI;
   }
 
   std::shared_ptr<Texture> albedo;

@@ -10,7 +10,7 @@ Camera::Camera(size_t image_width, size_t image_height, int samples_per_pixel,
       background(background), lookfrom(lookfrom), lookat(lookat), vup(vup),
       vfov(vfov), aspect_ratio(aspect_ratio) {
   origin = lookfrom;
-  float theta = vfov * utils::M_PI / 180.;
+  float theta = vfov * utils::TRACER_PI / 180.;
   float h = std::tan(theta / 2.);
   float viewport_height = 2. * h,
         viewport_width = aspect_ratio * viewport_height;

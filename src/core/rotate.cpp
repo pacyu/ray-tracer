@@ -3,7 +3,7 @@
 namespace tracer {
 
 RotateY::RotateY(std::shared_ptr<hittable> p, float angle) : ptr(p) {
-  float radians = angle * utils::M_PI / 180.;
+  float radians = angle * utils::TRACER_PI / 180.;
   sin_theta = std::sin(radians);
   cos_theta = std::cos(radians);
   hasbox = ptr->bounding_box(0, 1, bbox);

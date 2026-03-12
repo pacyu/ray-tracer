@@ -2,6 +2,7 @@
 #include "tracer/utils/drand48.h"
 #include "tracer/utils/math.h"
 #include <iostream>
+#include <smmintrin.h>
 
 namespace tracer {
 
@@ -88,7 +89,7 @@ inline Vec3 cross(const Vec3 &u, const Vec3 &v) {
 inline Vec3 unit_vector(const Vec3 &v) { return v / v.length(); }
 
 inline Vec3 random_unit_vector() {
-  float a = utils::random_float(0., 2 * utils::M_PI),
+  float a = utils::random_float(0., 2 * utils::TRACER_PI),
         z = utils::random_float(-1., 1.), r = std::sqrt(1 - z * z);
   return Vec3(r * std::cos(a), r * std::sin(a), z);
 }
@@ -98,7 +99,7 @@ inline Vec3 random_to_sphere(float radius, float distance_squared) {
   float r2 = utils::random_float();
   float z = 1 + r2 * (sqrt(1 - radius * radius / distance_squared) - 1);
 
-  float phi = 2 * utils::M_PI * r1;
+  float phi = 2 * utils::TRACER_PI * r1;
   float x = cos(phi) * sqrt(1 - z * z);
   auto y = sin(phi) * sqrt(1 - z * z);
 

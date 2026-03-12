@@ -20,7 +20,7 @@ inline Vec3 random_cosine_direction() {
   auto r2 = utils::random_float();
   auto z = sqrt(1 - r2);
 
-  auto phi = 2 * utils::M_PI * r1;
+  auto phi = 2 * utils::TRACER_PI * r1;
   auto x = cos(phi) * sqrt(r2);
   auto y = sin(phi) * sqrt(r2);
 
@@ -33,7 +33,7 @@ public:
 
   virtual float value(const Vec3 &direction) const override {
     auto cosine = dot(unit_vector(direction), uvw.w());
-    return (cosine <= 0) ? 0 : cosine / utils::M_PI;
+    return (cosine <= 0) ? 0 : cosine / utils::TRACER_PI;
   }
 
   virtual Vec3 generate() const override {

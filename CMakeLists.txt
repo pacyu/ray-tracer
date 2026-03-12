@@ -3,7 +3,6 @@ project(rayt)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(OpenCV_DIR "C:/OpenCV/build")
 
 # 使用 CMAKE_SOURCE_DIR 确保路径相对于项目根目录 
 if(MSVC)
@@ -29,13 +28,13 @@ include_directories(include)
 
 # 构建静态库
 file(GLOB_RECURSE SOURCES "src/parser/*.cpp" "src/core/*.cpp")
-add_library(tracer_lib ${SOURCES})
+add_library(tracer_lib STATIC ${SOURCES})
 target_link_libraries(tracer_lib PRIVATE ${OpenCV_LIBS} OpenMP::OpenMP_CXX)
 
 # 构建主可执行文件
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE tracer_lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE tracer_lib ${OpenCV_LIBS})
 
 # 构建解析器测试可执行文件
 add_executable(test_parser tests/test_parser.cpp)
@@ -45,7 +44,7 @@ target_link_libraries(test_parser PRIVATE tracer_lib)
 # 构建渲染器测试可执行文件
 add_executable(test_tracer tests/test_tracer.cpp)
 target_include_directories(test_tracer PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(test_tracer PRIVATE tracer_lib)
+target_link_libraries(test_tracer PRIVATE tracer_lib ${OpenCV_LIBS})
 
 set(ALL_TARGETS ${PROJECT_NAME} tracer_lib test_parser test_tracer)
 foreach(target ${ALL_TARGETS})
