@@ -87,7 +87,7 @@ Color Camera::ray_color(const Ray &r, const Color &background,
   if (depth <= 0)
     return background;
 
-  if (!world.hit(r, 0.05, tracer::utils::inf, rec))
+  if (!world.hit(r, 0.001, tracer::utils::inf, rec))
     return background;
 
   scatter_record srec;
