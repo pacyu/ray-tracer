@@ -1,6 +1,6 @@
 #pragma once
-#include "aabb.h"
-#include "hittable.h"
+#include "tracer/core/aabb.h"
+#include "tracer/core/hittable.h"
 #include "tracer/utils/drand48.h"
 #include <memory>
 #include <vector>

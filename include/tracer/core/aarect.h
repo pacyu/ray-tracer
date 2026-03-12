@@ -1,8 +1,8 @@
 #pragma once
 
-#include "aabb.h"
-#include "hittable.h"
-#include "ray.h"
+#include "tracer/core/aabb.h"
+#include "tracer/core/hittable.h"
+#include "tracer/core/ray.h"
 #include "tracer/utils/drand48.h"
 #include "tracer/utils/math.h"
 

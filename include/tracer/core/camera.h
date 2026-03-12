@@ -1,13 +1,14 @@
 #pragma once
-#include "hittable.h"
-#include "hittable_list.h"
-#include "material.h"
 #include "opencv2/opencv.hpp"
-#include "pdf.h"
-#include "ray.h"
+#include "tracer/core/hittable.h"
+#include "tracer/core/hittable_list.h"
+#include "tracer/core/material.h"
+#include "tracer/core/pdf.h"
+#include "tracer/core/ray.h"
 #include "tracer/utils/math.h"
 #include <chrono>
 #include <omp.h>
+
 
 namespace tracer {
 

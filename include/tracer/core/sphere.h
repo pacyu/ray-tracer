@@ -1,7 +1,7 @@
 #pragma once
-#include "hittable.h"
-#include "onb.h"
-#include "ray.h"
+#include "tracer/core/hittable.h"
+#include "tracer/core/onb.h"
+#include "tracer/core/ray.h"
 #include "tracer/utils/drand48.h"
 
 namespace tracer {

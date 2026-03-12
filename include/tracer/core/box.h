@@ -1,6 +1,6 @@
 #pragma once
-#include "aarect.h"
-#include "hittable_list.h"
+#include "tracer/core/aarect.h"
+#include "tracer/core/hittable_list.h"
 
 namespace tracer {
 

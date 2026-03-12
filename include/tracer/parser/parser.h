@@ -1,10 +1,9 @@
 #pragma once
 
-#include "ast.h"
-#include "exceptions.h"
-#include "token.h"
+#include "tracer/parser/ast.h"
+#include "tracer/parser/exceptions.h"
+#include "tracer/parser/token.h"
 #include <stdexcept>
-
 
 namespace tracer {
 

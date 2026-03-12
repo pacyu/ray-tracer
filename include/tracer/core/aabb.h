@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ray.h"
+#include "tracer/core/ray.h"
 
 namespace tracer {
 

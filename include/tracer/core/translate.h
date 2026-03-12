@@ -1,5 +1,5 @@
 #pragma once
-#include "hittable.h"
+#include "tracer/core/hittable.h"
 
 namespace tracer {
 

@@ -1,5 +1,4 @@
 #include "tracer/parser/factory.h"
-#include <unordered_map>
 
 namespace tracer {
 

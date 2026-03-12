@@ -1,5 +1,5 @@
 #pragma once
-#include "vec3.h"
+#include "tracer/core/vec3.h"
 
 namespace tracer {
 

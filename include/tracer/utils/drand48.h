@@ -1,5 +1,5 @@
 #pragma once
-#include "math.h"
+#include "tracer/utils/math.h"
 #include <random>
 
 namespace tracer {

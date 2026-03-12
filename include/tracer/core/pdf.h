@@ -1,6 +1,6 @@
 #pragma once
 
-#include "onb.h"
+#include "tracer/core/onb.h"
 #include "tracer/utils/drand48.h"
 #include "tracer/utils/math.h"
 #include "vec3.h"
