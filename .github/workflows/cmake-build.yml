@@ -29,7 +29,17 @@ jobs:
           vcpkg install opencv:x64-windows
 
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
+        run: |
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            # Windows 平台：使用 vcpkg 工具链
+            cmake -B build \
+              -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+              -DVCPKG_TARGET_TRIPLET=x64-windows
+          else
+            # Linux 平台：直接 Configure 即可
+            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
+          fi
+        shell: bash
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config Release -j 2
