@@ -1,5 +1,4 @@
 #pragma once
-
 #include "tracer/parser/ast.h"
 #include "tracer/parser/exceptions.h"
 #include "tracer/parser/token.h"

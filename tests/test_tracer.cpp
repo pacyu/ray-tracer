@@ -16,37 +16,36 @@ void test_tracer() {
   world.add(std::make_shared<XZRect>(0, 555, 0, 555, 0, gray));
   world.add(std::make_shared<XZRect>(0, 555, 0, 555, 555, gray));
 
-  auto boundary = std::make_shared<Sphere>(Point3(360, 150, 145), 70,
-                                           std::make_shared<Dielectric>(Color(0.9, 0.1, 0.1), 0.001, 1.5));
+  auto boundary = std::make_shared<Heart>(Point3(278, 278, 278), 150.f, red);
   world.add(boundary);
-  //world.add(
-  //    std::make_shared<ConstantMedium>(boundary, 0.2, Color(0.2, 0.4, 0.9)));
-  //world.add(std::make_shared<Heart>(Point3(278, 278, 278), 150.f, red));
+  world.add(std::make_shared<ConstantMedium>(boundary, 0.2, Color(0.2, 0.4, 0.9)));
 
-  //world.add(std::make_shared<RotateY>(
-  //    std::make_shared<Box>(Point3(130, 0, 65), Point3(295, 165, 230),
-  //                          std::make_shared<Dielectric>(1.5)),
-  //    45));
+  // world.add(std::make_shared<RotateY>(
+  //     std::make_shared<Box>(Point3(130, 0, 65), Point3(295, 165, 230),
+  //                           std::make_shared<Dielectric>(1.5)),
+  //     45));
 
   auto light = std::make_shared<flip_face>(
       std::make_shared<XZRect>(113, 443, 127, 432, 554, m_light));
   world.add(light);
+  std::shared_ptr<BVH> bvh_world =
+      std::make_shared<BVH>(world.objects, 0, world.objects.size());
 
   // 渲染场景
   const int w = 600;
   const int h = 600;
   float aspect_ratio = static_cast<float>(w) / static_cast<float>(h);
   int samples_per_pixel = 128;
-  int max_depth = 10;
+  int max_depth = 8;
 
   // 创建一个相机
   Camera cam(w, h, samples_per_pixel, max_depth, Color(0, 0, 0),
              Point3(278., 278., -800.), Point3(278., 278., 0.),
              Vec3(0., 1., 0.), 40., aspect_ratio);
 
-  cam.render(world, light);
+  cam.render(*bvh_world, light);
 }
-  
+
 int main() {
   test_tracer();
   std::cout << "Test passed!" << std::endl;

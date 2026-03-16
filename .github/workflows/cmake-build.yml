@@ -5,17 +5,19 @@ on:
     branches: ["main", "master"]
     paths-ignore:
       - "**.md"
-      - "docs/**" # 如果你有文档目录也可以加上
+      - "bin/**"
+      - "docs/**"
       - ".github/workflows/**"
-      - ".gitignore" # 忽略配置文件修改
+      - ".gitignore"
       - ".gitattributes"
   pull_request:
     branches: ["main", "master"]
     paths-ignore:
       - "**.md"
-      - "docs/**" # 如果你有文档目录也可以加上
+      - "bin/**"
+      - "docs/**"
       - ".github/workflows/**"
-      - ".gitignore" # 忽略配置文件修改
+      - ".gitignore"
       - ".gitattributes"
 
 jobs:

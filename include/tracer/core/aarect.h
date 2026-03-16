@@ -1,5 +1,4 @@
 #pragma once
-
 #include "tracer/core/aabb.h"
 #include "tracer/core/hittable.h"
 #include "tracer/core/ray.h"
@@ -19,28 +18,11 @@ public:
                    hit_record &rec) const override;
 
   virtual bool bounding_box(float t0, float t1,
-                            AABB &output_box) const override {
-    output_box = AABB(Point3(x0, y0, k - 0.0001), Point3(x1, y1, k + 0.0001));
-    return true;
-  }
+                            AABB &output_box) const override;
 
-  virtual float pdf_value(const Point3 &origin, const Vec3 &v) const override {
-    hit_record rec;
-    if (!this->hit(Ray(origin, v), 0.001, utils::inf, rec))
-      return 0;
+  virtual float pdf_value(const Point3 &origin, const Vec3 &v) const override;
 
-    auto area = (x1 - x0) * (y1 - y0);
-    auto distance_squared = rec.t * rec.t * v.squared_length();
-    auto cosine = fabs(dot(v, rec.normal) / v.length());
-
-    return distance_squared / (cosine * area);
-  }
-
-  virtual Vec3 random(const Point3 &origin) const override {
-    auto random_point =
-        Point3(utils::random_float(x0, x1), utils::random_float(y0, y1), k);
-    return random_point - origin;
-  }
+  virtual Vec3 random(const Point3 &origin) const override;
 
   std::shared_ptr<Material> mat_ptr;
   float x0, x1, y0, y1, k;
@@ -56,28 +38,11 @@ public:
                    hit_record &rec) const override;
 
   virtual bool bounding_box(float t0, float t1,
-                            AABB &output_box) const override {
-    output_box = AABB(Point3(x0, k - 0.0001, z0), Point3(x1, k + 0.0001, z1));
-    return true;
-  }
+                            AABB &output_box) const override;
 
-  virtual float pdf_value(const Point3 &origin, const Vec3 &v) const override {
-    hit_record rec;
-    if (!this->hit(Ray(origin, v), 0.001, utils::inf, rec))
-      return 0;
+  virtual float pdf_value(const Point3 &origin, const Vec3 &v) const override;
 
-    auto area = (x1 - x0) * (z1 - z0);
-    auto distance_squared = rec.t * rec.t * v.squared_length();
-    auto cosine = fabs(dot(v, rec.normal) / v.length());
-
-    return distance_squared / (cosine * area);
-  }
-
-  virtual Vec3 random(const Point3 &origin) const override {
-    auto random_point =
-        Point3(utils::random_float(x0, x1), k, utils::random_float(z0, z1));
-    return random_point - origin;
-  }
+  virtual Vec3 random(const Point3 &origin) const override;
 
   std::shared_ptr<Material> mat_ptr;
   float x0, x1, z0, z1, k;
@@ -93,28 +58,11 @@ public:
                    hit_record &rec) const override;
 
   virtual bool bounding_box(float t0, float t1,
-                            AABB &output_box) const override {
-    output_box = AABB(Point3(k - 0.0001, y0, z0), Point3(k + 0.0001, y1, z1));
-    return true;
-  }
+                            AABB &output_box) const override;
 
-  virtual float pdf_value(const Point3 &origin, const Vec3 &v) const override {
-    hit_record rec;
-    if (!this->hit(Ray(origin, v), 0.001, utils::inf, rec))
-      return 0;
+  virtual float pdf_value(const Point3 &origin, const Vec3 &v) const override;
 
-    auto area = (y1 - y0) * (z1 - z0);
-    auto distance_squared = rec.t * rec.t * v.squared_length();
-    auto cosine = fabs(dot(v, rec.normal) / v.length());
-
-    return distance_squared / (cosine * area);
-  }
-
-  virtual Vec3 random(const Point3 &origin) const override {
-    auto random_point =
-        Point3(k, utils::random_float(y0, y1), utils::random_float(z0, z1));
-    return random_point - origin;
-  }
+  virtual Vec3 random(const Point3 &origin) const override;
 
   std::shared_ptr<Material> mat_ptr;
   float y0, y1, z0, z1, k;

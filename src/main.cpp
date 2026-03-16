@@ -23,8 +23,10 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<Camera> cam = std::move(factory.get_camera());
     auto light = factory.get_light();
     hittable_list world = factory.get_world();
+    std::unique_ptr<hittable> bvh_world =
+        std::make_unique<BVH>(world.objects, 0, world.objects.size());
 
-    cam->render(world, light);
+    cam->render(*bvh_world, light);
 
   } catch (const parser::ParseException &e) {
     // 捕获带行号的自定义解析异常

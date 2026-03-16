@@ -1,5 +1,4 @@
 #pragma once
-
 #include "tracer/core/ray.h"
 
 namespace tracer {

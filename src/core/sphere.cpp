@@ -2,6 +2,13 @@
 
 namespace tracer {
 
+void get_sphere_uv(const Point3 &p, float &u, float &v) {
+  auto phi = atan2(p.z(), p.x());
+  auto theta = asin(p.y());
+  u = 1 - (phi + utils::TRACER_PI) / (2 * utils::TRACER_PI);
+  v = (theta + utils::TRACER_PI / 2) / utils::TRACER_PI;
+}
+
 bool Sphere::hit(const Ray &r, float t_min, float t_max,
                  hit_record &rec) const {
   Vec3 oc = r.origin() - center;

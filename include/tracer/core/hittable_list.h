@@ -21,20 +21,9 @@ public:
   virtual bool bounding_box(float t0, float t1,
                             AABB &output_box) const override;
 
-  float pdf_value(const Point3 &o, const Vec3 &v) const override {
-    auto weight = 1.0 / objects.size();
-    auto sum = 0.0;
+  virtual float pdf_value(const Point3 &o, const Vec3 &v) const override;
 
-    for (const auto &object : objects)
-      sum += weight * object->pdf_value(o, v);
-
-    return sum;
-  }
-
-  Vec3 random(const Vec3 &o) const override {
-    auto int_size = static_cast<int>(objects.size());
-    return objects[utils::random_int(0, int_size - 1)]->random(o);
-  }
+  virtual Vec3 random(const Vec3 &o) const override;
 
   std::vector<std::shared_ptr<hittable>> objects;
 };

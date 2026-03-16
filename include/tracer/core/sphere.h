@@ -6,12 +6,7 @@
 
 namespace tracer {
 
-inline void get_sphere_uv(const Point3 &p, float &u, float &v) {
-  auto phi = atan2(p.z(), p.x());
-  auto theta = asin(p.y());
-  u = 1 - (phi + utils::TRACER_PI) / (2 * utils::TRACER_PI);
-  v = (theta + utils::TRACER_PI / 2) / utils::TRACER_PI;
-}
+void get_sphere_uv(const Point3 &p, float &u, float &v);
 
 class Sphere : public hittable {
 public:

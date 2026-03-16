@@ -31,8 +31,7 @@ Ray Camera::get_ray(float u, float v) const {
              lower_left_corner + u * horizontal + v * vertical - origin);
 }
 
-void Camera::render(const hittable_list &world,
-                    std::shared_ptr<hittable> lights) {
+void Camera::render(const hittable &world, std::shared_ptr<hittable> lights) {
   cv::Mat img = cv::Mat::zeros(cv::Size(image_width, image_height), CV_8UC3);
 
   auto start = std::chrono::steady_clock::now();
@@ -80,8 +79,8 @@ void Camera::render(const hittable_list &world,
 }
 
 Color Camera::ray_color(const Ray &r, const Color &background,
-                        const hittable_list &world,
-                        std::shared_ptr<hittable> lights, int depth) {
+                        const hittable &world, std::shared_ptr<hittable> lights,
+                        int depth) {
   hit_record rec;
 
   if (depth <= 0)
@@ -101,8 +100,8 @@ Color Camera::ray_color(const Ray &r, const Color &background,
            ray_color(srec.specular_ray, background, world, lights, depth - 1);
   }
 
-  auto light_ptr = std::make_shared<Hittable_pdf>(lights, rec.p);
-  Mixture_pdf p(light_ptr, srec.pdf_ptr);
+  Hittable_pdf light_ptr = Hittable_pdf(lights.get(), rec.p);
+  Mixture_pdf p(&light_ptr, srec.pdf_ptr.get());
 
   Ray scattered = Ray(rec.p, p.generate());
   auto pdf_val = p.value(scattered.direction());

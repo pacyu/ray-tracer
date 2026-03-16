@@ -16,10 +16,7 @@ struct hit_record {
   float v;
   bool front_face;
 
-  void set_face_normal(const Ray &r, const Vec3 &outward_normal) {
-    front_face = dot(r.direction(), outward_normal) < 0;
-    normal = front_face ? outward_normal : -outward_normal;
-  }
+  void set_face_normal(const Ray &r, const Vec3 &outward_normal);
 };
 
 class hittable {
@@ -39,25 +36,14 @@ public:
   flip_face(std::shared_ptr<hittable> p) : ptr(p) {}
 
   virtual bool hit(const Ray &r, float t_min, float t_max,
-                   hit_record &rec) const override {
-
-    if (!ptr->hit(r, t_min, t_max, rec))
-      return false;
-
-    rec.front_face = !rec.front_face;
-    return true;
-  }
+                   hit_record &rec) const override;
 
   virtual bool bounding_box(float time0, float time1,
-                            AABB &output_box) const override {
-    return ptr->bounding_box(time0, time1, output_box);
-  }
+                            AABB &output_box) const override;
 
-  virtual float pdf_value(const Point3 &o, const Vec3 &v) const override {
-    return ptr->pdf_value(o, v);
-  }
+  virtual float pdf_value(const Point3 &o, const Vec3 &v) const override;
 
-  virtual Vec3 random(const Vec3 &o) const override { return ptr->random(o); }
+  virtual Vec3 random(const Vec3 &o) const override;
 
 public:
   std::shared_ptr<hittable> ptr;

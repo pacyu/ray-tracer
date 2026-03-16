@@ -14,13 +14,9 @@ public:
   Vec3 v() const { return axis[1]; }
   Vec3 w() const { return axis[2]; }
 
-  Vec3 local(float a, float b, float c) const {
-    return a * u() + b * v() + c * w();
-  }
+  Vec3 local(float a, float b, float c) const;
 
-  Vec3 local(const Vec3 &a) const {
-    return a.x() * u() + a.y() * v() + a.z() * w();
-  }
+  Vec3 local(const Vec3 &a) const;
 
   void build_from_w(const Vec3 &);
 

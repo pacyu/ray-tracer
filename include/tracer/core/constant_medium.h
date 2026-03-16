@@ -1,5 +1,4 @@
 #pragma once
-
 #include "tracer/core/hittable.h"
 #include "tracer/core/material.h"
 #include "tracer/core/texture.h"

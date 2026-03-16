@@ -9,7 +9,6 @@
 #include <chrono>
 #include <omp.h>
 
-
 namespace tracer {
 
 class Camera {
@@ -33,11 +32,10 @@ public:
   const Point3 get_origin() const;
   Ray get_ray(float u, float v) const;
 
-  void render(const hittable_list &world, std::shared_ptr<hittable> lights);
+  void render(const hittable &world, std::shared_ptr<hittable> lights);
 
-  Color ray_color(const Ray &r, const Color &background,
-                  const hittable_list &world, std::shared_ptr<hittable> lights,
-                  int depth);
+  Color ray_color(const Ray &r, const Color &background, const hittable &world,
+                  std::shared_ptr<hittable> lights, int depth);
 
 private:
   Point3 origin;
