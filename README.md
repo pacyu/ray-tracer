@@ -2,8 +2,7 @@
 
 [![Language](https://img.shields.io/badge/Language-C++-blue.svg)](https://en.cppreference.com/)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows-blue)](...)
-[![Ubuntu Build](https://github.com/pacyu/ray-tracer/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/pacyu/ray-tracer/actions)
-[![Windows Build](https://github.com/pacyu/ray-tracer/actions/workflows/windows.yml/badge.svg)](https://github.com/pacyu/ray-tracer/actions)
+[![C++ CI Build](https://github.com/pacyu/ray-tracer/actions/workflows/cmake-build.yml/badge.svg)](https://github.com/pacyu/ray-tracer/actions/workflows/cmake-build.yml)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](...)
 
 [中文](#chinese) | [English](#english) | [日本語](#japanese)

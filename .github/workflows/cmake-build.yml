@@ -3,8 +3,20 @@ name: C++ CI Build
 on:
   push:
     branches: ["main", "master"]
+    paths-ignore:
+      - "**.md"
+      - "docs/**" # 如果你有文档目录也可以加上
+      - ".github/workflows/**"
+      - ".gitignore" # 忽略配置文件修改
+      - ".gitattributes"
   pull_request:
     branches: ["main", "master"]
+    paths-ignore:
+      - "**.md"
+      - "docs/**" # 如果你有文档目录也可以加上
+      - ".github/workflows/**"
+      - ".gitignore" # 忽略配置文件修改
+      - ".gitattributes"
 
 jobs:
   build:
