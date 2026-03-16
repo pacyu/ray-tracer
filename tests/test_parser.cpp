@@ -11,14 +11,18 @@ using namespace tracer::parser;
 void test_parser() {
   // 使用工厂类解析场景描述
   Factory factory("..\\bin\\scene.aur");
+  factory.parse();
   factory.builder();
 
+  std::unique_ptr<Camera> camera = std::move(factory.get_camera());
+  hittable_list world = factory.get_world();
   // 验证解析结果
-  assert(factory.get_camera().image_width == 800);
-  assert(factory.get_camera().image_height == 600);
-  assert(factory.get_camera().samples_per_pixel == 128);
-  assert(factory.get_camera().max_depth == 8);
-  assert(factory.get_camera().background == Color(0.0, 0.0, 0.0));
+  assert(camera->image_width == 600);
+  assert(camera->image_height == 600);
+  assert(camera->samples_per_pixel == 128);
+  assert(camera->max_depth == 8);
+  assert(camera->background == Color(0.0, 0.0, 0.0));
+  assert(world.objects.size() >= 9);
 }
 
 int main() {

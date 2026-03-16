@@ -19,6 +19,7 @@ private:
   std::string_view source;
   size_t cursor = 0;
 
+  bool ispunct(char ch);
   char peek() const;
   void advance();
   void skip_whitespaces_and_comments();

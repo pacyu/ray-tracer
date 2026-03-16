@@ -4,6 +4,11 @@ namespace tracer {
 
 namespace parser {
 
+bool Lexer::ispunct(char ch) {
+  std::string targets = "\\/~`·@$%&?"; // 注意反斜杠需要转义
+  return targets.find(ch) != std::string::npos;
+}
+
 char Lexer::peek() const {
   if (cursor >= source.size())
     return EOF;
@@ -40,7 +45,8 @@ Token Lexer::peek_number() {
 
 Token Lexer::peek_identifier() {
   size_t start = cursor;
-  while (std::isalnum(peek()) || peek() == '_' || peek() == '-') {
+  while (std::isalnum(peek()) || ispunct(peek()) || peek() == '.' ||
+         peek() == '-') {
     advance();
   }
   return Token(TokenType::Identifier, source.substr(start, cursor - start));
@@ -55,6 +61,10 @@ Token Lexer::peek_char() {
     return Token(TokenType::LeftParen, source.substr(start, 1));
   case ')':
     return Token(TokenType::RightParen, source.substr(start, 1));
+  case '[':
+    return Token(TokenType::LeftBracket, source.substr(start, 1));
+  case ']':
+    return Token(TokenType::RightBracket, source.substr(start, 1));
   case '{':
     return Token(TokenType::LeftBrace, source.substr(start, 1));
   case '}':
@@ -63,6 +73,12 @@ Token Lexer::peek_char() {
     return Token(TokenType::Colon, source.substr(start, 1));
   case ',':
     return Token(TokenType::Comma, source.substr(start, 1));
+  case '=':
+    return Token(TokenType::Equal, source.substr(start, 1));
+  case '"':
+    return Token(TokenType::Quote, source.substr(start, 1));
+  case '\'':
+    return Token(TokenType::Quote, source.substr(start, 1));
   case EOF:
     return Token(TokenType::EndOfFile, "");
   default:
@@ -76,7 +92,7 @@ Token Lexer::next_token() {
   char c = peek();
   if (std::isdigit(c) || c == '.' || c == '-') {
     return peek_number();
-  } else if (std::isalpha(c) || c == '_') {
+  } else if (std::isalpha(c) || ispunct(c)) {
     return peek_identifier();
   } else {
     return peek_char();
