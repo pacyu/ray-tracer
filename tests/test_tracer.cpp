@@ -7,22 +7,26 @@ void test_tracer() {
   hittable_list world;
   auto red = std::make_shared<Lambertian>(Color(.65, .05, .05));
   auto green = std::make_shared<Lambertian>(Color(.12, .45, .15));
-  auto white = std::make_shared<Lambertian>(Color(.73, .73, .73));
+  auto gray = std::make_shared<Lambertian>(Color(.73, .73, .73));
   auto m_light = std::make_shared<DiffuseLight>(Color(4, 4, 4));
 
   world.add(std::make_shared<YZRect>(0, 555, 0, 555, 555, green));
   world.add(std::make_shared<YZRect>(0, 555, 0, 555, 0, red));
-  world.add(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));
-  world.add(std::make_shared<XZRect>(0, 555, 0, 555, 0, white));
-  world.add(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));
+  world.add(std::make_shared<XYRect>(0, 555, 0, 555, 555, gray));
+  world.add(std::make_shared<XZRect>(0, 555, 0, 555, 0, gray));
+  world.add(std::make_shared<XZRect>(0, 555, 0, 555, 555, gray));
 
-  world.add(std::make_shared<Heart>(Point3(278, 278, 278), 150.f, red));
+  auto boundary = std::make_shared<Sphere>(Point3(360, 150, 145), 70,
+                                           std::make_shared<Dielectric>(Color(0.9, 0.1, 0.1), 0.001, 1.5));
+  world.add(boundary);
+  //world.add(
+  //    std::make_shared<ConstantMedium>(boundary, 0.2, Color(0.2, 0.4, 0.9)));
+  //world.add(std::make_shared<Heart>(Point3(278, 278, 278), 150.f, red));
 
-  world.add(std::make_shared<RotateY>(
-      std::make_shared<Box>(
-          Point3(130, 0, 65), Point3(295, 165, 230),
-          std::make_shared<Dielectric>(Color(.45, .75, .35), 1.5)),
-      45));
+  //world.add(std::make_shared<RotateY>(
+  //    std::make_shared<Box>(Point3(130, 0, 65), Point3(295, 165, 230),
+  //                          std::make_shared<Dielectric>(1.5)),
+  //    45));
 
   auto light = std::make_shared<flip_face>(
       std::make_shared<XZRect>(113, 443, 127, 432, 554, m_light));
@@ -42,7 +46,7 @@ void test_tracer() {
 
   cam.render(world, light);
 }
-
+  
 int main() {
   test_tracer();
   std::cout << "Test passed!" << std::endl;

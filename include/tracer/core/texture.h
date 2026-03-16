@@ -15,7 +15,7 @@ public:
   SolidColor(Color c) : color_value(c) {}
   SolidColor(float red, float green, float blue)
       : SolidColor(Color(red, green, blue)) {}
-  virtual Color value(float u, float v, const Vec3 &p) const {
+  virtual Color value(float u, float v, const Vec3 &p) const override {
     return color_value;
   }
 

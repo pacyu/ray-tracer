@@ -100,13 +100,26 @@ inline float schlick(float cosine, float ref_idx) {
 
 class Dielectric : public Material {
 public:
-  Dielectric(const Color &a, float ri) : albedo(a), ref_idx(ri) {}
+  Dielectric(float refraction_index)
+      : albedo(), density(), ref_idx(refraction_index) {}
+  Dielectric(Color color, float refraction_index)
+      : albedo(color), density(), ref_idx(refraction_index) {}
+  Dielectric(Color color, float density, float refraction_index)
+      : albedo(color), density(density), ref_idx(refraction_index) {}
 
   virtual bool scatter(const Ray &r, const hit_record &rec,
                        scatter_record &srec) const {
     srec.is_specular = true;
     srec.pdf_ptr = nullptr;
-    srec.attenuation = Color(1.0, 1.0, 1.0);
+    if (!rec.front_face) {
+      float distance = rec.t;
+      srec.attenuation =
+          Color(std::exp(-density * (1.0f - albedo.r()) * distance),
+                std::exp(-density * (1.0f - albedo.g()) * distance),
+                std::exp(-density * (1.0f - albedo.b()) * distance));
+    } else {
+      srec.attenuation = Color(1.0, 1.0, 1.0); // 进入时保持透明
+    }
     float etai_over_etat = rec.front_face ? (1. / ref_idx) : ref_idx;
     Vec3 unit_direction = unit_vector(r.direction());
     float cos_theta = std::min(dot(-unit_direction, rec.normal), 1.f);
@@ -129,6 +142,7 @@ public:
 
   Color albedo;
   float ref_idx;
+  float density;
 };
 
 class DiffuseLight : public Material {
@@ -147,6 +161,28 @@ public:
   }
 
   std::shared_ptr<Texture> emit;
+};
+
+class isotropic : public Material {
+public:
+  isotropic(const Color &albedo) : tex(std::make_shared<SolidColor>(albedo)) {}
+  isotropic(std::shared_ptr<Texture> tex) : tex(tex) {}
+
+  virtual bool scatter(const Ray &r_in, const hit_record &rec,
+                       scatter_record &srec) const override {
+    srec.attenuation = tex->value(rec.u, rec.v, rec.p);
+    srec.pdf_ptr = std::make_shared<Sphere_pdf>();
+    srec.is_specular = false;
+    return true;
+  }
+
+  virtual float scattering_pdf(const Ray &r_in, const hit_record &rec,
+                               const Ray &scattered) const override {
+    return 1.0f / (4.0f * utils::TRACER_PI);
+  }
+
+private:
+  std::shared_ptr<Texture> tex;
 };
 
 } // namespace tracer

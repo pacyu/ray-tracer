@@ -25,9 +25,11 @@ public:
                                        mat_ptr));
   }
 
-  virtual bool hit(const Ray &r, float t0, float t1, hit_record &rec) const;
+  virtual bool hit(const Ray &r, float t0, float t1,
+                   hit_record &rec) const override;
 
-  virtual bool bounding_box(float t0, float t1, AABB &output_box) const {
+  virtual bool bounding_box(float t0, float t1,
+                            AABB &output_box) const override {
     output_box = AABB(box_min, box_max);
     return true;
   }

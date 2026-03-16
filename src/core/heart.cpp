@@ -13,7 +13,6 @@ bool Heart::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
 
   float t_entry = -b - sqrt(disc);
   float t_exit = -b + sqrt(disc);
-
   float t = std::max(t_min, t_entry);
   float t_end = std::min(t_max, t_exit);
 
@@ -27,12 +26,12 @@ bool Heart::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
     if (val < 0) {
       // 发现交点，牛顿迭代精修
       float t_fine = t;
-      for (int j = 0; j < 3; j++) {
+      for (int j = 0; j < 16; j++) {
         Point3 p_it = (r.at(t_fine) - center) / rho;
         double f = h_normalized(p_it.x(), p_it.y(), p_it.z());
         Vec3 grad = gradient_normalized(p_it);
         float f_prime = dot(grad / rho, r.direction());
-        if (std::abs(f_prime) > 1e-7) {
+        if (std::abs(f_prime) > 1e-12) {
           t_fine -= utils::clamp(static_cast<float>(f / f_prime), -base_step,
                                  base_step);
         }
@@ -50,15 +49,21 @@ bool Heart::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
       return true;
     }
 
+    // float adaptive_factor = 1.0f + std::abs(static_cast<float>(val)) * 10.0f;
+    // float current_step = base_step * adaptive_factor;
+
+    // // 限制最大单步跨度，防止直接“穿透”整个心形
+    // t += std::min(current_step, 0.2f * rho);
+
     Vec3 grad = gradient_normalized(p_loc);
     float grad_len = grad.length();
 
     // 使用方向导数或梯度模长来估算安全步长
-    // 原理：步长 = 当前函数值 / 变化率（梯度），0.7 为安全系数防止越界
+    // 原理：步长 = 当前函数值 / 变化率（梯度），0.5 为安全系数防止越界
     float adaptive_step =
-        static_cast<float>(std::abs(val) / (grad_len + 1e-6f)) * 0.7f;
-
-    t += utils::clamp(adaptive_step, base_step, 0.15f * rho);
+        static_cast<float>(std::abs(val) / (grad_len + 1e-6f));
+    float factor = (val < 0.05) ? 0.2f : 0.5f;
+    t += utils::clamp(adaptive_step * factor, base_step, 0.2f * rho);
   }
   return false;
 }

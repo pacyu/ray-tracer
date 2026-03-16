@@ -16,11 +16,12 @@ public:
   void add(std::shared_ptr<hittable> object) { objects.push_back(object); }
 
   virtual bool hit(const Ray &r, float t_min, float t_max,
-                   hit_record &rec) const;
+                   hit_record &rec) const override;
 
-  virtual bool bounding_box(float t0, float t1, AABB &output_box) const;
+  virtual bool bounding_box(float t0, float t1,
+                            AABB &output_box) const override;
 
-  float pdf_value(const Point3 &o, const Vec3 &v) const {
+  float pdf_value(const Point3 &o, const Vec3 &v) const override {
     auto weight = 1.0 / objects.size();
     auto sum = 0.0;
 
@@ -30,7 +31,7 @@ public:
     return sum;
   }
 
-  Vec3 random(const Vec3 &o) const {
+  Vec3 random(const Vec3 &o) const override {
     auto int_size = static_cast<int>(objects.size());
     return objects[utils::random_int(0, int_size - 1)]->random(o);
   }

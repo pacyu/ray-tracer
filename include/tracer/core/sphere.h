@@ -19,12 +19,13 @@ public:
       : center(center), radius(radius), mat_ptr(m) {}
 
   virtual bool hit(const Ray &r, float t_min, float t_max,
-                   hit_record &rec) const;
-  virtual bool bounding_box(float t0, float t1, AABB &output_box) const;
+                   hit_record &rec) const override;
+  virtual bool bounding_box(float t0, float t1,
+                            AABB &output_box) const override;
 
-  virtual float pdf_value(const Point3 &o, const Vec3 &v) const;
+  virtual float pdf_value(const Point3 &o, const Vec3 &v) const override;
 
-  virtual Vec3 random(const Point3 &o) const;
+  virtual Vec3 random(const Point3 &o) const override;
 
   Point3 center;
   float radius;

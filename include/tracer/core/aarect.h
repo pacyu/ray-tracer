@@ -15,9 +15,11 @@ public:
          std::shared_ptr<Material> m)
       : x0(x0), x1(x1), y0(y0), y1(y1), k(k), mat_ptr(m) {}
 
-  virtual bool hit(const Ray &r, float t0, float t1, hit_record &rec) const;
+  virtual bool hit(const Ray &r, float t0, float t1,
+                   hit_record &rec) const override;
 
-  virtual bool bounding_box(float t0, float t1, AABB &output_box) const {
+  virtual bool bounding_box(float t0, float t1,
+                            AABB &output_box) const override {
     output_box = AABB(Point3(x0, y0, k - 0.0001), Point3(x1, y1, k + 0.0001));
     return true;
   }
@@ -50,9 +52,11 @@ public:
          std::shared_ptr<Material> m)
       : x0(x0), x1(x1), z0(z0), z1(z1), k(k), mat_ptr(m) {}
 
-  virtual bool hit(const Ray &r, float t0, float t1, hit_record &rec) const;
+  virtual bool hit(const Ray &r, float t0, float t1,
+                   hit_record &rec) const override;
 
-  virtual bool bounding_box(float t0, float t1, AABB &output_box) const {
+  virtual bool bounding_box(float t0, float t1,
+                            AABB &output_box) const override {
     output_box = AABB(Point3(x0, k - 0.0001, z0), Point3(x1, k + 0.0001, z1));
     return true;
   }
@@ -85,9 +89,11 @@ public:
          std::shared_ptr<Material> m)
       : y0(y0), y1(y1), z0(z0), z1(z1), k(k), mat_ptr(m) {}
 
-  virtual bool hit(const Ray &r, float t0, float t1, hit_record &rec) const;
+  virtual bool hit(const Ray &r, float t0, float t1,
+                   hit_record &rec) const override;
 
-  virtual bool bounding_box(float t0, float t1, AABB &output_box) const {
+  virtual bool bounding_box(float t0, float t1,
+                            AABB &output_box) const override {
     output_box = AABB(Point3(k - 0.0001, y0, z0), Point3(k + 0.0001, y1, z1));
     return true;
   }

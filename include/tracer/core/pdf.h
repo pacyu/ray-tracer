@@ -73,7 +73,7 @@ public:
   Hittable_pdf(std::shared_ptr<hittable> p, const Point3 &origin)
       : ptr(p), o(origin) {}
 
-  virtual float value(const Vec3 &direction) const {
+  virtual float value(const Vec3 &direction) const override {
     return ptr->pdf_value(o, direction);
   }
 
@@ -82,6 +82,17 @@ public:
 public:
   Point3 o;
   std::shared_ptr<hittable> ptr;
+};
+
+class Sphere_pdf : public PDF {
+public:
+  Sphere_pdf() {}
+
+  virtual float value(const Vec3 &direction) const override {
+    return 1 / (4 * tracer::utils::TRACER_PI);
+  }
+
+  virtual Vec3 generate() const override { return random_unit_vector(); }
 };
 
 } // namespace tracer

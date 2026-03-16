@@ -1,74 +1,78 @@
-Camera {
-  image_size: (600, 600)
-  samples_per_pixel: 128
-  max_depth: 8
-  background: (0.0, 0.0, 0.0)
-  
-  lookfrom: (278.0, 278.0, -800.0)
-  lookat: (278.0, 278.0, 0.0)
-  vup: (0.0, 1.0, 0.0)
-  fov: 40.0
+Camera (spp: 512)
+
+red: Lam (albedo: [0.65, 0.05, 0.05])
+green: Lam (albedo: [0.12, 0.45, 0.15])
+grey: Lam (albedo: [0.73, 0.73, 0.73])
+blue: M (albedo: [0.06, 0.32, 0.73], fuzz: 0.0)
+glass: G (albedo: [0.6953, 0.7422, 0.7070], density: 0.08, ri: 1.5)
+
+light: XYRect (
+  quat: [-100, 100, -100, 100]
+  k: 277.0
+  material: Light
+)
+
+quad = Quat [-278, 278, -278, 278]
+
+floor: XYRect (
+  quat: quad
+  k: -278.0
+  material: grey
+)
+
+ceiling: XYRect (
+  quat: quad
+  k: 278.0
+  material: grey
+)
+
+right: XZRect (
+  quat: quad
+  k: 278.0
+  material: red
+)
+
+left: XZRect (
+  quat: quad
+  k: -278.0
+  material: green
+)
+
+inner: YZRect (
+  quat: quad
+  k: -278.0
+  material: grey
+)
+
+Box (
+  p0: [100, -150, -277]
+  p1: [200, -50, -50]
+  rot: (0, 0, 45.0)
+  material: blue
+)
+
+Sphere (
+  center: [100, 100, -200]
+  radius: 80.0
+  material: glass
+)
+
+boll: Sphere {
+  center: [-100, 0, -200]
+  radius: 80.0
+  material: glass
 }
 
-DiffuseLight {
-  albedo: (4, 4, 4)
-}
+ConstantMedium (
+  albedo: [0.5294, 0.8078, 0.9216]
+  density: 0.2
+  shape: boll
+)
 
-Lambertian-red {
-  albedo: (0.65, 0.05, 0.05)
-}
-
-Lambertian-green {
-  albedo: (0.12, 0.45, 0.15)
-}
-
-Lambertian-grey {
-  albedo: (0.73, 0.73, 0.73)
-}
-
-XZRect {
-  quaternion: (113, 443, 127, 432)
-  k: 554.0
-  material: DiffuseLight
-}
-
-XZRect2 {
-  quaternion: (0, 555, 0, 555)
-  k: 0.0
-  material: Lambertian-grey
-}
-
-XZRect3 {
-  quaternion: (0, 555, 0, 555)
-  k: 555.0
-  material: Lambertian-grey
-}
-
-YZRect {
-  quaternion: (0, 555, 0, 555)
-  k: 0.0
-  material: Lambertian-red
-}
-
-YZRect2 {
-  quaternion: (0, 555, 0, 555)
-  k: 555.0
-  material: Lambertian-green
-}
-
-XYRect {
-  quaternion: (0, 555, 0, 555)
-  k: 555.0
-  material: Lambertian-grey
-}
-
-Light {
-  object: XZRect
-}
-
-Heart {
-  center: (278, 278, 278)
-  radius: 150.0
-  material: Lambertian-red
-}
+Heart (
+  center: [0, 0, 0]
+  rho: 120.0
+  rot: (0, 0, 90)
+  material: red
+)
 

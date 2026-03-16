@@ -17,13 +17,14 @@ int main(int argc, char *argv[]) {
 
   try {
     parser::Factory factory(scene_path);
+    factory.parse();
     factory.builder();
 
-    Camera cam = factory.get_camera();
+    std::unique_ptr<Camera> cam = std::move(factory.get_camera());
     auto light = factory.get_light();
     hittable_list world = factory.get_world();
 
-    cam.render(world, light);
+    cam->render(world, light);
 
   } catch (const parser::ParseException &e) {
     // 捕获带行号的自定义解析异常

@@ -2,6 +2,7 @@
 
 #include "tracer/core/box.h"
 #include "tracer/core/camera.h"
+#include "tracer/core/constant_medium.h"
 #include "tracer/core/heart.h"
 #include "tracer/core/hittable.h"
 #include "tracer/core/hittable_list.h"
@@ -12,3 +13,4 @@
 #include "tracer/core/sphere.h"
 #include "tracer/core/translate.h"
 #include "tracer/core/vec3.h"
+
