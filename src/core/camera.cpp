@@ -75,13 +75,14 @@ void Camera::render(const hittable &world, const hittable &lights,
           float u = (i + local_rand()) / (image_width - 1),
                 v = (j + local_rand()) / (image_height - 1);
 
+          hit_record rec;
+
           Ray r = get_ray(u, v);
 
           r.bvh_hit_count = 0;
 
           if (visual_bvh) {
-            world.hit(r, 0.001f, std::numeric_limits<float>::infinity(),
-                      hit_record());
+            world.hit(r, 0.001f, std::numeric_limits<float>::infinity(), rec);
 
             float heat = static_cast<float>(r.bvh_hit_count) / 50.0f;
             pixel += Color(heat, 0.0f, 0.0f); // R 红色通道代表热力
