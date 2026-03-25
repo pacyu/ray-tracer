@@ -10,7 +10,7 @@ static void test_tracer() {
   auto gray = std::make_shared<Lambertian>(Color(.73f, .73f, .73f));
   auto earth_surface =
       std::make_shared<Lambertian>(std::make_shared<ImageTexture>(
-          "C:/Users/darkchii/Downloads/earthmap.jpg"));
+          "../examples/earthmap.jpg"));
   auto blue = std::make_shared<Dielectric>(Color(0.6953f, 0.7422f, 0.7070f),
                                            0.1f, 1.5f);
   auto m_light = std::make_shared<DiffuseLight>(Color(4, 4, 4));

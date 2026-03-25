@@ -10,7 +10,7 @@ w = Random (0, 50)
 
 spp = 128
 
-texture = String "C:/Users/darkchii/Downloads/img.png"
+texture = String "../examples/earthmap.jpg"
 
 red = Lambert ((0.65, 0.05, 0.05))
 green = Lambert ((0.12, 0.45, 0.15))
