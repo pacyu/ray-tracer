@@ -23,7 +23,7 @@ Vec3 &Vec3::operator*=(float t) {
   return *this;
 }
 
-Vec3 &Vec3::operator/=(float t) { return *this *= (1. / t); }
+Vec3 &Vec3::operator/=(float t) { return *this *= (1.f / t); }
 
 float Vec3::dot(const Vec3 &v) const {
   __m128 m1 = _mm_set_ps(0, e[2], e[1], e[0]);

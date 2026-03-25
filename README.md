@@ -11,7 +11,12 @@
 
 ![taubin's heart](/examples/image.png)
 
-## 🚀 Latest Updates (2026.03.16)
+## 🚀 Latest Updates (2026.03.25)
+
+- **Auroric 语法重构**：完全重构了解释器后端，现在 `aur` 脚本写起来会更灵活，自然。代码示例参考[这里](/bin/scene.aur).
+- **新增纹理**：增加 `ImageTexture`（图片纹理），支持图片作为纹理的渲染效果。
+
+## 🚀 Updates (2026.03.16)
 
 - **Auroric 语法重构**：全面支持变量引用、`=` 赋值表达式及材质/物体定义。
 - **物理渲染增强**：引入 **Beer's Law**（比尔定律），支持高质量彩色玻璃渲染。
@@ -30,12 +35,12 @@
 
 ### 📖 关于项目
 
-这是一个基于物理的光线追踪渲染器（RayTracer），起步于学习图形学的兴趣。该项目最初源自经典的“一周光线追踪”系列教程，目前正逐渐进化为一个功能丰富的渲染小工具。
+这是一个基于物理的光线追踪渲染器（RayTracer），起步于学习图形学的兴趣。该项目最初源自经典的“一周光线追踪”系列教程，后面会考虑增加物理引擎。目的是通过该项目学习计算机图形学、数学（辛几何、PDE、数值算法等）、语言（英语和日语）、物理学（广义相对论/天体/宇宙物理/量子物理等相关知识），以此来了解世界底层原理以及拓展知识，便于接触前沿学术。目前是利用CPU多线程加速渲染，只能做到离线渲染，后面会迁移到GPU，利用CUDA性能加速。
 
 ### 🌟 核心特性
 
 * **Auroric 脚本语言**：
-  * 支持变量赋值 (`x = Int 10`) 与引用。
+  * 支持变量赋值 (`x = Num 10`) 与引用。
   * 材质与物体解耦定义。
   * 智能初始化：内置默认 `Camera` 配置，开箱即画。
 * **基于物理渲染 (PBR)**：
@@ -55,6 +60,11 @@
 * [x] **跨平台支持**：支持 Linux 和 Windows。
 * [ ] **脚本进阶**：为 Auroric 增加 `loop` 循环与 `random` 随机数生成支持。
 * [ ] **几何体扩展**：增加三角面片（Mesh）和更复杂的 SDF 物体。
+* [ ] **非均匀密度材质**
+* [ ] **卡通渲染**
+* [ ] **黎曼几何/光线弯曲**
+* [ ] **海洋模拟/流体模拟**
+* [ ] **三体问题模拟**
 
 ---
 
@@ -68,7 +78,7 @@ A physically-based RayTracer built from scratch as a hobbyist project. Originall
 
 ### 🌟 Key Features
 
-* **Auroric DSL (.aur)**: A custom-designed, human-readable configuration language with a strict type system (int/float differentiation).
+* **Auroric DSL (.aur)**: A custom-designed, human-readable configuration language.
   * Now supports variables, `=` expressions, and material/object decoupling. Default Camera auto-initialization.
 * **PBR Workflow**:
   * Supports Lambertian, Metal, and Dielectric (Glass) materials.
@@ -151,49 +161,49 @@ cd bin
 
 ### 4. Auroric Script Example
 
-**Note: Strictly distinguish between integers and floating-point numbers.**
-
 ```aur
 # Example .aur scene file
 
-Camera {
-  image_size: (600, 600) # Integers for dimensions
-  samples_per_pixel: 128 # Integer
-  max_depth: 8           # Integer
-  background: (0.0, 0.0, 0.0)
-  lookfrom: (278.0, 278.0, -800.0)
-  lookat: (278.0, 278.0, 0.0)
-  vup: (0.0, 1.0, 0.0)
-  fov: 40.0              # Strict float
-}
+spp = 128
 
-red: Lambertian {
-  albedo: (0.65, 0.05, 0.05)
-}
+texture = String "C:/Users/darkchii/Downloads/img.png"
 
-XZRect (
-  quaternion: (113, 443, 127, 432)
-  k: 554.0
-  material: Light
-)
+red = Lambert ((0.65, 0.05, 0.05))
+green = Lambert ((0.12, 0.45, 0.15))
+grey = Lambert ((0.73, 0.73, 0.73))
+blue = Metal ((0.06, 0.32, 0.73), 0.0)
+glass = Dielect ((0.6953, 0.7422, 0.7070), 0.08, 1.5)
+img_texture = Lambert (texture)
 
-floor: XZRect (
-  quat: (0, 555, 0, 555)
-  k: 0.0
-  material: red
-)
+light = Light ((7, 7, 7))
 
-ceiling: XZRect (
-  quat: (0, 555, 0, 555)
-  k: 555.0
-  material: red
-)
+rect_light = XYRect ((-100, 100, -100, 100), 277.0, light)
 
-Heart {
-  center: (278, 278, 278)
-  radius: 150.0          # Strict float
-  material: red
-}
+quad = Quater (-278, 278, -278, 278)
+
+floor = XYRect (quad, -278.0, grey)
+
+ceiling = XYRect (quad, 278.0, grey)
+
+inner = YZRect (quad, -278.0, grey)
+
+right = XZRect (quad, 278.0, red)
+
+left = XZRect (quad, -278.0, green)
+
+box = Box ((100, -150, -277), (200, -50, -50), blue, (0, 0, 45.0))
+
+sphere = Sphere ((100, 100, -200), 80.0, glass)
+
+img_sphere = Sphere ((120, 10, -80), 100.0, img_texture)
+
+boll = Sphere ((-100, 0, -200), 80.0, glass)
+
+cm = ConstMedium ((0.5294, 0.8078, 0.9216), 0.05, boll)
+
+heart = Heart ((0, 0, 0), 120.0, red, (0, 0, 90))
+
+world = [rect_light, floor, ceiling, inner, right, left, box, sphere, cm, img_sphere, heart]
 ```
 
 ## 📄 Credits

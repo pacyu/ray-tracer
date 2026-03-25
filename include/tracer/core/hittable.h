@@ -23,7 +23,10 @@ class hittable {
 public:
   virtual bool hit(const Ray &r, float t_min, float t_max,
                    hit_record &rec) const = 0;
+
   virtual bool bounding_box(float t0, float t1, AABB &output_box) const = 0;
+
+  virtual std::shared_ptr<Material> get_material() const = 0;
 
   virtual float pdf_value(const Point3 &o, const Vec3 &v) const { return 0.0; }
 
@@ -40,6 +43,10 @@ public:
 
   virtual bool bounding_box(float time0, float time1,
                             AABB &output_box) const override;
+
+  virtual std::shared_ptr<Material> get_material() const override {
+    return ptr->get_material();
+  }
 
   virtual float pdf_value(const Point3 &o, const Vec3 &v) const override;
 

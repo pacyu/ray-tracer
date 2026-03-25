@@ -19,34 +19,19 @@ public:
   void parse();
 
   std::unique_ptr<Camera> &get_camera() { return camera; }
-  const std::shared_ptr<flip_face> &get_light() const { return light; }
+  const hittable_list &get_lights() const { return lights; }
   const hittable_list &get_world() const { return world; }
+  const Auroric &get_ast() const { return ast; }
 
 private:
   std::string source;
-
+  Auroric ast;
   std::unique_ptr<Camera> camera;
-  std::shared_ptr<flip_face> light;
   hittable_list world;
-  std::vector<Instance> scenes;
+  hittable_list lights;
 
-  std::unordered_map<std::string, BasicType> types_map;
-
-  int build_integer(const Argument &arg);
-  float build_float(const Argument &arg);
-  Pair build_pair(const Argument &arg);
-  Vec3 build_vector3(const Argument &arg);
-  Quaternion build_quaternion(const Argument &arg);
-  std::string build_string(const Argument &args);
-  std::unique_ptr<Camera> build_camera(const std::vector<Argument> &args);
-  std::shared_ptr<Material> build_lambertian(const std::vector<Argument> &args);
-  std::shared_ptr<Material> build_metal(const std::vector<Argument> &args);
-  std::shared_ptr<Material> build_dielectric(const std::vector<Argument> &args);
-  std::shared_ptr<hittable> build_rect(const Instance &instance);
-  std::shared_ptr<hittable> build_box(const Instance &instance);
-  std::shared_ptr<hittable> build_sphere(const Instance &instance);
-  std::shared_ptr<hittable> build_heart(const Instance &instance);
-  std::shared_ptr<hittable> build_constant_medium(const Instance &instance);
+  void get_parameter(std::shared_ptr<Environment> &, const std::string &);
+  void create_scene(std::shared_ptr<Environment> &);
 };
 
 } // namespace parser

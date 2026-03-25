@@ -18,14 +18,14 @@ Vec3 refract(const Vec3 &uv, const Vec3 &n, float etai_over_etat) {
   float cos_theta = dot(-uv, n);
   Vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
   Vec3 r_out_parallel =
-      -std::sqrt(std::abs(1. - r_out_perp.squared_length())) * n;
+      -std::sqrt(std::abs(1.f - r_out_perp.squared_length())) * n;
   return r_out_perp + r_out_parallel;
 }
 
 float schlick(float cosine, float ref_idx) {
-  float r0 = (1. - ref_idx) / (1. + ref_idx);
+  float r0 = (1.f - ref_idx) / (1.f + ref_idx);
   r0 *= r0;
-  return r0 + (1. - r0) * std::pow((1. - cosine), 5.);
+  return r0 + (1.f - r0) * std::pow((1.f - cosine), 5.f);
 }
 
 bool Lambertian::scatter(const Ray &r, const hit_record &rec,
@@ -39,7 +39,7 @@ bool Lambertian::scatter(const Ray &r, const hit_record &rec,
 float Lambertian::scattering_pdf(const Ray &r_in, const hit_record &rec,
                                  const Ray &scattered) const {
   auto cosine = dot(rec.normal, unit_vector(scattered.direction()));
-  return cosine < 0 ? 0 : cosine / utils::TRACER_PI;
+  return cosine < 0.f ? 0.f : cosine / utils::TRACER_PI;
 }
 
 bool Metal::scatter(const Ray &r, const hit_record &rec,
@@ -48,7 +48,7 @@ bool Metal::scatter(const Ray &r, const hit_record &rec,
   srec.specular_ray = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
   srec.attenuation = albedo;
   srec.is_specular = true;
-  srec.pdf_ptr = 0;
+  srec.pdf_ptr = nullptr;
   return true;
 }
 
@@ -63,13 +63,13 @@ bool Dielectric::scatter(const Ray &r, const hit_record &rec,
               std::exp(-density * (1.0f - albedo.g()) * distance),
               std::exp(-density * (1.0f - albedo.b()) * distance));
   } else {
-    srec.attenuation = Color(1.0, 1.0, 1.0); // 进入时保持透明
+    srec.attenuation = Color(1.0f, 1.0f, 1.0f); // 进入时保持透明
   }
-  float etai_over_etat = rec.front_face ? (1. / ref_idx) : ref_idx;
+  float etai_over_etat = rec.front_face ? (1.f / ref_idx) : ref_idx;
   Vec3 unit_direction = unit_vector(r.direction());
   float cos_theta = std::min(dot(-unit_direction, rec.normal), 1.f);
-  float sin_theta = std::sqrt(1. - cos_theta * cos_theta);
-  if (etai_over_etat * sin_theta > 1.) {
+  float sin_theta = std::sqrt(1.f - cos_theta * cos_theta);
+  if (etai_over_etat * sin_theta > 1.f) {
     Vec3 reflected = reflect(unit_direction, rec.normal);
     srec.specular_ray = Ray(rec.p, reflected);
     return true;
@@ -95,7 +95,7 @@ Color DiffuseLight::emitted(const Ray &r_in, const hit_record &rec, float u,
   return emit->value(u, v, p);
 }
 
-bool isotropic::scatter(const Ray &r_in, const hit_record &rec,
+bool Isotropic::scatter(const Ray &r_in, const hit_record &rec,
                         scatter_record &srec) const {
   srec.attenuation = tex->value(rec.u, rec.v, rec.p);
   srec.pdf_ptr = std::make_unique<Sphere_pdf>();
@@ -103,7 +103,7 @@ bool isotropic::scatter(const Ray &r_in, const hit_record &rec,
   return true;
 }
 
-float isotropic::scattering_pdf(const Ray &r_in, const hit_record &rec,
+float Isotropic::scattering_pdf(const Ray &r_in, const hit_record &rec,
                                 const Ray &scattered) const {
   return 1.0f / (4.0f * utils::TRACER_PI);
 }

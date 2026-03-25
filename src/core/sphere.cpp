@@ -51,7 +51,7 @@ bool Sphere::bounding_box(float t0, float t1, AABB &output_box) const {
 
 float Sphere::pdf_value(const Point3 &o, const Vec3 &v) const {
   hit_record rec;
-  if (!this->hit(Ray(o, v), 0.001, utils::inf, rec))
+  if (!this->hit(Ray(o, v), 0.001f, utils::inf, rec))
     return 0;
 
   auto cos_theta_max =

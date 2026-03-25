@@ -13,8 +13,8 @@ namespace tracer {
 
 class Camera {
 public:
-  size_t image_width;
-  size_t image_height;
+  int image_width;
+  int image_height;
   int samples_per_pixel;
   int max_depth;
   Vec3 background;
@@ -25,17 +25,17 @@ public:
   float vfov;
   float aspect_ratio;
 
-  Camera() {}
-  Camera(size_t image_width, size_t image_height, int samples_per_pixel,
+  Camera();
+  Camera(int image_width, int image_height, int samples_per_pixel,
          int max_depth, Vec3 background, Point3 lookfrom, Point3 lookat,
-         Vec3 vup, float vfov, float aspect_ratio);
+         Vec3 vup, float vfov);
   const Point3 get_origin() const;
   Ray get_ray(float u, float v) const;
 
-  void render(const hittable &world, std::shared_ptr<hittable> lights);
+  void render(const hittable &world, const hittable &lights, bool visual_bvh);
 
   Color ray_color(const Ray &r, const Color &background, const hittable &world,
-                  std::shared_ptr<hittable> lights, int depth);
+                  const hittable &lights, int depth);
 
 private:
   Point3 origin;

@@ -18,6 +18,10 @@ public:
   virtual bool bounding_box(float t0, float t1,
                             AABB &output_box) const override;
 
+  virtual std::shared_ptr<Material> get_material() const override {
+    return mat_ptr;
+  }
+
   virtual float pdf_value(const Point3 &o, const Vec3 &v) const override;
 
   virtual Vec3 random(const Point3 &o) const override;

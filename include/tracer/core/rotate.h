@@ -14,6 +14,9 @@ public:
     output_box = bbox;
     return hasbox;
   }
+  virtual std::shared_ptr<Material> get_material() const override {
+    return ptr->get_material();
+  }
 
   std::shared_ptr<hittable> ptr;
   float sin_theta;
@@ -33,6 +36,9 @@ public:
     output_box = bbox;
     return hasbox;
   }
+  virtual std::shared_ptr<Material> get_material() const override {
+    return ptr->get_material();
+  }
 
   std::shared_ptr<hittable> ptr;
   float sin_theta;
@@ -51,6 +57,9 @@ public:
                             AABB &output_box) const override {
     output_box = bbox;
     return hasbox;
+  }
+  virtual std::shared_ptr<Material> get_material() const override {
+    return ptr->get_material();
   }
 
   std::shared_ptr<hittable> ptr;

@@ -33,24 +33,24 @@ Mixture_pdf::Mixture_pdf(const PDF *p0, const PDF *p1) {
 float Mixture_pdf::value(const Vec3 &direction) const {
   if (!p[0] || !p[1])
     return 0.0f;
-  return 0.5 * p[0]->value(direction) + 0.5 * p[1]->value(direction);
+  return 0.5f * p[0]->value(direction) + 0.5f * p[1]->value(direction);
 }
 
 Vec3 Mixture_pdf::generate() const {
-  if (utils::random_float() < 0.5)
+  if (utils::random_float() < 0.5f)
     return p[0]->generate();
   else
     return p[1]->generate();
 }
 
-Hittable_pdf::Hittable_pdf(const hittable *p, const Point3 &origin)
+Hittable_pdf::Hittable_pdf(const hittable &p, const Point3 &origin)
     : ptr(p), o(origin) {}
 
 float Hittable_pdf::value(const Vec3 &direction) const {
-  return ptr->pdf_value(o, direction);
+  return ptr.pdf_value(o, direction);
 }
 
-Vec3 Hittable_pdf::generate() const { return ptr->random(o); }
+Vec3 Hittable_pdf::generate() const { return ptr.random(o); }
 
 float Sphere_pdf::value(const Vec3 &direction) const {
   return 1 / (4 * tracer::utils::TRACER_PI);

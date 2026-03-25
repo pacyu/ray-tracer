@@ -1,5 +1,6 @@
 #pragma once
 #include "tracer/core/vec3.h"
+#include "opencv2/opencv.hpp"
 
 namespace tracer {
 
@@ -18,6 +19,16 @@ public:
 
 private:
   Color color_value;
+};
+
+class ImageTexture : public Texture {
+public:
+  ImageTexture(const char *filename);
+
+  virtual Color value(float u, float v, const Point3 &p) const override;
+
+private:
+  cv::Mat image;
 };
 
 } // namespace tracer

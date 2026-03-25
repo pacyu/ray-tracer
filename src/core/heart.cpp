@@ -2,21 +2,21 @@
 
 namespace tracer {
 
-double h_normalized(double x, double y, double z) {
-  double a = x * x + 2.25 * y * y + z * z - 1.0;
-  return a * a * a - (x * x + 0.1125 * y * y) * (z * z * z);
+float h_normalized(float x, float y, float z) {
+  float a = x * x + 2.25f * y * y + z * z - 1.0f;
+  return a * a * a - (x * x + 0.1125f * y * y) * (z * z * z);
 }
 
 Vec3 gradient_normalized(Point3 p_loc) {
-  double x = p_loc.x(), y = p_loc.y(), z = p_loc.z();
-  double a = x * x + 2.25 * y * y + z * z - 1.0;
-  double a2 = a * a;
-  double z2 = z * z;
-  double z3 = z2 * z;
+  float x = p_loc.x(), y = p_loc.y(), z = p_loc.z();
+  float a = x * x + 2.25f * y * y + z * z - 1.0f;
+  float a2 = a * a;
+  float z2 = z * z;
+  float z3 = z2 * z;
 
-  double dx = 6.0 * x * a2 - 2.0 * x * z3;
-  double dy = 13.5 * y * a2 - 0.225 * y * z3;
-  double dz = 6.0 * z * a2 - 3.0 * z2 * (x * x + 0.1125 * y * y);
+  float dx = 6.0f * x * a2 - 2.0f * x * z3;
+  float dy = 13.5f * y * a2 - 0.225f * y * z3;
+  float dz = 6.0f * z * a2 - 3.0f * z2 * (x * x + 0.1125f * y * y);
 
   return Vec3(static_cast<float>(dx), static_cast<float>(dy),
               static_cast<float>(dz));
@@ -41,17 +41,17 @@ bool Heart::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
 #pragma loop(hint_parallel(0))
   for (int i = 0; i < 256 && t < t_end; i++) {
     Point3 p_loc = (r.at(t) - center) / rho;
-    double val = h_normalized(p_loc.x(), p_loc.y(), p_loc.z());
+    float val = h_normalized(p_loc.x(), p_loc.y(), p_loc.z());
 
     if (val < 0) {
       // 发现交点，牛顿迭代精修
       float t_fine = t;
       for (int j = 0; j < 16; j++) {
         Point3 p_it = (r.at(t_fine) - center) / rho;
-        double f = h_normalized(p_it.x(), p_it.y(), p_it.z());
+        float f = h_normalized(p_it.x(), p_it.y(), p_it.z());
         Vec3 grad = gradient_normalized(p_it);
         float f_prime = dot(grad / rho, r.direction());
-        if (std::abs(f_prime) > 1e-12) {
+        if (std::abs(f_prime) > 1e-12f) {
           t_fine -= utils::clamp(static_cast<float>(f / f_prime), -base_step,
                                  base_step);
         }
@@ -82,7 +82,7 @@ bool Heart::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
     // 原理：步长 = 当前函数值 / 变化率（梯度），0.5 为安全系数防止越界
     float adaptive_step =
         static_cast<float>(std::abs(val) / (grad_len + 1e-6f));
-    float factor = (val < 0.05) ? 0.2f : 0.5f;
+    float factor = (val < 0.05f) ? 0.2f : 0.5f;
     t += utils::clamp(adaptive_step * factor, base_step, 0.2f * rho);
   }
   return false;
@@ -97,7 +97,7 @@ bool Heart::bounding_box(float t0, float t1, AABB &output_box) const {
 float Heart::pdf_value(const Point3 &o, const Vec3 &v) const {
   hit_record rec;
 
-  if (!this->hit(Ray(o, v), 0.001, tracer::utils::inf, rec))
+  if (!this->hit(Ray(o, v), 0.001f, tracer::utils::inf, rec))
     return 0;
 
   // 1. 计算心形的近似包围球（基于中心和 rho）

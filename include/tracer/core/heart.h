@@ -6,7 +6,7 @@
 namespace tracer {
 
 // 统一使用归一化坐标计算
-double h_normalized(double x, double y, double z);
+float h_normalized(float x, float y, float z);
 
 // 梯度函数：用于牛顿迭代和法线计算
 Vec3 gradient_normalized(Point3 p_loc);
@@ -20,6 +20,9 @@ public:
                    hit_record &rec) const override;
   virtual bool bounding_box(float t0, float t1,
                             AABB &output_box) const override;
+  virtual std::shared_ptr<Material> get_material() const override {
+    return mat_ptr;
+  }
 
   virtual float pdf_value(const Point3 &o, const Vec3 &v) const override;
 

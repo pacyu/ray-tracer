@@ -19,9 +19,12 @@ public:
 
   virtual Vec3 random(const Point3 &o) const override;
 
+  virtual std::shared_ptr<Material> get_material() const override;
+
   Point3 box_min;
   Point3 box_max;
   hittable_list sides;
+  std::shared_ptr<Material> mat_ptr;
 };
 
 } // namespace tracer

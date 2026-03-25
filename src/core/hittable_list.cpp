@@ -35,8 +35,8 @@ bool hittable_list::bounding_box(float t0, float t1, AABB &output_box) const {
 }
 
 float hittable_list::pdf_value(const Point3 &o, const Vec3 &v) const {
-  auto weight = 1.0 / objects.size();
-  auto sum = 0.0;
+  float weight = 1.0f / static_cast<float>(objects.size());
+  float sum = 0.0f;
 
   for (const auto &object : objects)
     sum += weight * object->pdf_value(o, v);
@@ -45,8 +45,13 @@ float hittable_list::pdf_value(const Point3 &o, const Vec3 &v) const {
 }
 
 Vec3 hittable_list::random(const Vec3 &o) const {
-  auto int_size = static_cast<int>(objects.size());
-  return objects[utils::random_int(0, int_size - 1)]->random(o);
+  const int int_size = static_cast<int>(objects.size());
+  if (int_size <= 0) {
+    return Vec3(0, 0, 0);
+  }
+  int idx = utils::random_int(0, int_size - 1);
+  idx = std::clamp(idx, 0, int_size - 1);
+  return objects[idx]->random(o);
 }
 
 } // namespace tracer

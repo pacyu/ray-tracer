@@ -4,15 +4,39 @@ namespace tracer {
 
 namespace parser {
 
-bool Lexer::ispunct(char ch) {
-  std::string targets = "\\/~`·@$%&?"; // 注意反斜杠需要转义
-  return targets.find(ch) != std::string::npos;
+Lexer::Lexer(const std::string &src) : source(src) {
+  reserved["Num"] = TokenType::NumberType;
+  reserved["String"] = TokenType::String;
+  reserved["List"] = TokenType::List;
+  reserved["Pair"] = TokenType::Pair;
+  reserved["Vec3"] = TokenType::Vector3;
+  reserved["Quater"] = TokenType::Quater;
+  reserved["Random"] = TokenType::Random;
+  reserved["Lambert"] = TokenType::LambertianType;
+  reserved["Metal"] = TokenType::MetalType;
+  reserved["Dielect"] = TokenType::DielectricType;
+  reserved["Light"] = TokenType::LightType;
+  reserved["XYRect"] = TokenType::XYRectType;
+  reserved["XZRect"] = TokenType::XZRectType;
+  reserved["YZRect"] = TokenType::YZRectType;
+  reserved["Box"] = TokenType::BoxType;
+  reserved["Sphere"] = TokenType::SphereType;
+  reserved["Heart"] = TokenType::HeartType;
+  reserved["Translate"] = TokenType::TranslateType;
+  reserved["ConstMedium"] = TokenType::ConstantMediumType;
+  reserved["Camera"] = TokenType::CameraType;
 }
 
 char Lexer::peek() const {
   if (cursor >= source.size())
     return EOF;
   return source[cursor];
+}
+
+char Lexer::lookahead() const {
+  if (cursor + 1 >= source.size())
+    return EOF;
+  return source[cursor + 1];
 }
 
 void Lexer::advance() {
@@ -43,13 +67,27 @@ Token Lexer::peek_number() {
   return Token(TokenType::Number, source.substr(start, cursor - start));
 }
 
-Token Lexer::peek_identifier() {
+Token Lexer::peek_string() {
+  char ch = peek(); // " or '
+  advance();
   size_t start = cursor;
-  while (std::isalnum(peek()) || ispunct(peek()) || peek() == '.' ||
-         peek() == '-') {
+  while (peek() != ch) {
     advance();
   }
-  return Token(TokenType::Identifier, source.substr(start, cursor - start));
+  advance();
+  return Token(TokenType::LiteralStr, source.substr(start, cursor - start - 1));
+}
+
+Token Lexer::peek_identifier() {
+  size_t start = cursor;
+  while (std::isalnum(peek()) || peek() == '_' || peek() == '$') {
+    advance();
+  }
+  std::string_view str = source.substr(start, cursor - start);
+  if (reserved.find(std::string(str)) != reserved.end())
+    return Token(reserved[std::string(str)], str);
+  else
+    return Token(TokenType::Identifier, str);
 }
 
 Token Lexer::peek_char() {
@@ -75,10 +113,18 @@ Token Lexer::peek_char() {
     return Token(TokenType::Comma, source.substr(start, 1));
   case '=':
     return Token(TokenType::Equal, source.substr(start, 1));
-  case '"':
-    return Token(TokenType::Quote, source.substr(start, 1));
-  case '\'':
-    return Token(TokenType::Quote, source.substr(start, 1));
+  case '|':
+    return Token(TokenType::Pipe, source.substr(start, 1));
+  case '+':
+    return Token(TokenType::Plus, source.substr(start, 1));
+  case '-':
+    return Token(TokenType::Minus, source.substr(start, 1));
+  case '*':
+    return Token(TokenType::Mul, source.substr(start, 1));
+  case '/':
+    return Token(TokenType::Div, source.substr(start, 1));
+  case '%':
+    return Token(TokenType::Mod, source.substr(start, 1));
   case EOF:
     return Token(TokenType::EndOfFile, "");
   default:
@@ -87,12 +133,32 @@ Token Lexer::peek_char() {
   }
 }
 
+Token Lexer::peek_ddot() {
+  size_t start = cursor;
+  advance();
+  advance();
+  return Token(TokenType::DDot, source.substr(start, cursor - start));
+}
+
+Token Lexer::peek_rightarrow() {
+  size_t start = cursor;
+  advance();
+  advance();
+  return Token(TokenType::RightArrow, source.substr(start, cursor - start));
+}
+
 Token Lexer::next_token() {
   skip_whitespaces_and_comments();
   char c = peek();
-  if (std::isdigit(c) || c == '.' || c == '-') {
+  if (c == '.' && lookahead() == '.') {
+    return peek_ddot();
+  } else if (c == '-' && lookahead() == '>') {
+    return peek_rightarrow();
+  } else if (std::isdigit(c) || c == '.') {
     return peek_number();
-  } else if (std::isalpha(c) || ispunct(c)) {
+  } else if (c == '"' || c == '\'') {
+    return peek_string();
+  } else if (std::isalpha(c) || c == '_' || c == '$') {
     return peek_identifier();
   } else {
     return peek_char();

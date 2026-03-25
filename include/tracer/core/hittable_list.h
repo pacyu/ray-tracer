@@ -25,6 +25,10 @@ public:
 
   virtual Vec3 random(const Vec3 &o) const override;
 
+  virtual std::shared_ptr<Material> get_material() const override {
+    return nullptr;
+  }
+
   std::vector<std::shared_ptr<hittable>> objects;
 };
 

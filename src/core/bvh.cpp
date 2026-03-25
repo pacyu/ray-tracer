@@ -47,6 +47,8 @@ bool BVH::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
   if (!bbox.hit(r, t_min, t_max))
     return false;
 
+  r.bvh_hit_count++;
+
   bool hit_left = left->hit(r, t_min, t_max, rec);
   bool hit_right = right->hit(r, t_min, hit_left ? rec.t : t_max, rec);
 

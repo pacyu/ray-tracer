@@ -71,7 +71,7 @@ inline Vec3 operator*(float t, const Vec3 &v) {
 
 inline Vec3 operator*(const Vec3 &v, float t) { return t * v; }
 
-inline Vec3 operator/(const Vec3 &v, float t) { return (1. / t) * v; }
+inline Vec3 operator/(const Vec3 &v, float t) { return (1.f / t) * v; }
 
 inline float dot(const Vec3 &u, const Vec3 &v) {
   __m128 m1 = _mm_set_ps(0, u.e[2], u.e[1], u.e[0]);

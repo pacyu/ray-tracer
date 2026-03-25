@@ -7,15 +7,15 @@ namespace tracer {
 
 class ConstantMedium : public hittable {
 public:
-  ConstantMedium(std::shared_ptr<hittable> boundary, double density,
+  ConstantMedium(std::shared_ptr<hittable> boundary, float density,
                  std::shared_ptr<Texture> tex)
       : boundary(boundary), neg_inv_density(-1 / density),
-        phase_function(std::make_shared<isotropic>(tex)) {}
+        phase_function(std::make_shared<Isotropic>(tex)) {}
 
-  ConstantMedium(std::shared_ptr<hittable> boundary, double density,
+  ConstantMedium(std::shared_ptr<hittable> boundary, float density,
                  const Color &albedo)
       : boundary(boundary), neg_inv_density(-1 / density),
-        phase_function(std::make_shared<isotropic>(albedo)) {}
+        phase_function(std::make_shared<Isotropic>(albedo)) {}
 
   bool hit(const Ray &r, float t_min, float t_max,
            hit_record &rec) const override;
@@ -24,9 +24,13 @@ public:
     return boundary->bounding_box(t0, t1, output_box);
   }
 
+  virtual std::shared_ptr<Material> get_material() const override {
+    return phase_function;
+  }
+
 private:
   std::shared_ptr<hittable> boundary;
-  double neg_inv_density;
+  float neg_inv_density;
   std::shared_ptr<Material> phase_function;
 };
 

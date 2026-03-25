@@ -9,7 +9,7 @@ bool ConstantMedium::hit(const Ray &r, float t_min, float t_max,
   if (!boundary->hit(r, -utils::inf, +utils::inf, rec1))
     return false;
 
-  if (!boundary->hit(r, rec1.t + 0.0001, utils::inf, rec2))
+  if (!boundary->hit(r, rec1.t + 0.0001f, utils::inf, rec2))
     return false;
 
   if (rec1.t < t_min)
@@ -20,8 +20,8 @@ bool ConstantMedium::hit(const Ray &r, float t_min, float t_max,
   if (rec1.t >= rec2.t)
     return false;
 
-  if (rec1.t < 0)
-    rec1.t = 0;
+  if (rec1.t < 0.f)
+    rec1.t = 0.f;
 
   auto ray_length = r.direction().length();
   auto distance_inside_boundary = (rec2.t - rec1.t) * ray_length;

@@ -23,10 +23,14 @@ struct scatter_record {
 
 class Material {
 public:
+  virtual ~Material() = default;
+
   virtual Color emitted(const Ray &r_in, const hit_record &rec, float u,
                         float v, const Point3 &p) const {
     return Color(0, 0, 0);
   }
+
+  virtual bool is_emitter() const { return false; }
 
   virtual bool scatter(const Ray &r, const hit_record &rec,
                        scatter_record &srec) const = 0;
@@ -41,6 +45,9 @@ class Lambertian : public Material {
 public:
   Lambertian(const Color &a) : albedo(std::make_shared<SolidColor>(a)) {}
   Lambertian(std::shared_ptr<Texture> a) : albedo(a) {}
+
+  virtual bool is_emitter() const override { return false; }
+
   virtual bool scatter(const Ray &r, const hit_record &rec,
                        scatter_record &srec) const override;
 
@@ -53,6 +60,9 @@ public:
 class Metal : public Material {
 public:
   Metal(const Color &a, float f) : albedo(a), fuzz(f < 1 ? f : 1) {}
+
+  virtual bool is_emitter() const override { return false; }
+
   virtual bool scatter(const Ray &r, const hit_record &rec,
                        scatter_record &srec) const override;
 
@@ -69,6 +79,8 @@ public:
   Dielectric(Color color, float density, float refraction_index)
       : albedo(color), density(density), ref_idx(refraction_index) {}
 
+  virtual bool is_emitter() const override { return false; }
+
   virtual bool scatter(const Ray &r, const hit_record &rec,
                        scatter_record &srec) const override;
 
@@ -82,6 +94,8 @@ public:
   DiffuseLight(std::shared_ptr<Texture> a) : emit(a) {}
   DiffuseLight(Color c) : emit(std::make_shared<SolidColor>(c)) {}
 
+  virtual bool is_emitter() const override { return true; }
+
   virtual bool scatter(const Ray &r_in, const hit_record &rec,
                        scatter_record &srec) const override;
 
@@ -91,10 +105,12 @@ public:
   std::shared_ptr<Texture> emit;
 };
 
-class isotropic : public Material {
+class Isotropic : public Material {
 public:
-  isotropic(const Color &albedo) : tex(std::make_shared<SolidColor>(albedo)) {}
-  isotropic(std::shared_ptr<Texture> tex) : tex(tex) {}
+  Isotropic(const Color &albedo) : tex(std::make_shared<SolidColor>(albedo)) {}
+  Isotropic(std::shared_ptr<Texture> tex) : tex(tex) {}
+
+  virtual bool is_emitter() const override { return false; }
 
   virtual bool scatter(const Ray &r_in, const hit_record &rec,
                        scatter_record &srec) const override;

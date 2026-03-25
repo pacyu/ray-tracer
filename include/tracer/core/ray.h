@@ -14,6 +14,8 @@ public:
   Point3 at(float t) const { return orig + t * dir; }
   float time() const { return tm; }
 
+  mutable int bvh_hit_count = 0;
+
 private:
   Point3 orig;
   Point3 dir;

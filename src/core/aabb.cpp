@@ -4,7 +4,7 @@ namespace tracer {
 
 bool AABB::hit(const Ray &r, float tmin, float tmax) const {
   for (int i = 0; i < 3; i++) {
-    float invD = 1. / r.direction()[i];
+    float invD = 1.f / r.direction()[i];
     float t0 = (min[i] - r.origin()[i]) * invD,
           t1 = (max[i] - r.origin()[i]) * invD;
     if (invD < 0.0f)
@@ -25,4 +25,5 @@ AABB AABB::surrounding_box(AABB box0, AABB box1) {
                      std::max(box0.max.y(), box1.max.y()),
                      std::max(box0.max.z(), box1.max.z())));
 }
+
 } // namespace tracer

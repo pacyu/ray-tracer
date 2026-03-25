@@ -24,6 +24,10 @@ public:
 
   virtual Vec3 random(const Point3 &origin) const override;
 
+  virtual std::shared_ptr<Material> get_material() const override {
+    return mat_ptr;
+  }
+
   std::shared_ptr<Material> mat_ptr;
   float x0, x1, y0, y1, k;
 };
@@ -44,6 +48,10 @@ public:
 
   virtual Vec3 random(const Point3 &origin) const override;
 
+  virtual std::shared_ptr<Material> get_material() const override {
+    return mat_ptr;
+  }
+
   std::shared_ptr<Material> mat_ptr;
   float x0, x1, z0, z1, k;
 };
@@ -63,6 +71,10 @@ public:
   virtual float pdf_value(const Point3 &origin, const Vec3 &v) const override;
 
   virtual Vec3 random(const Point3 &origin) const override;
+
+  virtual std::shared_ptr<Material> get_material() const override {
+    return mat_ptr;
+  }
 
   std::shared_ptr<Material> mat_ptr;
   float y0, y1, z0, z1, k;

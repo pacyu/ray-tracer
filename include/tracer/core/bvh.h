@@ -18,6 +18,10 @@ public:
   virtual bool bounding_box(float t0, float t1,
                             AABB &output_box) const override;
 
+  virtual std::shared_ptr<Material> get_material() const override {
+    return nullptr;
+  }
+
 private:
   std::shared_ptr<hittable> left;
   std::shared_ptr<hittable> right;

@@ -29,7 +29,7 @@ include_directories(include)
 # 构建静态库
 file(GLOB_RECURSE SOURCES "src/parser/*.cpp" "src/core/*.cpp")
 add_library(tracer_lib STATIC ${SOURCES})
-target_link_libraries(tracer_lib PRIVATE ${OpenCV_LIBS} OpenMP::OpenMP_CXX)
+target_link_libraries(tracer_lib PUBLIC OpenMP::OpenMP_CXX PRIVATE ${OpenCV_LIBS})
 
 # 构建主可执行文件
 add_executable(${PROJECT_NAME} src/main.cpp)
@@ -49,10 +49,20 @@ target_link_libraries(test_tracer PRIVATE tracer_lib ${OpenCV_LIBS})
 set(ALL_TARGETS ${PROJECT_NAME} tracer_lib test_parser test_tracer)
 foreach(target ${ALL_TARGETS})
     if(MSVC)
-        # /Ox /Ot /fp:fast /arch:AVX2 针对光追计算密度进行优化
-        target_compile_options(${target} PRIVATE /Ox /Ot /fp:fast /arch:AVX2)
+        # 使用生成器表达式：如果【不是】Debug 模式，才应用优化选项
+        target_compile_options(${target} PRIVATE 
+            $<$<NOT:$<CONFIG:Debug>>:/Ox>
+            $<$<NOT:$<CONFIG:Debug>>:/Ot>
+            $<$<NOT:$<CONFIG:Debug>>:/fp:fast>
+            /arch:AVX2 # AVX2 指令集可以在 Debug 下共存，保持不变
+        )
     else()
-        target_compile_options(${target} PRIVATE -O3 -march=native -ffast-math)
+        # 同样，类 Unix 平台下，Debug 模式也建议不加 -O3
+        target_compile_options(${target} PRIVATE 
+            $<$<NOT:$<CONFIG:Debug>>:-O3>
+            $<$<NOT:$<CONFIG:Debug>>:-ffast-math>
+            -march=native
+        )
     endif()
 endforeach()
 

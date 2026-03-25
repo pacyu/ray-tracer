@@ -9,25 +9,71 @@ namespace tracer {
 namespace parser {
 
 enum class TokenType {
-  Identifier   = 1 << 0,
-  Number       = 1 << 1,
+  Identifier,
+  Number,
+  NumberType,
+  Pair,
+  Vector3,
+  Quater,
+  List,
+  String,
+  Random,
+  LambertianType,
+  MetalType,
+  DielectricType,
+  LightType,
+  XYRectType,
+  XZRectType,
+  YZRectType,
+  BoxType,
+  SphereType,
+  HeartType,
+  TranslateType,
+  ConstantMediumType,
+  CameraType,
 
-  Quote        = 1 << 2,
-  LeftParen    = 1 << 3,
-  RightParen   = 1 << 4,
+  LeftParen,
+  RightParen,
 
-  LeftBracket  = 1 << 5,
-  RightBracket = 1 << 6,
+  LeftBracket,
+  RightBracket,
 
-  LeftBrace    = 1 << 7,
-  RightBrace   = 1 << 8,
+  LeftBrace,
+  RightBrace,
 
-  Colon        = 1 << 9,
-  Comma        = 1 << 10,
-  Equal        = 1 << 11,
+  LeftArrow,
+  RightArrow,
 
-  Newline      = 1 << 12,
-  EndOfFile    = 1 << 13
+  Colon,
+  Comma,
+  Equal,
+  Pipe,
+  Quote,
+  DoubleQuote,
+
+  DDot,
+
+  Plus,
+  Minus,
+  Mul,
+  Div,
+  Mod,
+
+  LiteralStr,
+
+  Newline,
+  EndOfFile
+};
+
+enum Precedence {
+  NONE,
+  ASSIGN,     // =
+  R_ARROW,    // ->
+  TERM,       // + -
+  FACTOR,     // * /
+  UNARY,      // - !
+  CALL,       // | (Pipe)
+  PRIMARY
 };
 
 struct Token {
@@ -40,7 +86,7 @@ struct Token {
 };
 
 std::string to_string(TokenType type);
-std::string get_expected_types_string(size_t mask);
+std::string get_expected_types_string(std::vector<TokenType> types);
 
 } // namespace parser
 

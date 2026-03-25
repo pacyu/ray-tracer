@@ -43,7 +43,7 @@ public:
 
 class Hittable_pdf : public PDF {
 public:
-  Hittable_pdf(const hittable *p, const Point3 &origin);
+  Hittable_pdf(const hittable& p, const Point3 &origin);
 
   virtual float value(const Vec3 &direction) const override;
 
@@ -51,7 +51,7 @@ public:
 
 public:
   Point3 o;
-  const hittable *ptr;
+  const hittable &ptr;
 };
 
 class Sphere_pdf : public PDF {
