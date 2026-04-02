@@ -12,7 +12,6 @@ bool Plastic::scatter(const Ray &r_in, const hit_record &rec,
   float fresnel = F0 + (1.0f - F0) * pow(1.0f - cos_theta, 5.0f);
 
   // 2. 决定这根光线是发生“涂层反射”还是“进入基底散射”
-  // 我们使用随机数与菲涅尔值对比
   if (tracer::math::random_float() < fresnel) {
     // 镜面/涂层反射 (Specular/Coat)
     srec.is_specular = true;

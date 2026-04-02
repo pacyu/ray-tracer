@@ -10,7 +10,6 @@ bool GlossyPlastic::scatter(const Ray &r_in, const hit_record &rec,
                      dot(unit_vector(-r_in.direction()), rec.normal), ior),
                  0.0f, 1.0f);
   if (tracer::math::random_float() < F) {
-    // 1. 镜面反射逻辑
     Vec3 reflected =
         tracer::optics::reflect(unit_vector(r_in.direction()), rec.normal);
     srec.specular_ray = Ray(rec.p, reflected);

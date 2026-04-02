@@ -136,40 +136,6 @@ Color Camera::ray_color(const Ray &r,
   hit_record rec;
   bool hit_surface = world.hit(r, 0.001f, tracer::math::INF, rec);
 
-  // bool in_water = r.origin().z() < -1.0f;
-
-  // Medium water(Vec3(0.25f, 0.03f, 0.002f), // sigma_a
-  //              Vec3(0.02f, 0.02f, 0.02f),  // sigma_s
-  //              0.8f                        // g（前向散射）
-  // );
-
-  // if (in_water) {
-  //   Vec3 sigma_t = water.sigma_t();
-  //   float sigma_t_avg = (sigma_t.x() + sigma_t.y() + sigma_t.z()) / 3.0f;
-
-  //   float t = -log(1 - utils::random_float()) / sigma_t_avg;
-
-  //   if (!hit_surface || t < rec.t) {
-  //     Point3 p = r.at(t);
-
-  //     Vec3 Tr(exp(-water.sigma_a.x() * t), exp(-water.sigma_a.y() * t),
-  //             exp(-water.sigma_a.z() * t));
-
-  //     Ray scattered_ray(p, utils::sample_HG(r.direction(), water.g));
-  //     return Tr *
-  //            ray_color(scattered_ray, background, world, lights, depth - 1) /
-  //            sigma_t_avg;
-  //   } else {
-  //     // 撞击表面前的吸收 (Absorption)
-  //     // 即便撞到了物体，水下的光路依然要服从 Beer's Law
-  //     Vec3 Tr =
-  //         Vec3(exp(-water.sigma_a.x() * rec.t), exp(-water.sigma_a.y() *
-  //         rec.t),
-  //              exp(-water.sigma_a.z() * rec.t));
-  //     return Tr * ray_color(r, background, world, lights, depth - 1);
-  //   }
-  // }
-
   if (!hit_surface) {
     return background->value(r);
   }
