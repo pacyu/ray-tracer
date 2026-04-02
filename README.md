@@ -11,9 +11,7 @@
 
 ![taubin's heart](/examples/image.png)
 
-<video width="640" height="360" controls>
-  <source src="./examples/output.mp4" type="video/mp4">
-</video>
+![Dynamics Ocean](/examples/output.mp4)
 
 ## 🚀 Latest Updates (2026.04.02)
 

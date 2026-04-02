@@ -1,4 +1,6 @@
 #pragma once
+#include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <random>
 #include <thread>
