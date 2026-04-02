@@ -20,7 +20,7 @@ red = Lambert ((0.65, 0.05, 0.05))
 green = Lambert ((0.12, 0.45, 0.15))
 grey = Lambert ((0.73, 0.73, 0.73))
 blue = Metal ((0.06, 0.32, 0.73), 0.0)
-glass = Dielect (1.5)
+glass = Dielect ((0.5294, 0.8078, 0.9216), 0.02, 1.5)
 img_texture = Lambert (texture)
 
 light = Light ((7, 7, 7))
