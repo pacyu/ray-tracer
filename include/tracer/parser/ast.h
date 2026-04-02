@@ -1,21 +1,26 @@
 #pragma once
-#include "tracer/core/aarect.h"
-#include "tracer/core/box.h"
 #include "tracer/core/camera.h"
-#include "tracer/core/constant_medium.h"
-#include "tracer/core/heart.h"
 #include "tracer/core/hittable.h"
-#include "tracer/core/material.h"
-#include "tracer/core/rotate.h"
-#include "tracer/core/sphere.h"
-#include "tracer/core/translate.h"
-#include "tracer/core/vec3.h"
+#include "tracer/geometry/aarect.h"
+#include "tracer/geometry/box.h"
+#include "tracer/geometry/heart.h"
+#include "tracer/geometry/ocean.h"
+#include "tracer/geometry/sphere.h"
+#include "tracer/material/dielectric.h"
+#include "tracer/material/diffuse_light.h"
+#include "tracer/material/lambertian.h"
+#include "tracer/material/metal.h"
+#include "tracer/material/ocean_material.h"
+#include "tracer/math/vec3.h"
+#include "tracer/texture/image_texture.h"
+#include "tracer/transform/rotate.h"
+#include "tracer/transform/translate.h"
+#include "tracer/volume/constant_medium.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace tracer {
-
 namespace parser {
 
 struct Environment;
@@ -42,10 +47,10 @@ struct BasicType {
   BasicType(int val) : t_integer(val), tag(T_INT) {}
 
   BasicType(int r_min, int r_max)
-      : t_integer(tracer::utils::random_int(r_min, r_max)), tag(T_RANDOM) {}
+      : t_integer(tracer::math::random_int(r_min, r_max)), tag(T_RANDOM) {}
 
   BasicType(float r_min, float r_max)
-      : t_float(tracer::utils::random_float(r_min, r_max)), tag(T_RANDOM) {}
+      : t_float(tracer::math::random_float(r_min, r_max)), tag(T_RANDOM) {}
 
   BasicType(float val) : t_float(val), tag(T_FLOAT) {}
 
@@ -306,11 +311,21 @@ public:
 
 class DielectricNode : public ASTNode {
 private:
-  std::shared_ptr<ASTNode> albedo_expr, ri_expr, density_expr;
+  std::shared_ptr<ASTNode> albedo_expr, density_expr, ri_expr;
 
 public:
   DielectricNode(std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
                  std::shared_ptr<ASTNode>);
+
+  virtual BasicType evaluate(std::shared_ptr<Environment> env) override;
+};
+
+class OceanMaterialNode : public ASTNode {
+private:
+  std::shared_ptr<ASTNode> ior_expr, roughness_expr;
+
+public:
+  OceanMaterialNode(std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>);
 
   virtual BasicType evaluate(std::shared_ptr<Environment> env) override;
 };
@@ -391,6 +406,20 @@ public:
   virtual BasicType evaluate(std::shared_ptr<Environment> env) override;
 };
 
+class OceanNode : public ASTNode {
+private:
+  std::shared_ptr<ASTNode> n_expr, l_expr, speed_expr, dir_expr, a_expr,
+      mat_expr, lambda_expr, height_expr;
+
+public:
+  OceanNode(std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
+            std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
+            std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
+            std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>);
+
+  virtual BasicType evaluate(std::shared_ptr<Environment> env) override;
+};
+
 class TranslateNode : public ASTNode {
 private:
   std::shared_ptr<ASTNode> object_expr, offset_expr;
@@ -414,17 +443,17 @@ public:
 
 class CameraNode : public ASTNode {
 public:
-  std::shared_ptr<ASTNode> shape_expr, spp_expr, depth_expr, bg_expr, from_expr,
-      at_expr, vup_expr, fov_expr;
+  std::shared_ptr<ASTNode> shape_expr, spp_expr, depth_expr, name_expr, bg_expr,
+      from_expr, at_expr, vup_expr, fov_expr;
   CameraNode() {};
   CameraNode(std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
              std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
              std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
-             std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>);
+             std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
+             std::shared_ptr<ASTNode>);
 
   virtual BasicType evaluate(std::shared_ptr<Environment> env) override;
 };
 
 } // namespace parser
-
 } // namespace tracer

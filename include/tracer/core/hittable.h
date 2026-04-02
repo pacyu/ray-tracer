@@ -15,6 +15,7 @@ struct hit_record {
   float u;
   float v;
   bool front_face;
+  float roughness;
 
   void set_face_normal(const Ray &r, const Vec3 &outward_normal);
 };
@@ -31,6 +32,8 @@ public:
   virtual float pdf_value(const Point3 &o, const Vec3 &v) const { return 0.0; }
 
   virtual Vec3 random(const Vec3 &o) const { return Vec3(1, 0, 0); }
+
+  virtual void refit(float t0, float t1) {}
 };
 
 class flip_face : public hittable {

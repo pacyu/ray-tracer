@@ -7,7 +7,6 @@
 #include <unordered_map>
 
 namespace tracer {
-
 namespace parser {
 
 class Factory {
@@ -35,5 +34,4 @@ private:
 };
 
 } // namespace parser
-
 } // namespace tracer

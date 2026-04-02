@@ -1,6 +1,4 @@
-#ifndef TRACER_PARSER_EXCEPTIONS_H
-#define TRACER_PARSER_EXCEPTIONS_H
-
+#pragma once
 #include <exception>
 #include <string>
 
@@ -18,5 +16,3 @@ private:
 
 } // namespace parser
 } // namespace tracer
-
-#endif // TRACER_PARSER_EXCEPTIONS_H

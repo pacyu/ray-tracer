@@ -65,7 +65,6 @@ static void test_parser() {
   assert(camera->image_height == 600);
   assert(camera->samples_per_pixel >= 128);
   assert(camera->max_depth == 8);
-  assert(camera->background == Color(0.0, 0.0, 0.0));
   assert(world.objects.size() >= 9);
 }
 

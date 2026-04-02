@@ -5,7 +5,6 @@
 #include <stdexcept>
 
 namespace tracer {
-
 namespace parser {
 
 class Parser {
@@ -37,6 +36,7 @@ private:
   std::shared_ptr<ASTNode> parse_lambertian();
   std::shared_ptr<ASTNode> parse_metal();
   std::shared_ptr<ASTNode> parse_dielectric();
+  std::shared_ptr<ASTNode> parse_ocean_material();
   std::shared_ptr<ASTNode> parse_light();
   std::shared_ptr<ASTNode> parse_xyrect();
   std::shared_ptr<ASTNode> parse_xzrect();
@@ -44,6 +44,7 @@ private:
   std::shared_ptr<ASTNode> parse_box();
   std::shared_ptr<ASTNode> parse_sphere();
   std::shared_ptr<ASTNode> parse_heart();
+  std::shared_ptr<ASTNode> parse_ocean();
   std::shared_ptr<ASTNode> parse_translate();
   std::shared_ptr<ASTNode> parse_constant_medium();
   std::shared_ptr<ASTNode> parse_camera();
@@ -57,5 +58,4 @@ private:
 };
 
 } // namespace parser
-
 } // namespace tracer

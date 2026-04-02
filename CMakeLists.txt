@@ -21,54 +21,62 @@ else()
 endif()
 
 # 依赖项
+find_package(FFTW3 QUIET)
+if(NOT FFTW3_FOUND)
+    message(STATUS "Standard find_package(FFTW3) failed, falling back to manual search...")
+
+    # 如果标准寻找失败（比如在 Windows 上没提供 Config 文件），手动捞出头文件和库
+    find_path(FFTW3_INCLUDE_DIRS 
+        NAMES fftw3.h
+        PATH_SUFFIXES include
+    )
+
+    find_library(FFTW3_LIBRARIES 
+        NAMES fftwf libfftw3f-3 fftw3f-3 fftw3f
+        PATH_SUFFIXES lib bin
+    )
+
+    if(FFTW3_INCLUDE_DIRS AND FFTW3_LIBRARIES)
+        set(FFTW3_FOUND TRUE)
+    endif()
+endif()
 find_package(OpenMP REQUIRED)
 find_package(OpenCV REQUIRED)
 
-include_directories(include)
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
-# 构建静态库
-file(GLOB_RECURSE SOURCES "src/parser/*.cpp" "src/core/*.cpp")
-add_library(tracer_lib STATIC ${SOURCES})
-target_link_libraries(tracer_lib PUBLIC OpenMP::OpenMP_CXX PRIVATE ${OpenCV_LIBS})
-
-# 构建主可执行文件
-add_executable(${PROJECT_NAME} src/main.cpp)
-target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE tracer_lib ${OpenCV_LIBS})
-
-# 构建解析器测试可执行文件
-add_executable(test_parser tests/test_parser.cpp)
-target_include_directories(test_parser PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(test_parser PRIVATE tracer_lib)
-
-# 构建渲染器测试可执行文件
-add_executable(test_tracer tests/test_tracer.cpp)
-target_include_directories(test_tracer PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(test_tracer PRIVATE tracer_lib ${OpenCV_LIBS})
-
-set(ALL_TARGETS ${PROJECT_NAME} tracer_lib test_parser test_tracer)
-foreach(target ${ALL_TARGETS})
+function(apply_optimizations target_name)
     if(MSVC)
-        # 使用生成器表达式：如果【不是】Debug 模式，才应用优化选项
-        target_compile_options(${target} PRIVATE 
+        target_compile_options(${target_name} PRIVATE 
             $<$<NOT:$<CONFIG:Debug>>:/Ox>
             $<$<NOT:$<CONFIG:Debug>>:/Ot>
             $<$<NOT:$<CONFIG:Debug>>:/fp:fast>
-            /arch:AVX2 # AVX2 指令集可以在 Debug 下共存，保持不变
+            $<$<NOT:$<CONFIG:Debug>>:/Gy>
+            $<$<NOT:$<CONFIG:Debug>>:/Gw>
+            /arch:AVX2
+        )
+        target_link_options(${target_name} PRIVATE
+            $<$<NOT:$<CONFIG:Debug>>:/LTCG>
+            $<$<NOT:$<CONFIG:Debug>>:/INCREMENTAL:NO>
         )
     else()
-        # 同样，类 Unix 平台下，Debug 模式也建议不加 -O3
-        target_compile_options(${target} PRIVATE 
+        target_compile_options(${target_name} PRIVATE 
             $<$<NOT:$<CONFIG:Debug>>:-O3>
+            $<$<NOT:$<CONFIG:Debug>>:-ffunction-sections>
+            $<$<NOT:$<CONFIG:Debug>>:-fdata-sections>
             $<$<NOT:$<CONFIG:Debug>>:-ffast-math>
             -march=native
         )
     endif()
-endforeach()
+    
+    # 启用 IPO
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT result OUTPUT error)
+    if(result)
+        set_property(TARGET ${target_name} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
+endfunction()
 
-# 启用 IPO（Interprocedural Optimization）以提高性能
-include(CheckIPOSupported)
-check_ipo_supported(RESULT result OUTPUT error)
-if(result)
-    set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-endif()
+add_subdirectory(src)
+add_subdirectory(tests)

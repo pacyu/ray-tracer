@@ -6,7 +6,6 @@
 #include <vector>
 
 namespace tracer {
-
 namespace parser {
 
 class Lexer {
@@ -36,5 +35,4 @@ private:
 };
 
 } // namespace parser
-
 } // namespace tracer

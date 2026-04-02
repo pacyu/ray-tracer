@@ -11,11 +11,21 @@
 
 ![taubin's heart](/examples/image.png)
 
-## 🚀 Latest Updates (2026.03.25)
+<video width="640" height="360" controls>
+  <source src="./examples/output.mp4" type="video/mp4">
+</video>
 
-- **Auroric 语法重构**：完全重构了解释器后端，现在 `aur` 脚本写起来会更灵活，自然。代码示例参考[这里](/bin/scene.aur).
+## 🚀 Latest Updates (2026.04.02)
+
+- **项目重构**: 对各个部件进行了分类，现在的项目目录结构更便于管理材质、纹理、几何对象。
+- **新增材质**: 增加 `Plastic`、`OceanMaterial`（这个名字其实我想改为Water，还在考虑中）、`GlossyPlastic`、`Cloth` 材质。
+- **新增海洋可渲染对象**: `Ocean` 作为一个几何物体，通过 Phillips Spectrum([J Tessendorf · 2004](https://jtessen.people.clemson.edu/reports/papers_files/coursenotes2004.pdf)) 可以通过给定分辨率、风速、风向等创建。
+
+## 🚀 Updates (2026.03.25)
+
+- **Auroric 语法重构**: 完全重构了解释器后端，现在 `aur` 脚本写起来会更灵活，自然。代码示例参考[这里](/bin/scene.aur)。
 - **性能优化**: 增加了 `BVH` 树进行场景管理以及命中判断加速，对于简单场景性能提升比较少，也做了一部分智能指针优化，但性能提升不明显。
-- **新增纹理**：增加 `ImageTexture`（图片纹理），支持图片作为纹理的渲染效果。
+- **新增纹理**: 增加 `ImageTexture`（图片纹理），支持图片作为纹理的渲染效果。
 
 ## 🚀 Updates (2026.03.16)
 
@@ -59,11 +69,14 @@
 
 * [x] **场景配置语言**：自定义 DSL，无需重新编译即可动态定义物体、光源和相机。
 * [x] **跨平台支持**：支持 Linux 和 Windows。
-* [ ] **脚本进阶**：为 Auroric 增加 `for` 循环与 `random` 随机数生成支持。
-* [ ] **几何体扩展**：增加三角面片（Mesh）和更复杂的 SDF 物体。
+* [x] **Auroric 扩展**: `Random` 随机数生成。
+* [ ] **Auroric 进阶**：为 Auroric 增加 `for` 循环支持。
+* [x] **几何体扩展**：增加三角面片（Mesh）和更复杂的 SDF 物体。
+* [ ] **第三方模型导入**: 增加支持 .obj 等格式的模型导入渲染功能。
 * [ ] **非均匀密度材质**
 * [ ] **黎曼几何/光线弯曲**
-* [ ] **海洋模拟/流体模拟**
+* [x] **海洋模拟**
+* [ ] **流体模拟**
 * [ ] **三体问题模拟**
 * [ ] **卡通渲染**
 

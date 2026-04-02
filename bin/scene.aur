@@ -8,15 +8,19 @@ z = Num (1 + 1 * 3)
 
 w = Random (0, 50)
 
+from = Vec3 (1000, 0, 0)
+
+at = Vec3 (278, 0, 0)
+
 spp = 128
 
-texture = String "../examples/earthmap.jpg"
+texture = String "../textures/earthmap.jpg"
 
 red = Lambert ((0.65, 0.05, 0.05))
 green = Lambert ((0.12, 0.45, 0.15))
 grey = Lambert ((0.73, 0.73, 0.73))
 blue = Metal ((0.06, 0.32, 0.73), 0.0)
-glass = Dielect ((0.6953, 0.7422, 0.7070), 0.08, 1.5)
+glass = Dielect (1.5)
 img_texture = Lambert (texture)
 
 light = Light ((7, 7, 7))

@@ -35,7 +35,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libopencv-dev libomp-dev cmake g++
+          sudo apt-get install -y libopencv-dev libomp-dev cmake g++ libfftw3-dev
 
       - name: Install Dependencies (Windows)
         if: runner.os == 'Windows'

@@ -1,8 +1,7 @@
 #pragma once
 #include "tracer/core/aabb.h"
 #include "tracer/core/hittable.h"
-#include "tracer/utils/drand48.h"
-#include <memory>
+#include "tracer/math/drand48.h"
 #include <vector>
 
 namespace tracer {

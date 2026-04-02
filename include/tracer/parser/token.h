@@ -5,7 +5,6 @@
 #include <vector>
 
 namespace tracer {
-
 namespace parser {
 
 enum class TokenType {
@@ -21,6 +20,7 @@ enum class TokenType {
   LambertianType,
   MetalType,
   DielectricType,
+  OceanMaterialType,
   LightType,
   XYRectType,
   XZRectType,
@@ -28,6 +28,7 @@ enum class TokenType {
   BoxType,
   SphereType,
   HeartType,
+  OceanType,
   TranslateType,
   ConstantMediumType,
   CameraType,
@@ -67,12 +68,12 @@ enum class TokenType {
 
 enum Precedence {
   NONE,
-  ASSIGN,     // =
-  R_ARROW,    // ->
-  TERM,       // + -
-  FACTOR,     // * /
-  UNARY,      // - !
-  CALL,       // | (Pipe)
+  ASSIGN,  // =
+  R_ARROW, // ->
+  TERM,    // + -
+  FACTOR,  // * /
+  UNARY,   // - !
+  CALL,    // | (Pipe)
   PRIMARY
 };
 
@@ -89,5 +90,4 @@ std::string to_string(TokenType type);
 std::string get_expected_types_string(std::vector<TokenType> types);
 
 } // namespace parser
-
 } // namespace tracer

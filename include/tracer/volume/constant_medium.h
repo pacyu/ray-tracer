@@ -1,0 +1,39 @@
+#pragma once
+#include "tracer/core/hittable.h"
+#include "tracer/core/texture.h"
+#include "tracer/material/isotropic.h"
+
+namespace tracer {
+namespace volume {
+
+class ConstantMedium : public hittable {
+public:
+  ConstantMedium(std::shared_ptr<hittable> boundary, float density,
+                 std::shared_ptr<Texture> tex)
+      : boundary(boundary), neg_inv_density(-1 / density),
+        phase_function(std::make_shared<material::Isotropic>(tex)) {}
+
+  ConstantMedium(std::shared_ptr<hittable> boundary, float density,
+                 const Color &albedo)
+      : boundary(boundary), neg_inv_density(-1 / density),
+        phase_function(std::make_shared<material::Isotropic>(albedo)) {}
+
+  bool hit(const Ray &r, float t_min, float t_max,
+           hit_record &rec) const override;
+
+  bool bounding_box(float t0, float t1, AABB &output_box) const override {
+    return boundary->bounding_box(t0, t1, output_box);
+  }
+
+  virtual std::shared_ptr<Material> get_material() const override {
+    return phase_function;
+  }
+
+private:
+  std::shared_ptr<hittable> boundary;
+  float neg_inv_density;
+  std::shared_ptr<Material> phase_function;
+};
+
+} // namespace volume
+} // namespace tracer

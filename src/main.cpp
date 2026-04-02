@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     hittable_list lights = factory.get_lights();
     hittable_list world = factory.get_world();
 
-    BVH bvh_world = BVH(world.objects, 0, world.objects.size());
+    BVH bvh_world = BVH(world);
 
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);

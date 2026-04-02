@@ -1,13 +1,11 @@
 #pragma once
 #include "tracer/core/hittable.h"
+#include "tracer/math/math.h"
 #include "tracer/core/onb.h"
-#include "tracer/core/vec3.h"
-#include "tracer/utils/drand48.h"
-#include "tracer/utils/math.h"
+#include "tracer/math/optics.h"
+#include "tracer/math/sampling.h"
 
 namespace tracer {
-
-Vec3 random_cosine_direction();
 
 class PDF {
 public:
@@ -43,7 +41,7 @@ public:
 
 class Hittable_pdf : public PDF {
 public:
-  Hittable_pdf(const hittable& p, const Point3 &origin);
+  Hittable_pdf(const hittable &p, const Point3 &origin);
 
   virtual float value(const Vec3 &direction) const override;
 
@@ -57,6 +55,20 @@ public:
 class Sphere_pdf : public PDF {
 public:
   Sphere_pdf() {}
+
+  virtual float value(const Vec3 &direction) const override;
+
+  virtual Vec3 generate() const override;
+};
+
+class GGX_pdf : public PDF {
+public:
+  Vec3 n;
+  Vec3 v;
+  float alpha;
+
+  GGX_pdf(const Vec3 &normal, const Vec3 &view, float alpha)
+      : n(normal), v(view), alpha(alpha) {}
 
   virtual float value(const Vec3 &direction) const override;
 
