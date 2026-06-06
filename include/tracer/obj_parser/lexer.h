@@ -2,6 +2,7 @@
 #include "tracer/obj_parser/token.h"
 #include <iostream>
 #include <unordered_map>
+#include <vector>
 
 namespace tracer {
 namespace obj_parser {

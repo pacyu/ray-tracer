@@ -36,7 +36,6 @@ Vec3 GlossyPlastic::scattering_pdf(const Ray &r_in, const hit_record &rec,
 
   // 混合 PDF：漫反射部分 (Cosine PDF) + 镜面部分
   // 注意：如果是完美镜面，镜面部分的 PDF 是 Delta 分布，通常不直接加在 PDF
-  // 函数里 这里返回漫反射部分的 PDF 贡献
   return (1.0f - F) * albedo;
 }
 
