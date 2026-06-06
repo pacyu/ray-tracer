@@ -7,7 +7,7 @@ on:
       - "**.md"
       - "bin/**"
       - "docs/**"
-      - ".github/workflows/**"
+      # - ".github/workflows/**"
       - ".gitignore"
       - ".gitattributes"
   pull_request:
@@ -40,6 +40,7 @@ jobs:
       - name: Install Dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
+          vcpkg install fftw3:x64-windows
           vcpkg install opencv:x64-windows
 
       - name: Configure CMake

@@ -40,6 +40,10 @@ public:
 
   static Vec3 random(float min, float max);
 
+  static Vec3 min(const Vec3 &v1, const Vec3 &v2);
+
+  static Vec3 max(const Vec3 &v1, const Vec3 &v2);
+
 public:
   float e[3];
 };

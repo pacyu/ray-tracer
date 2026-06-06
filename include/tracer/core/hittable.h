@@ -27,7 +27,7 @@ public:
 
   virtual bool bounding_box(float t0, float t1, AABB &output_box) const = 0;
 
-  virtual std::shared_ptr<Material> get_material() const = 0;
+  virtual std::shared_ptr<Material> get_material() const { return nullptr; }
 
   virtual float pdf_value(const Point3 &o, const Vec3 &v) const { return 0.0; }
 

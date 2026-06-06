@@ -353,8 +353,8 @@ BasicType DielectricNode::evaluate(std::shared_ptr<Environment> env) {
 BasicType OceanMaterialNode::evaluate(std::shared_ptr<Environment> env) {
   BasicType ior = ior_expr->evaluate(env);
   BasicType roughness = roughness_expr->evaluate(env);
-  return BasicType(std::make_shared<material::OceanMaterial>(
-      ior.t_float, roughness.t_float));
+  return BasicType(
+      std::make_shared<material::Water>(ior.t_float, roughness.t_float));
 }
 
 BasicType DiffuseLightNode::evaluate(std::shared_ptr<Environment> env) {
@@ -456,15 +456,15 @@ BasicType OceanNode::evaluate(std::shared_ptr<Environment> env) {
   BasicType lambda = lambda_expr->evaluate(env);
   BasicType height = height_expr->evaluate(env);
   physics::OceanParams params;
-  params.N = n.t_float;
+  params.N = static_cast<int>(n.t_float);
   params.L = l.t_float;
   params.wind_speed = wind_speed.t_float;
   params.wind_dir = physics::Complex(wind_dir.t_pair.first->t_float,
                                      wind_dir.t_pair.second->t_float);
   params.A = a.t_float;
+  auto simulator = std::make_unique<physics::FFTOcean>(params);
   return BasicType(std::make_shared<geometry::Ocean>(
-      physics::FFTOcean(params), mat.t_material, lambda.t_float,
-      height.t_float));
+      &*simulator, mat.t_material, lambda.t_float, height.t_float));
 }
 
 BasicType TranslateNode::evaluate(std::shared_ptr<Environment> env) {
@@ -524,22 +524,22 @@ BasicType CameraNode::evaluate(std::shared_ptr<Environment> env) {
     fov.t_float = 40.f;
 
   if (bg.tag == BasicType::T_VEC3)
-    return BasicType(std::make_unique<Camera>(
-        shape.t_pair.first->t_integer, shape.t_pair.second->t_integer,
-        spp.t_integer, depth.t_integer, name.t_string,
-        std::make_shared<PhysicalSky>(bg.t_vector3), from.t_vector3,
-        at.t_vector3, vup.t_vector3, fov.t_float));
+    return BasicType(
+        Camera(shape.t_pair.first->t_integer, shape.t_pair.second->t_integer,
+               spp.t_integer, depth.t_integer, name.t_string,
+               std::make_shared<PhysicalSky>(bg.t_vector3), from.t_vector3,
+               at.t_vector3, vup.t_vector3, fov.t_float));
   else if (bg.tag == BasicType::T_STRING)
-    return BasicType(std::make_unique<Camera>(
-        shape.t_pair.first->t_integer, shape.t_pair.second->t_integer,
-        spp.t_integer, depth.t_integer, name.t_string,
-        std::make_shared<ImageBackground>(bg.t_string), from.t_vector3,
-        at.t_vector3, vup.t_vector3, fov.t_float));
-  return BasicType(std::make_unique<Camera>(
-      shape.t_pair.first->t_integer, shape.t_pair.second->t_integer,
-      spp.t_integer, depth.t_integer, name.t_string,
-      std::make_shared<Background>(), from.t_vector3, at.t_vector3,
-      vup.t_vector3, fov.t_float));
+    return BasicType(
+        Camera(shape.t_pair.first->t_integer, shape.t_pair.second->t_integer,
+               spp.t_integer, depth.t_integer, name.t_string,
+               std::make_shared<ImageBackground>(bg.t_string), from.t_vector3,
+               at.t_vector3, vup.t_vector3, fov.t_float));
+  return BasicType(Camera(shape.t_pair.first->t_integer,
+                          shape.t_pair.second->t_integer, spp.t_integer,
+                          depth.t_integer, name.t_string,
+                          std::make_shared<Background>(), from.t_vector3,
+                          at.t_vector3, vup.t_vector3, fov.t_float));
 }
 
 } // namespace parser

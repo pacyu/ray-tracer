@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: rayt.exe
+            asset_name: raytracer-windows-x86_64.zip
+          - os: ubuntu-latest
+            artifact_name: rayt
+            asset_name: raytracer-linux-x86_64.tar.gz
+  
+  steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Windows 下通过 vcpkg 安装 FFTW3 和 OpenCV（你需要的依赖）
+      - name: Install vcpkg dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          vcpkg install fftw3:x64-windows
+          vcpkg install opencv:x64-windows
+
+      # Ubuntu 下安装系统依赖（示例，按需调整）
+      - name: Install system dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfftw3-dev libopencv-dev libomp-dev cmake g++
+
+      # 配置 CMake（Release 模式）
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      # 编译
+      - name: Build
+        run: cmake --build build --config Release
+
+      # 打包二进制文件（压缩）
+      - name: Package binary
+        shell: bash
+        run: |
+          cd build
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            7z a -tzip ../${{ matrix.asset_name }} Release/${{ matrix.artifact_name }}
+          else
+            tar czvf ../${{ matrix.asset_name }} ${{ matrix.artifact_name }}
+          fi
+
+      # 上传打包后的文件作为 workflow artifact（供后续 release 步骤使用）
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: ${{ matrix.asset_name }}
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*/*
+          generate_release_notes: true   # 让 GitHub 自动生成 release notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

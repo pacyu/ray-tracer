@@ -10,15 +10,15 @@ using namespace tracer::parser;
 
 static void test_parser() {
   // 使用工厂类解析场景 aur 文件
-  Factory factory("..\\bin\\scene.aur");
+  Factory factory("../bin/scene.aur");
   factory.parse();
   factory.builder();
 
-  std::unique_ptr<Camera> camera = std::move(factory.get_camera());
-  hittable_list world = factory.get_world();
+  Camera camera = factory.take_camera();
+  hittable_list world = factory.take_world();
 
   std::shared_ptr<Environment> global_env = std::make_shared<Environment>();
-  for (const auto &[name, node] : factory.get_ast().program) {
+  for (const auto &[name, node] : factory.take_ast().program) {
     BasicType value = node->evaluate(global_env);
     global_env->set_environment(name, value);
     if (value.tag == BasicType::T_OBJECT) {
@@ -61,10 +61,10 @@ static void test_parser() {
   }
 
   // 验证解析结果
-  assert(camera->image_width == 600);
-  assert(camera->image_height == 600);
-  assert(camera->samples_per_pixel >= 128);
-  assert(camera->max_depth == 8);
+  assert(camera.image_width == 600);
+  assert(camera.image_height == 600);
+  assert(camera.samples_per_pixel >= 128);
+  assert(camera.max_depth == 8);
   assert(world.objects.size() >= 9);
 }
 

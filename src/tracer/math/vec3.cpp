@@ -46,4 +46,14 @@ Vec3 Vec3::random(float min, float max) {
               math::random_float(min, max));
 }
 
+Vec3 Vec3::min(const Vec3 &v1, const Vec3 &v2) {
+  return Vec3(std::min(v1.x(), v2.x()), std::min(v1.y(), v2.y()),
+              std::min(v1.z(), v2.z()));
+}
+
+Vec3 Vec3::max(const Vec3 &v1, const Vec3 &v2) {
+  return Vec3(std::max(v1.x(), v2.x()), std::max(v1.y(), v2.y()),
+              std::max(v1.z(), v2.z()));
+}
+
 } // namespace tracer

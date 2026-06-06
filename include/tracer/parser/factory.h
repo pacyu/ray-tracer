@@ -17,15 +17,19 @@ public:
   void builder();
   void parse();
 
-  std::unique_ptr<Camera> &get_camera() { return camera; }
+  const Camera &get_camera() const { return camera; }
   const hittable_list &get_lights() const { return lights; }
   const hittable_list &get_world() const { return world; }
   const Auroric &get_ast() const { return ast; }
+  Camera take_camera() { return std::move(camera); }
+  hittable_list take_lights() { return std::move(lights); }
+  hittable_list take_world() { return std::move(world); }
+  Auroric take_ast() { return std::move(ast); }
 
 private:
   std::string source;
   Auroric ast;
-  std::unique_ptr<Camera> camera;
+  Camera camera;
   hittable_list world;
   hittable_list lights;
 

@@ -1,4 +1,4 @@
-# 🎨 Toy RayTracer: A Playground of Light
+# Toy RayTracer: A Playground of Light
 
 [![Language](https://img.shields.io/badge/Language-C++-blue.svg)](https://en.cppreference.com/)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows-blue)](...)
@@ -9,30 +9,37 @@
 
 ---
 
-![taubin's heart](/examples/image.png)
-
 ![Dynamics Ocean](/examples/output.gif)
+![taubin's heart](/examples/image.png)
+![car's model](/examples/test_obj_image.png)
 
-## 🚀 Latest Updates (2026.04.02)
+---
+
+## Latest Updates (2026.06.06)
+
+- **obj 模型支持**: 现在渲染器支持 `.obj` 模型加载并渲染了。
+- **一些优化**: 为了支持通用的模型，重构了下 `Triangle`、`Mesh`、`Ocean`。
+
+## Updates (2026.04.02)
 
 - **项目重构**: 对各个部件进行了分类，现在的项目目录结构更便于管理材质、纹理、几何对象。
 - **新增材质**: 增加 `Plastic`、`OceanMaterial`（这个名字其实我想改为Water，还在考虑中）、`GlossyPlastic`、`Cloth` 材质。
 - **新增海洋可渲染对象**: `Ocean` 作为一个几何物体，通过 Phillips Spectrum([J Tessendorf · 2004](https://jtessen.people.clemson.edu/reports/papers_files/coursenotes2004.pdf)) 可以通过给定分辨率、风速、风向等创建。
 
-## 🚀 Updates (2026.03.25)
+## Updates (2026.03.25)
 
 - **Auroric 语法重构**: 完全重构了解释器后端，现在 `aur` 脚本写起来会更灵活，自然。代码示例参考[这里](/bin/scene.aur)。
 - **性能优化**: 增加了 `BVH` 树进行场景管理以及命中判断加速，对于简单场景性能提升比较少，也做了一部分智能指针优化，但性能提升不明显。
 - **新增纹理**: 增加 `ImageTexture`（图片纹理），支持图片作为纹理的渲染效果。
 
-## 🚀 Updates (2026.03.16)
+## Updates (2026.03.16)
 
 - **Auroric 语法重构**：全面支持变量引用、`=` 赋值表达式及材质/物体定义。
 - **物理渲染增强**：引入 **Beer's Law**（比尔定律），支持高质量彩色玻璃渲染。
 - **隐式曲面修复**：彻底解决 `Heart` 方程的表面裂纹问题，并修复了轴向旋转 (RotateX/Y/Z) 逻辑。
 - **新增对象**：增加 `ConstantMedium`（参与介质），支持烟雾、体积雾效果。
 
-## 🚀 Updates (2026.03.10)
+## Updates (2026.03.10)
 
 本次重大更新引入了全新的场景描述语言 —— **`Auroric` (.aur)**。用户可以通过编写 `.aur` 脚本动态配置物体、材质、相机和光源，彻底摆脱了修改场景必须重新编译代码的烦恼。
 
@@ -42,13 +49,13 @@
 
 ## 🇨🇳 中文 (Chinese)
 
-### 📖 关于项目
+### 关于项目
 
 **本项目有一个宗旨：如果可能，为了保持项目的整洁，尽可能的手写对各种依赖的实现，尽量不依赖第三方库。除非性能问题。**
 
 这是一个基于物理的光线追踪渲染器（RayTracer），起步于学习图形学的兴趣。该项目最初源自经典的“一周光线追踪”系列教程，后面会考虑增加物理引擎。目的是通过该项目学习计算机图形学、数学（辛几何、PDE、数值算法等）、语言（英语和日语）、物理学（广义相对论/天体/宇宙物理/量子物理等相关知识），以此来了解世界底层原理以及拓展知识，便于接触前沿学术。目前是利用CPU多线程加速渲染，只能做到离线渲染，后面会迁移到GPU，利用CUDA性能加速。
 
-### 🌟 核心特性
+### 核心特性
 
 * **Auroric 脚本语言**：
   * 支持变量赋值 (`x = Num 10`) 与引用。
@@ -65,17 +72,17 @@
 * **多线程加速**：集成 **OpenMP**，充分压榨 CPU 核心性能。
 * **图像存储**：利用 **OpenCV** 处理并保存高质量图像。
 
-### 🚀 未来蓝图
+### 未来蓝图
 
 * [x] **场景配置语言**：自定义 DSL，无需重新编译即可动态定义物体、光源和相机。
 * [x] **跨平台支持**：支持 Linux 和 Windows。
 * [x] **Auroric 扩展**: `Random` 随机数生成。
 * [ ] **Auroric 进阶**：为 Auroric 增加 `for` 循环支持。
 * [x] **几何体扩展**：增加三角面片（Mesh）和更复杂的 SDF 物体。
-* [ ] **第三方模型导入**: 增加支持 .obj 等格式的模型导入渲染功能。
+* [x] **第三方模型导入**: 增加支持 .obj 等格式的模型导入渲染功能。
+* [x] **海洋模拟**
 * [ ] **非均匀密度材质**
 * [ ] **黎曼几何/光线弯曲**
-* [x] **海洋模拟**
 * [ ] **流体模拟**
 * [ ] **三体问题模拟**
 * [ ] **卡通渲染**
@@ -86,11 +93,11 @@
 
 ## 🇺🇸 English
 
-### 📖 About
+### About
 
 A physically-based RayTracer built from scratch as a hobbyist project. Originally inspired by the "Ray Tracing in One Weekend" series, it is now evolving into a flexible rendering tool with advanced features.
 
-### 🌟 Key Features
+### Key Features
 
 * **Auroric DSL (.aur)**: A custom-designed, human-readable configuration language.
   * Now supports variables, `=` expressions, and material/object decoupling. Default Camera auto-initialization.
@@ -104,11 +111,11 @@ A physically-based RayTracer built from scratch as a hobbyist project. Originall
 * **Parallel Rendering**: Powered by **OpenMP** for high-performance CPU rendering.
 * **Image Output**: Integrated with **OpenCV** for image handling and storage.
 
-### 🚀 Roadmap
+### Roadmap
 
 * [x] **Scene Configuration DSL**: A custom language to define scenes/objects without recompilation.
 * [x] **Cross-Platform Support**: Migration to CMake for Linux and Windows support.
-* [ ] **Advanced Geometry**: Mesh loading (.obj) and complex SDF shapes.
+* [x] **Advanced Geometry**: Mesh loading (.obj) and complex SDF shapes.
 
 ---
 
@@ -116,11 +123,11 @@ A physically-based RayTracer built from scratch as a hobbyist project. Originall
 
 ## 🇯🇵 日本語 (Japanese)
 
-### 📖 プロジェクトについて
+### プロジェクトについて
 
 これは物理ベースのレイトレーシング・レンダラーです。最初は学習用の小さなプロジェクトとして始まりましたが、現在は機能拡張を続ける趣味のレンダリングツールへと進化しています。
 
-### 🌟 主な機能
+### 主な機能
 
 * **Auroric DSL (.aur)**: シーン構成を直感的に記述できる独自言語。
   * 変数定義、代入式、材質・物体の定義をサポート。デフォルトカメラによる自動初期化。
@@ -134,15 +141,15 @@ A physically-based RayTracer built from scratch as a hobbyist project. Originall
 * **並列化**: **OpenMP** によるマルチスレッド高速レンダリング。
 * **画像処理**: **OpenCV** を使用したレンダリング結果の保存。
 
-### 🚀 ロードマップ
+### ロードマップ
 
 * [x] **シーン設定言語**: コードを再コンパイルせずにシーンや物体を定義できる独自言語の実装。
 * [x] **マルチプラットフォーム**: Linux および Windows への対応。
-* [ ] **高度なジオメトリ**: 三角メッシュの読み込みと SDF 形状の追加。
+* [x] **高度なジオメトリ**: 三角メッシュの読み込みと SDF 形状の追加。
 
 ---
 
-## 🛠️ Build & Setup (Windows)
+## Build & Setup (Windows/Linux)
 
 ### 1. Prerequisites
 
@@ -220,6 +227,6 @@ heart = Heart ((0, 0, 0), 120.0, red, (0, 0, 90))
 world = [rect_light, floor, ceiling, inner, right, left, box, sphere, cm, img_sphere, heart]
 ```
 
-## 📄 Credits
+## Credits
 
 Originally based on Ray Tracing in One Weekend. Auroric DSL parser implemented with a custom recursive descent approach.

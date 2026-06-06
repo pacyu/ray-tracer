@@ -9,7 +9,7 @@ class Lambertian : public Material {
 public:
   Lambertian(const Color &a)
       : albedo(std::make_shared<texture::SolidColor>(a)) {}
-  Lambertian(std::shared_ptr<Texture> a) : albedo(a) {}
+  Lambertian(std::shared_ptr<Texture> a) : albedo(std::move(a)) {}
 
   virtual bool is_emitter() const override { return false; }
 

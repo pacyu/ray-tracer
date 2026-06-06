@@ -23,9 +23,9 @@ int main(int argc, char *argv[]) {
     factory.parse();
     factory.builder();
 
-    std::unique_ptr<Camera> cam = std::move(factory.get_camera());
-    hittable_list lights = factory.get_lights();
-    hittable_list world = factory.get_world();
+    Camera cam = factory.take_camera();
+    hittable_list lights = factory.take_lights();
+    hittable_list world = factory.take_world();
 
     BVH bvh_world = BVH(world);
 
@@ -36,10 +36,10 @@ int main(int argc, char *argv[]) {
               << std::put_time(now_tm, "%Y-%m-%d %H:%M:%S") << std::endl;
 
     if (argc <= 2) {
-      cam->render(bvh_world, lights, false);
+      cam.render(bvh_world, lights, false);
     } else if (std::string(argv[2]) == "--heatmap") {
       std::cout << "当前渲染效果为热力图模式" << std::endl;
-      cam->render(bvh_world, lights, true);
+      cam.render(bvh_world, lights, true);
     }
 
     now = std::chrono::system_clock::now();

@@ -3,18 +3,22 @@
 namespace tracer {
 namespace geometry {
 
-std::shared_ptr<Material> IndexedTriangle::get_material() const {
-  return mesh_ptr->mat_ptr;
+std::shared_ptr<Material> Triangle::get_material() const {
+  int mat_idx = mesh_ptr->material_indices[index];
+  return mesh_ptr->materials[mat_idx];
 }
 
-bool IndexedTriangle::hit(const Ray &r, float t_min, float t_max,
-                          hit_record &rec) const {
+bool Triangle::hit(const Ray &r, float t_min, float t_max,
+                   hit_record &rec) const {
+  uint32_t i0 = mesh_ptr->indices[index * 3];
+  uint32_t i1 = mesh_ptr->indices[index * 3 + 1];
+  uint32_t i2 = mesh_ptr->indices[index * 3 + 2];
 
-  const Vec3 &v0 = mesh_ptr->vertices[i0];
-  const Vec3 &v1 = mesh_ptr->vertices[i1];
-  const Vec3 &v2 = mesh_ptr->vertices[i2];
+  const Vec3 &v0 = mesh_ptr->vertices[i0].vertex;
+  const Vec3 &v1 = mesh_ptr->vertices[i1].vertex;
+  const Vec3 &v2 = mesh_ptr->vertices[i2].vertex;
 
-  // --- Möller-Trumbore ---
+  // Möller-Trumbore
   Vec3 e1 = v1 - v0;
   Vec3 e2 = v2 - v0;
   Vec3 pvec = cross(r.direction(), e2);
@@ -24,70 +28,66 @@ bool IndexedTriangle::hit(const Ray &r, float t_min, float t_max,
     return false;
 
   float inv_det = 1.0f / det;
-
   Vec3 tvec = r.origin() - v0;
   float u = dot(tvec, pvec) * inv_det;
+
   if (u < 0.0f || u > 1.0f)
     return false;
 
   Vec3 qvec = cross(tvec, e1);
   float v = dot(r.direction(), qvec) * inv_det;
+
   if (v < 0.0f || u + v > 1.0f)
     return false;
 
   float t = dot(e2, qvec) * inv_det;
+
   if (t < t_min || t > t_max)
     return false;
 
   rec.t = t;
   rec.p = r.at(t);
-  rec.mat_ptr = mesh_ptr->mat_ptr;
+
+  int mat_idx = mesh_ptr->material_indices[index];
+  rec.mat_ptr = mesh_ptr->materials[mat_idx];
 
   float w = 1.0f - u - v;
 
-  const Vec3 &n0 = mesh_ptr->normals[i0];
-  const Vec3 &n1 = mesh_ptr->normals[i1];
-  const Vec3 &n2 = mesh_ptr->normals[i2];
-
+  const Vec3 &n0 = mesh_ptr->vertices[i0].normal;
+  const Vec3 &n1 = mesh_ptr->vertices[i1].normal;
+  const Vec3 &n2 = mesh_ptr->vertices[i2].normal;
   rec.normal = unit_vector(w * n0 + u * n1 + v * n2);
+
+  Vec2 uv0 = mesh_ptr->vertices[i0].tex_coord;
+  Vec2 uv1 = mesh_ptr->vertices[i1].tex_coord;
+  Vec2 uv2 = mesh_ptr->vertices[i2].tex_coord;
+  rec.u = uv0.x() * w + uv1.x() * u + uv2.x() * v;
+  rec.v = uv0.y() * w + uv1.y() * u + uv2.y() * v;
 
   // 确保法线始终与射线方向相对
   rec.set_face_normal(r, rec.normal);
 
-  // -----------------------
-  // roughness（用 slope）
-  // -----------------------
-  if (!mesh_ptr->slope_x.empty()) {
-
-    float dh_dx = w * mesh_ptr->slope_x[i0] + u * mesh_ptr->slope_x[i1] +
-                  v * mesh_ptr->slope_x[i2];
-
-    float dh_dy = w * mesh_ptr->slope_y[i0] + u * mesh_ptr->slope_y[i1] +
-                  v * mesh_ptr->slope_y[i2];
-
-    float slope = std::sqrt(dh_dx * dh_dx + dh_dy * dh_dy);
-
-    rec.roughness = std::clamp(slope * 0.5f, 0.02f, 0.3f);
-
+  float roughness = mesh_ptr->get_roughness(index, u, v, w);
+  if (roughness >= 0.f) {
+    rec.roughness = roughness;
   } else {
-    // fallback（如果你还没接 slope）
     float slope = std::sqrt(rec.normal.x() * rec.normal.x() +
                             rec.normal.y() * rec.normal.y());
 
     rec.roughness = std::clamp(slope, 0.02f, 0.3f);
   }
 
-  rec.u = u; // 记录重心坐标，方便后续纹理映射
-  rec.v = v;
-
   return true;
 }
 
-bool IndexedTriangle::bounding_box(float time0, float time1,
-                                   AABB &output_box) const {
-  const Vec3 &v0 = mesh_ptr->vertices[i0];
-  const Vec3 &v1 = mesh_ptr->vertices[i1];
-  const Vec3 &v2 = mesh_ptr->vertices[i2];
+bool Triangle::bounding_box(float time0, float time1, AABB &output_box) const {
+  uint32_t i0 = mesh_ptr->indices[index * 3];
+  uint32_t i1 = mesh_ptr->indices[index * 3 + 1];
+  uint32_t i2 = mesh_ptr->indices[index * 3 + 2];
+
+  const Vec3 &v0 = mesh_ptr->vertices[i0].vertex;
+  const Vec3 &v1 = mesh_ptr->vertices[i1].vertex;
+  const Vec3 &v2 = mesh_ptr->vertices[i2].vertex;
 
   // 找出三个顶点的 X, Y, Z 的最小值和最大值
   Vec3 min_v(std::min({v0.x(), v1.x(), v2.x()}),
@@ -117,15 +117,19 @@ bool IndexedTriangle::bounding_box(float time0, float time1,
   return true;
 }
 
-float IndexedTriangle::pdf_value(const Vec3 &o, const Vec3 &v) const {
+float Triangle::pdf_value(const Vec3 &o, const Vec3 &v) const {
+  uint32_t i0 = mesh_ptr->indices[index * 3];
+  uint32_t i1 = mesh_ptr->indices[index * 3 + 1];
+  uint32_t i2 = mesh_ptr->indices[index * 3 + 2];
+
   hit_record rec;
   // 如果这个方向没有击中三角形，概率为 0
   if (!this->hit(Ray(o, v), 0.001f, 1e9, rec))
     return 0.0f;
 
-  const Vec3 &v0 = mesh_ptr->vertices[i0];
-  const Vec3 &v1 = mesh_ptr->vertices[i1];
-  const Vec3 &v2 = mesh_ptr->vertices[i2];
+  const Vec3 &v0 = mesh_ptr->vertices[i0].vertex;
+  const Vec3 &v1 = mesh_ptr->vertices[i1].vertex;
+  const Vec3 &v2 = mesh_ptr->vertices[i2].vertex;
 
   // 计算三角形面积 Area = 0.5 * |(v1 - v0) x (v2 - v0)|
   float area = 0.5f * cross(v1 - v0, v2 - v0).length();
@@ -140,10 +144,14 @@ float IndexedTriangle::pdf_value(const Vec3 &o, const Vec3 &v) const {
   return distance_squared / (cosine * area);
 }
 
-Vec3 IndexedTriangle::random(const Vec3 &o) const {
-  const Vec3 &v0 = mesh_ptr->vertices[i0];
-  const Vec3 &v1 = mesh_ptr->vertices[i1];
-  const Vec3 &v2 = mesh_ptr->vertices[i2];
+Vec3 Triangle::random(const Vec3 &o) const {
+  uint32_t i0 = mesh_ptr->indices[index * 3];
+  uint32_t i1 = mesh_ptr->indices[index * 3 + 1];
+  uint32_t i2 = mesh_ptr->indices[index * 3 + 2];
+
+  const Vec3 &v0 = mesh_ptr->vertices[i0].vertex;
+  const Vec3 &v1 = mesh_ptr->vertices[i1].vertex;
+  const Vec3 &v2 = mesh_ptr->vertices[i2].vertex;
 
   // 获取均匀采样的重心坐标
   Vec3 bary = tracer::math::random_triangle_barycentric();
@@ -153,38 +161,6 @@ Vec3 IndexedTriangle::random(const Vec3 &o) const {
 
   // 返回从观察点 o 指向该随机点的方向向量
   return random_point - o;
-}
-
-TriangleMesh::TriangleMesh(std::shared_ptr<Material> mat) : mat_ptr(mat) {}
-
-void TriangleMesh::compute_smooth_normals(const std::vector<int> &indices) {
-  normals.assign(vertices.size(), Vec3(0, 0, 0));
-
-  // 1. 累加面法线
-  for (size_t i = 0; i < indices.size(); i += 3) {
-    int i0 = indices[i];
-    int i1 = indices[i + 1];
-    int i2 = indices[i + 2];
-
-    const Vec3 &v0 = vertices[i0];
-    const Vec3 &v1 = vertices[i1];
-    const Vec3 &v2 = vertices[i2];
-
-    Vec3 n = cross(v1 - v0, v2 - v0); // Z轴朝上逆时针叉积
-
-    normals[i0] += n;
-    normals[i1] += n;
-    normals[i2] += n;
-  }
-
-  // 2. 归一化
-  for (Vec3 &n : normals) {
-    if (n.squared_length() > 0) {
-      n = normalize(n);
-    } else {
-      n = Vec3(0, 0, 1); // 默认 Z 轴朝上
-    }
-  }
 }
 
 } // namespace geometry

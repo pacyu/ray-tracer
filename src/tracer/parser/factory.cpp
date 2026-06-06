@@ -11,8 +11,6 @@ Factory::Factory(const std::string &filename) : lights(), world(), ast() {
   std::stringstream buffer;
   buffer << file.rdbuf();
   source = buffer.str();
-
-  camera = std::make_unique<Camera>();
 }
 
 void Factory::parse() {
@@ -29,14 +27,14 @@ void Factory::get_parameter(std::shared_ptr<Environment> &env,
   try {
     BasicType val = env->get(name);
     if (name == "image_shape") {
-      camera->image_width = val.t_pair.first->t_integer;
-      camera->image_height = val.t_pair.second->t_integer;
+      camera.image_width = val.t_pair.first->t_integer;
+      camera.image_height = val.t_pair.second->t_integer;
     } else if (name == "spp") {
-      camera->samples_per_pixel = val.t_integer;
+      camera.samples_per_pixel = val.t_integer;
     } else if (name == "depth") {
-      camera->max_depth = val.t_integer;
+      camera.max_depth = val.t_integer;
     } else if (name == "background") {
-      camera->background = std::make_shared<PhysicalSky>(val.t_vector3);
+      camera.background = std::make_shared<PhysicalSky>(val.t_vector3);
     } else if (name == "from") {
 
     } else if (name == "at") {

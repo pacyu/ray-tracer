@@ -10,7 +10,7 @@
 #include "tracer/material/diffuse_light.h"
 #include "tracer/material/lambertian.h"
 #include "tracer/material/metal.h"
-#include "tracer/material/ocean_material.h"
+#include "tracer/material/water.h"
 #include "tracer/math/vec3.h"
 #include "tracer/texture/image_texture.h"
 #include "tracer/transform/rotate.h"
@@ -74,8 +74,7 @@ struct BasicType {
   BasicType(std::shared_ptr<hittable> val)
       : t_object(std::move(val)), tag(T_OBJECT) {}
 
-  BasicType(std::unique_ptr<Camera> val)
-      : t_camera(std::move(val)), tag(T_CAMERA) {}
+  BasicType(Camera val) : t_camera(val), tag(T_CAMERA) {}
 
   BasicType(const BasicType &other)
       : tag(other.tag), t_list(other.t_list), t_lambda(other.t_lambda),
@@ -122,7 +121,7 @@ struct BasicType {
     T_RANDOM,
     T_MATERIAL,
     T_OBJECT,
-    T_CAMERA
+    T_CAMERA,
   } tag;
 
   std::vector<BasicType> t_list;
@@ -137,7 +136,7 @@ struct BasicType {
   Quaternion t_quater;
   std::shared_ptr<Material> t_material;
   std::shared_ptr<hittable> t_object;
-  std::unique_ptr<Camera> t_camera;
+  Camera t_camera;
 };
 
 struct ASTNode {
