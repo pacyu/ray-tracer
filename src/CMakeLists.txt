@@ -12,13 +12,21 @@ target_include_directories(tracer_lib PUBLIC
     "${OpenCV_INCLUDE_DIRS}"
 )
 
-target_link_libraries(tracer_lib 
-    PUBLIC 
-    ${OpenCV_LIBS} 
-    ${FFTW3_LIBRARIES}
-    OpenMP::OpenMP_CXX
-)
-
+if(FFTW3f_FOUND)
+    target_link_libraries(tracer_lib 
+        PUBLIC 
+        ${OpenCV_LIBS} 
+        FFTW3::fftw3f
+        OpenMP::OpenMP_CXX
+    )
+else()
+    target_link_libraries(tracer_lib 
+        PUBLIC 
+        ${OpenCV_LIBS} 
+        ${FFTW3f_LIBRARIES}
+        OpenMP::OpenMP_CXX
+    )
+endif()
 apply_optimizations(tracer_lib)
 
 # 构建主程序
