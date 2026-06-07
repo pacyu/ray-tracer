@@ -45,6 +45,8 @@ void Object::builder() {
 
   std::unordered_map<std::string, uint32_t> mat_map;
 
+  Value value;
+  value.v_mesh = std::make_unique<geometry::Mesh>();
   uint32_t m_idx = 0;
   for (const auto &mesh_node : o_parser.meshes) {
 
@@ -54,8 +56,6 @@ void Object::builder() {
       mat_map[mtl_value.v_mat_name] = m_idx++;
     }
 
-    Value value;
-    value.v_mesh = std::make_unique<geometry::Mesh>();
     for (const auto &mtl : mtl_value.v_params) {
       // Ns（光泽度） 转粗糙度公式
       float roughness = std::sqrt(2.0f / (mtl.Ns + 2.0f));
@@ -134,13 +134,11 @@ void Object::builder() {
         }
       }
     }
-    meshes.push_back(std::move(value.v_mesh));
   }
+  mesh = std::move(value.v_mesh);
 }
 
-std::vector<std::shared_ptr<geometry::Mesh>> Object::take() {
-  return std::move(meshes);
-}
+std::shared_ptr<geometry::Mesh> Object::take() { return std::move(mesh); }
 
 } // namespace obj_parser
 } // namespace tracer

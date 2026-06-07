@@ -12,6 +12,7 @@
 #include "tracer/material/metal.h"
 #include "tracer/material/water.h"
 #include "tracer/math/vec3.h"
+#include "tracer/obj_parser/factory.h"
 #include "tracer/texture/image_texture.h"
 #include "tracer/transform/rotate.h"
 #include "tracer/transform/translate.h"
@@ -19,6 +20,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
 
 namespace tracer {
 namespace parser {
@@ -415,6 +417,17 @@ public:
             std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
             std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
             std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>);
+
+  virtual BasicType evaluate(std::shared_ptr<Environment> env) override;
+};
+
+class MeshNode : public ASTNode {
+private:
+  std::shared_ptr<ASTNode> model_path_expr, position_expr, rot_expr;
+
+public:
+  MeshNode(std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
+           std::shared_ptr<ASTNode>);
 
   virtual BasicType evaluate(std::shared_ptr<Environment> env) override;
 };

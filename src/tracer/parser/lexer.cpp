@@ -4,6 +4,9 @@ namespace tracer {
 namespace parser {
 
 Lexer::Lexer(const std::string &src) : source(src) {
+  reserved["if"] = TokenType::If;
+  reserved["else"] = TokenType::Else;
+  reserved["for"] = TokenType::For;
   reserved["Num"] = TokenType::NumberType;
   reserved["String"] = TokenType::String;
   reserved["List"] = TokenType::List;
@@ -23,6 +26,7 @@ Lexer::Lexer(const std::string &src) : source(src) {
   reserved["Sphere"] = TokenType::SphereType;
   reserved["Heart"] = TokenType::HeartType;
   reserved["Ocean"] = TokenType::OceanType;
+  reserved["Mesh"] = TokenType::MeshType;
   reserved["Translate"] = TokenType::TranslateType;
   reserved["ConstMedium"] = TokenType::ConstantMediumType;
   reserved["Camera"] = TokenType::CameraType;

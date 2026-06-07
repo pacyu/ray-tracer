@@ -32,7 +32,7 @@ if(NOT FFTW3_FOUND)
     )
 
     find_library(FFTW3_LIBRARIES 
-        NAMES fftwf libfftw3f-3 fftw3f-3 fftw3f
+        NAMES fftw3 fftw3-3 fftwf libfftw3f-3 fftw3f-3 fftw3f
         PATH_SUFFIXES lib bin
     )
 

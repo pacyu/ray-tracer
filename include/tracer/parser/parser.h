@@ -32,6 +32,7 @@ private:
   std::shared_ptr<ASTNode> parse_random();
   std::shared_ptr<ASTNode> parse_string(const std::string_view &);
   std::shared_ptr<ASTNode> parse_list();
+  std::shared_ptr<ASTNode> parse_for_expr();
   std::shared_ptr<ASTNode> parse_paren_list();
   std::shared_ptr<ASTNode> parse_lambertian();
   std::shared_ptr<ASTNode> parse_metal();
@@ -45,6 +46,7 @@ private:
   std::shared_ptr<ASTNode> parse_sphere();
   std::shared_ptr<ASTNode> parse_heart();
   std::shared_ptr<ASTNode> parse_ocean();
+  std::shared_ptr<ASTNode> parse_mesh();
   std::shared_ptr<ASTNode> parse_translate();
   std::shared_ptr<ASTNode> parse_constant_medium();
   std::shared_ptr<ASTNode> parse_camera();

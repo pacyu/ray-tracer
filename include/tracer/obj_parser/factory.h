@@ -16,13 +16,13 @@ public:
   Object() {}
   Object(const std::string &);
 
-  std::vector<std::shared_ptr<geometry::Mesh>> take();
+  std::shared_ptr<geometry::Mesh> take();
 
 private:
   std::string source;
   ObjParser o_parser;
   ObjParser mtl_parser;
-  std::vector<std::shared_ptr<geometry::Mesh>> meshes;
+  std::shared_ptr<geometry::Mesh> mesh;
 
   void builder();
 };

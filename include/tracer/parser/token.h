@@ -29,6 +29,7 @@ enum class TokenType {
   SphereType,
   HeartType,
   OceanType,
+  MeshType,
   TranslateType,
   ConstantMediumType,
   CameraType,
@@ -59,6 +60,10 @@ enum class TokenType {
   Mul,
   Div,
   Mod,
+
+  If,
+  Else,
+  For,
 
   LiteralStr,
 

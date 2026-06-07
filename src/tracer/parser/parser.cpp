@@ -159,6 +159,11 @@ std::shared_ptr<ASTNode> Parser::parse_list() {
   }
 }
 
+std::shared_ptr<ASTNode> Parser::parse_for_expr() {
+  // TODO
+  return nullptr;
+}
+
 std::shared_ptr<ASTNode> Parser::parse_paren_list() {
   std::vector<std::shared_ptr<ASTNode>> list;
   while (peek_token().type != TokenType::RightParen) {
@@ -318,6 +323,21 @@ std::shared_ptr<ASTNode> Parser::parse_ocean() {
   return ocean;
 }
 
+std::shared_ptr<ASTNode> Parser::parse_mesh() {
+  expect_token({TokenType::LeftParen});
+  std::shared_ptr<ASTNode> model_path = parse_expression(Precedence::NONE);
+  std::shared_ptr<ASTNode> position = parse_expression(Precedence::NONE);
+  std::shared_ptr<MeshNode> mesh = nullptr;
+  if (peek_token().type != TokenType::RightParen) {
+    std::shared_ptr<ASTNode> rot = parse_expression(Precedence::NONE);
+    mesh = std::make_shared<MeshNode>(model_path, position, rot);
+  } else {
+    mesh = std::make_shared<MeshNode>(model_path, position, nullptr);
+  }
+  expect_token({TokenType::RightParen});
+  return mesh;
+}
+
 std::shared_ptr<ASTNode> Parser::parse_translate() {
   expect_token({TokenType::LeftParen});
   std::shared_ptr<ASTNode> object = parse_expression(Precedence::NONE);
@@ -435,6 +455,11 @@ std::shared_ptr<ASTNode> Parser::parse_expression(const Precedence &prec) {
     break;
   }
 
+  case TokenType::For: {
+    left = parse_for_expr();
+    break;
+  }
+
   case TokenType::Pair: {
     left = parse_pair();
     break;
@@ -512,6 +537,11 @@ std::shared_ptr<ASTNode> Parser::parse_expression(const Precedence &prec) {
 
   case TokenType::OceanType: {
     left = parse_ocean();
+    break;
+  }
+
+  case TokenType::MeshType: {
+    left = parse_mesh();
     break;
   }
 

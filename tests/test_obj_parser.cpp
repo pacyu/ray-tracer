@@ -1,4 +1,6 @@
 #include "tracer/tracer.h"
+#include <chrono>
+#include <iostream>
 
 using namespace tracer;
 
@@ -16,13 +18,28 @@ int main() {
 
   std::shared_ptr<Background> background = std::make_shared<ImageBackground>(
       "../textures/autumn_field_puresky_4k.hdr");
-  obj_parser::Object obj("../models/free-datsun-280z/source/Datsun_280Z.obj");
+  obj_parser::Object obj("../models/free-datsun-280z/Datsun_280Z.obj");
 
-  std::vector<std::shared_ptr<geometry::Mesh>> meshes = obj.take();
-  for (const auto &mesh : meshes) {
-    mesh->finalize();
-    world.add(mesh);
-  }
+  std::shared_ptr<geometry::Mesh> mesh = obj.take();
+  size_t vn = mesh->indices.size();
+  std::cout << "模型顶点个数: " << vn << ", 面数量: " << vn / 3 << std::endl;
+  std::cout << "[Build] 开始构建 BVH ..." << std::endl;
+  auto start_time = std::chrono::high_resolution_clock::now();
+
+  mesh->finalize();
+  auto car = std::make_shared<transform::RotateZ>(
+      std::make_shared<transform::RotateX>(
+          std::make_shared<transform::Translate>(mesh, Vec3(0.f, 0.f, 0.f)),
+          -90.f),
+      -120.f);
+  world.add(car);
+
+  auto end_time = std::chrono::high_resolution_clock::now();
+  std::cout << "[Build] BVH 构建完毕！用时: "
+            << std::chrono::duration_cast<std::chrono::seconds>(end_time -
+                                                                start_time)
+                   .count()
+            << " s" << std::endl;
 
   auto sun_mat =
       std::make_shared<material::DiffuseLight>(Vec3(15.0f, 15.0f, 15.0f));
