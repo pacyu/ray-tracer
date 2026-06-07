@@ -21,24 +21,20 @@ else()
 endif()
 
 # 依赖项
-find_package(FFTW3 QUIET)
-if(NOT FFTW3_FOUND)
-    message(STATUS "Standard find_package(FFTW3) failed, falling back to manual search...")
+find_package(FFTW3f CONFIG QUIET)
+if(NOT FFTW3f_FOUND)
+    message(STATUS "Standard find_package(FFTW3f) failed, falling back to manual search...")
 
     # 如果标准寻找失败（比如在 Windows 上没提供 Config 文件），手动捞出头文件和库
-    find_path(FFTW3_INCLUDE_DIRS 
+    find_path(FFTW3_INCLUDE_DIRS
         NAMES fftw3.h
         PATH_SUFFIXES include
     )
 
-    find_library(FFTW3_LIBRARIES 
+    find_library(FFTW3f_LIBRARIES 
         NAMES fftwf libfftw3f-3 fftw3f-3 fftw3f
         PATH_SUFFIXES lib bin
     )
-
-    if(FFTW3_INCLUDE_DIRS AND FFTW3_LIBRARIES)
-        set(FFTW3_FOUND TRUE)
-    endif()
 endif()
 find_package(OpenMP REQUIRED)
 find_package(OpenCV REQUIRED)
