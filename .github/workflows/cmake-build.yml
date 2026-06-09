@@ -70,3 +70,12 @@ jobs:
         with:
           name: rendered-scene-${{ matrix.os }}
           path: bin/*.png
+
+      - name: Upload Compiled Binary for Release
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-binary-${{ matrix.os }}
+          path: |
+            bin/rayt
+            bin/rayt.exe
+          if-no-files-found: error
