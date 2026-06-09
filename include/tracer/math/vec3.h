@@ -45,7 +45,7 @@ public:
   static Vec3 max(const Vec3 &v1, const Vec3 &v2);
 
 public:
-  float e[3];
+  float e[3] = {0.0f, 0.0f, 0.0f};
 };
 
 inline std::ostream &operator<<(std::ostream &os, const Vec3 &v) {

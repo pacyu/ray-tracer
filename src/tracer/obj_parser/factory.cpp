@@ -30,7 +30,7 @@ Object::Object(const std::string &path) {
     mtl_parser.parse_mtl();
     std::cout << "材质解析完成!" << std::endl;
   }
-
+  mesh = std::make_unique<geometry::Mesh>();
   std::cout << "正在加载模型: " << path << std::endl;
   this->builder();
   std::cout << "模型加载完成!" << std::endl;
@@ -46,8 +46,8 @@ void Object::builder() {
   std::unordered_map<std::string, uint32_t> mat_map;
 
   Value value;
-  value.v_mesh = std::make_unique<geometry::Mesh>();
   uint32_t m_idx = 0;
+
   for (const auto &mesh_node : o_parser.meshes) {
 
     Value mtl_value;
@@ -78,13 +78,12 @@ void Object::builder() {
       // Vec3 base_emissive = mtl.Ke;
       // mat->emissive = mtl.Ke + mtl.Ka * 0.1f;
       // mat.ior = mtl.ior;
-      value.v_mesh->materials.push_back(mat);
+      mesh->materials.push_back(mat);
     }
 
-    if (value.v_mesh->materials.empty()) {
-      value.v_mesh->materials.push_back(
-          std::make_shared<material::StandardMaterial>(Vec3(0.8f, 0.8f, 0.8f),
-                                                       1.0f, 0.0f));
+    if (mesh->materials.empty()) {
+      mesh->materials.push_back(std::make_shared<material::StandardMaterial>(
+          Vec3(0.8f, 0.8f, 0.8f), 1.0f, 0.0f));
     }
     for (const auto &node : mesh_node->nodes) {
       node->evaluate(value);
@@ -105,9 +104,9 @@ void Object::builder() {
     std::unordered_map<Index, uint32_t> vertex_map;
     for (const auto &face : faces) {
       if (!face.mat.empty()) {
-        value.v_mesh->material_indices.push_back(mat_map[face.mat]);
+        mesh->material_indices.push_back(mat_map[face.mat]);
       } else {
-        value.v_mesh->material_indices.push_back(0);
+        mesh->material_indices.push_back(0);
       }
 
       for (size_t j = 0; j < 3; j++) {
@@ -118,8 +117,8 @@ void Object::builder() {
         Index index{face.v[0].idx[j], face.v[1].idx[j], face.v[2].idx[j]};
         auto it = vertex_map.find(index);
         if (it == vertex_map.end()) {
-          uint32_t idx = (uint32_t)value.v_mesh->vertices.size();
-          value.v_mesh->vertices.push_back(geometry::Vertex{
+          uint32_t idx = (uint32_t)mesh->vertices.size();
+          mesh->vertices.push_back(geometry::Vertex{
               vertices[vertex_index],
               normal_index < normals.size() ? normals[normal_index]
                                             : Vec3(0.0f, 0.0f, 1.0f),
@@ -128,14 +127,13 @@ void Object::builder() {
                   : Vec2(),
           });
           vertex_map[index] = idx;
-          value.v_mesh->indices.push_back(idx);
+          mesh->indices.push_back(idx);
         } else {
-          value.v_mesh->indices.push_back(it->second);
+          mesh->indices.push_back(it->second);
         }
       }
     }
   }
-  mesh = std::move(value.v_mesh);
 }
 
 std::shared_ptr<geometry::Mesh> Object::take() { return std::move(mesh); }

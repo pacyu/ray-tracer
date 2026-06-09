@@ -12,38 +12,44 @@ static void test_tracer() {
       std::make_shared<texture::ImageTexture>("../textures/earthmap.jpg"));
   auto blue = std::make_shared<material::Dielectric>(
       Vec3(0.5294f, 0.8078f, 0.9216f), 0.02f, 1.5f);
-  auto m_light = std::make_shared<material::DiffuseLight>(Color(4, 4, 4));
+  auto m_light = std::make_shared<material::DiffuseLight>(Color(4.f, 4.f, 4.f));
 
-  world.add(std::make_shared<geometry::YZRect>(0, 555, 0, 555, 555, green));
-  world.add(std::make_shared<geometry::YZRect>(0, 555, 0, 555, 0, red));
-  world.add(std::make_shared<geometry::XYRect>(0, 555, 0, 555, 555, gray));
-  world.add(std::make_shared<geometry::XZRect>(0, 555, 0, 555, 0, gray));
-  world.add(std::make_shared<geometry::XZRect>(0, 555, 0, 555, 555, gray));
+  world.add(
+      std::make_shared<geometry::YZRect>(0.f, 555.f, 0.f, 555.f, 555.f, green));
+  world.add(
+      std::make_shared<geometry::YZRect>(0.f, 555.f, 0.f, 555.f, 0.f, red));
+  world.add(
+      std::make_shared<geometry::XYRect>(0.f, 555.f, 0.f, 555.f, 555.f, gray));
+  world.add(
+      std::make_shared<geometry::XZRect>(0.f, 555.f, 0.f, 555.f, 0.f, gray));
+  world.add(
+      std::make_shared<geometry::XZRect>(0.f, 555.f, 0.f, 555.f, 555.f, gray));
 
   std::shared_ptr<hittable> heart =
-      std::make_shared<geometry::Heart>(Point3(0, 0, 0), 120.f, red);
-  heart = std::make_shared<transform::RotateX>(heart, 90);
-  heart = std::make_shared<transform::Translate>(heart, Point3(278, 278, 278));
+      std::make_shared<geometry::Heart>(Point3(0.f, 0.f, 0.f), 120.f, red);
+  heart = std::make_shared<transform::RotateX>(heart, 90.f);
+  heart = std::make_shared<transform::Translate>(heart,
+                                                 Point3(278.f, 278.f, 278.f));
   world.add(heart);
 
   std::shared_ptr<hittable> sphere = std::make_shared<geometry::Sphere>(
-      Point3(200, 130, 450), 80.f, earth_surface);
+      Point3(200.f, 130.f, 450.f), 80.f, earth_surface);
   world.add(sphere);
 
-  std::shared_ptr<hittable> boll =
-      std::make_shared<geometry::Sphere>(Point3(400, 130, 100), 80.f, blue);
+  std::shared_ptr<hittable> boll = std::make_shared<geometry::Sphere>(
+      Point3(400.f, 130.f, 100.f), 80.f, blue);
   boll = std::make_shared<volume::ConstantMedium>(boll, 0.2f,
                                                   Color(0.2f, 0.4f, 0.9f));
   world.add(boll);
 
   std::shared_ptr<hittable> box = std::make_shared<geometry::Box>(
-      Point3(0, 0, 0), Point3(100, 100, 100), blue);
-  box = std::make_shared<transform::RotateY>(box, -18);
-  box = std::make_shared<transform::Translate>(box, Point3(130, 0, 65));
+      Point3(0.f, 0.f, 0.f), Point3(100.f, 100.f, 100.f), blue);
+  box = std::make_shared<transform::RotateY>(box, -18.f);
+  box = std::make_shared<transform::Translate>(box, Point3(130.f, 0.f, 65.f));
   world.add(box);
 
-  auto light =
-      std::make_shared<geometry::XZRect>(113, 443, 127, 432, 554, m_light);
+  auto light = std::make_shared<geometry::XZRect>(113.f, 443.f, 127.f, 432.f,
+                                                  554.f, m_light);
   world.add(light);
   BVH bvh_world = BVH(world);
 
@@ -59,7 +65,8 @@ static void test_tracer() {
 
   // 创建一个相机
   Camera cam(w, h, samples_per_pixel, max_depth, "test_tracer.png", background,
-             Point3(278, 278, -800), Point3(278, 278, 0), Vec3(0, 1, 0), 40);
+             Point3(278.f, 278.f, -800.f), Point3(278.f, 278.f, 0.f),
+             Vec3(0.f, 1.f, 0.f), 40.f);
 
   cam.render(bvh_world, lights, false);
 }

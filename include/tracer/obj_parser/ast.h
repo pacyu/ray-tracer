@@ -41,7 +41,6 @@ struct Value {
   Vec2 v_texture_coord;
   Face v_face;
   std::vector<TexParams> v_params;
-  std::unique_ptr<geometry::Mesh> v_mesh;
   std::string v_mat_path;
   std::string v_mat_name;
 
@@ -52,7 +51,6 @@ struct Value {
     V_TEXTURE,
     V_FACE,
     V_TEX_PARAMS,
-    V_MESH,
     V_MAT_PATH,
     V_MAT_NAME
   } v_type;
@@ -71,7 +69,7 @@ public:
 
 private:
   int value = 0;
-	std::string str_value;
+  std::string str_value;
 };
 
 class VertexNode : public ASTNode {

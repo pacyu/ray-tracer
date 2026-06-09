@@ -14,9 +14,9 @@ int main() {
   Vec3 lookat(0.0f, 0.0f, 2.0f);
   Vec3 vup(0.0f, 0.0f, 1.0f);
 
-  auto sun = std::make_shared<material::DiffuseLight>(Vec3(15, 15, 15));
-  auto sun_sphere =
-      std::make_shared<geometry::Sphere>(Vec3(0, -15000, 1000), 300, sun);
+  auto sun = std::make_shared<material::DiffuseLight>(Vec3(15.f, 15.f, 15.f));
+  auto sun_sphere = std::make_shared<geometry::Sphere>(
+      Vec3(0.f, -15000.f, 1000.f), 300.f, sun);
   auto cloth_mat =
       std::make_shared<material::Cloth>(Vec3(0.8f, 0.1f, 0.1f), 0.1f);
   //   auto opaque_mat = std::make_shared<material::Plastic>(

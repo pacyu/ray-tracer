@@ -9,21 +9,54 @@
 
 ---
 
-![Dynamics Ocean](/examples/output.gif)
-![taubin's heart](/examples/image.png)
-![car's model](/examples/test_obj_image.png)
+![Car's model](/examples/test_obj_image.png)
+![Water material](/examples/test_ocean.png)
+![Dynamics ocean](/examples/output.gif)
+![Taubin's heart](/examples/image.png)
 
 ---
 
-## Latest Updates (2026.06.06)
+## Latest Updates (2026.06.09)
 
-- **obj 模型支持**: 现在渲染器支持 `.obj` 模型加载并渲染了。
+- **性能优化**: 为了提升Mesh模型的构建性能和渲染性能，重构了 `Mesh`，使用更紧凑的 BVH 结构进行加速，并且只存储索引，这样无论是速度还是内存占用都大大减少。
+
+`Datsun_280Z.obj`渲染信息：
+
+```bash
+成功加载HDR: ../textures/autumn_field_puresky_4k.hdr [4096x2048]
+正在解析材质: Datsun_D280z.mtl
+材质解析完成!
+正在加载模型: ../models/free-datsun-280z/Datsun_280Z.obj
+模型加载完成!
+模型顶点个数: 4169892, 面数量: 1389964
+[Build] 开始构建 BVH ...
+[Build] BVH 构建完毕！用时: 0 s
+渲染进度: 96.67% | 已用时间: 27.9s | 预计剩余: 1.0s
+```
+
+## Updates (2026.06.06)
+
+- **obj 模型支持**: 手写实现了一个 `.obj` 解析器（还未经过充分测试，不确定 `mtl` 材质是否能完全正确渲染），现在渲染器支持 `.obj` 模型加载并渲染了。
 - **一些优化**: 为了支持通用的模型，重构了下 `Triangle`、`Mesh`、`Ocean`。
+
+`Datsun_280Z.obj` 渲染信息:
+
+```bash
+成功加载HDR: ../textures/autumn_field_puresky_4k.hdr [4096x2048]
+正在解析材质: Datsun_D280z.mtl
+材质解析完成!
+正在加载模型: ../models/free-datsun-280z/Datsun_280Z.obj
+模型加载完成!
+模型顶点个数: 4169892, 面数量: 1389964
+[Build] 开始构建 BVH ...
+[Build] BVH 构建完毕！用时: 47 s
+渲染进度: 89.33% | 已用时间: 117s | 预计剩余: 0.1s
+```
 
 ## Updates (2026.04.02)
 
 - **项目重构**: 对各个部件进行了分类，现在的项目目录结构更便于管理材质、纹理、几何对象。
-- **新增材质**: 增加 `Plastic`、`OceanMaterial`（这个名字其实我想改为Water，还在考虑中）、`GlossyPlastic`、`Cloth` 材质。
+- **新增材质**: 增加 `Plastic`、`OceanMaterial`（材质名已改为 Water）、`GlossyPlastic`、`Cloth` 材质。
 - **新增海洋可渲染对象**: `Ocean` 作为一个几何物体，通过 Phillips Spectrum([J Tessendorf · 2004](https://jtessen.people.clemson.edu/reports/papers_files/coursenotes2004.pdf)) 可以通过给定分辨率、风速、风向等创建。
 
 ## Updates (2026.03.25)

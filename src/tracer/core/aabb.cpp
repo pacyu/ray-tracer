@@ -26,4 +26,23 @@ AABB AABB::surrounding_box(AABB box0, AABB box1) {
                      std::max(box0.max.z(), box1.max.z())));
 }
 
+void AABB::expand(const Vec3 &point) {
+  min = Vec3::min(min, point);
+  max = Vec3::max(max, point);
+}
+
+void AABB::expand(const AABB &box) {
+  expand(box.min);
+  expand(box.max);
+}
+
+int AABB::max_extent() const {
+  Vec3 d = max - min;
+  if (d.x() > d.y() && d.x() > d.z())
+    return 0;
+  if (d.y() > d.z())
+    return 1;
+  return 2;
+}
+
 } // namespace tracer

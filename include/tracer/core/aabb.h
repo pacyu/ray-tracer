@@ -11,6 +11,12 @@ public:
   bool hit(const Ray &r, float tmin, float tmax) const;
   static AABB surrounding_box(AABB box0, AABB box1);
 
+  void expand(const Vec3 &point);
+
+  void expand(const AABB &box);
+
+  int max_extent() const;
+
   Point3 min, max;
 };
 

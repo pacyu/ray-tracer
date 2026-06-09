@@ -18,9 +18,10 @@ int main() {
   std::shared_ptr<Background> background = std::make_shared<ImageBackground>(
       "../textures/autumn_field_puresky_4k.hdr");
 
-  // auto water_mat = std::make_shared<material::Water>(1.333f, 0.05f);
-  auto water_mat =
-      std::make_shared<material::Metal>(Vec3(0.5294f, 0.8078f, 0.9216f), 0.8f);
+  auto water_mat = std::make_shared<material::Water>(1.333f, 0.05f);
+  //   auto water_mat =
+  //       std::make_shared<material::Metal>(Vec3(0.5294f, 0.8078f, 0.9216f),
+  //       0.8f);
   auto sun_mat =
       std::make_shared<material::DiffuseLight>(Vec3(15.0f, 15.0f, 15.0f));
 
@@ -56,8 +57,8 @@ int main() {
   lights.add(light);
   world.add(light);
   world.add(ocean);
-  world.add(std::make_shared<geometry::XYRect>(-1000.0f, 1000.0f, -1000.0f,
-                                               1000.0f, -80.0f, sea_floor_mat));
+  world.add(std::make_shared<geometry::XYRect>(
+      -1000.0f, 1000.0f, -1000.0f, 1000.0f, -180.0f, sea_floor_mat));
 
   BVH bvh(world);
 

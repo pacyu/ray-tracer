@@ -64,7 +64,7 @@ void BVH::refit(float t0, float t1) {
   bool has_left = left && left->bounding_box(t0, t1, box_left);
   bool has_right = right && right->bounding_box(t0, t1, box_right);
 
-  // 3. 重新拟合当前节点的 box
+  // 重新拟合当前节点的 box
   if (!has_left && !has_right) {
     // 如果两边都没包围盒，这个节点理论上应该失效
   } else if (!has_left) {
