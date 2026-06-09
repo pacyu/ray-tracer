@@ -1,9 +1,15 @@
 # Toy RayTracer: A Playground of Light
 
-[![Language](https://img.shields.io/badge/Language-C++-blue.svg)](https://en.cppreference.com/)
-[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows-blue)](...)
-[![C++ CI Build](https://github.com/pacyu/ray-tracer/actions/workflows/cmake-build.yml/badge.svg)](https://github.com/pacyu/ray-tracer/actions/workflows/cmake-build.yml)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](...)
+[![C++ CI Build](https://img.shields.io/github/actions/workflow/status/pacyu/ray-tracer/cmake-build.yml?branch=master&label=build&passed_color=7b9e87&failed_color=bd2c00&style=flat-square)](https://github.com/pacyu/ray-tracer/actions)
+[![License](https://img.shields.io/badge/License-GPLv3-7b9e87?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
+
+[![Language](https://img.shields.io/badge/Language-C++-5a738e?style=flat-square)](https://en.cppreference.com/)
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows-5a738e?style=flat-square)](https://github.com/pacyu/ray-tracer)
+
+[![OpenCV](https://img.shields.io/badge/Dependencies-OpenCV-6b8eac?style=flat-square&logo=opencv&logoColor=white)](https://opencv.org/)
+[![OpenMP](https://img.shields.io/badge/Parallel-OpenMP-6b8eac?style=flat-square&logo=cpu-fill&logoColor=white)](https://www.openmp.org/)
+
+[![GitHub code size](https://img.shields.io/github/languages/code-size/pacyu/ray-tracer?color=8c92ac&style=flat-square)](https://github.com/pacyu/ray-tracer)
 
 [中文](#chinese) | [English](#english) | [日本語](#japanese)
 
@@ -263,3 +269,10 @@ world = [rect_light, floor, ceiling, inner, right, left, box, sphere, cm, img_sp
 ## Credits
 
 Originally based on Ray Tracing in One Weekend. Auroric DSL parser implemented with a custom recursive descent approach.
+
+## Acknowledgements
+
+This project legal framework complies with the GNU GPL v3.0. It integrates and builds upon the following high-performance libraries:
+
+- [FFTW3](https://www.fftw.org/) (GPL-2.0-or-later) - Powering the ocean wave FFT simulations.
+- [OpenCV](https://opencv.org/) (Apache-2.0) - Image processing and texture mapping utilities.
