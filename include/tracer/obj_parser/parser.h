@@ -8,8 +8,7 @@ namespace obj_parser {
 
 class ObjParser {
 public:
-  std::vector<std::unique_ptr<MeshNode>> meshes;
-  std::vector<std::shared_ptr<ASTNode>> nodes;
+  std::vector<std::unique_ptr<ASTNode>> nodes;
   std::vector<std::unique_ptr<MtlLibNode>> mtl_labels;
   ObjParser() {}
   ObjParser(const std::vector<Token> &);
@@ -28,18 +27,20 @@ private:
   void consume();
 
   float make_number();
+  std::string make_string();
   Vec3 make_vector3();
 
-  std::shared_ptr<SmoothNode> make_smooth();
-  std::shared_ptr<VertexNode> make_vertex();
-  std::shared_ptr<NormalNode> make_normal();
-  std::shared_ptr<TextureCoordNode> make_texture_coord();
+  std::unique_ptr<MtlLibNode> make_mtllib();
+  std::unique_ptr<VertexNode> make_vertex();
+  std::unique_ptr<NormalNode> make_normal();
+  std::unique_ptr<TextureCoordNode> make_texture_coord();
+  std::unique_ptr<ObjectNode> make_object();
+  std::unique_ptr<GroupNode> make_group();
+  std::unique_ptr<UseMtlNode> make_usemtl();
+  std::unique_ptr<SmoothNode> make_smooth();
   void make_face();
-  MtlLibNode make_mtllib();
-  std::shared_ptr<UseMtlNode> make_usemtl();
-  void make_mesh();
 
-  std::shared_ptr<TexParamsNode> make_newmtl();
+  std::unique_ptr<MaterialParamsNode> make_newmtl();
 };
 
 } // namespace obj_parser

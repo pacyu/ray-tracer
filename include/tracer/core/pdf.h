@@ -29,7 +29,7 @@ public:
 
 class Mixture_pdf : public PDF {
 public:
-  Mixture_pdf(const PDF *p0, const PDF *p1);
+  Mixture_pdf(const PDF *p0, const PDF *p1, float blend);
 
   virtual float value(const Vec3 &direction) const override;
 
@@ -37,6 +37,7 @@ public:
 
 public:
   const PDF *p[2];
+  float blend;
 };
 
 class Hittable_pdf : public PDF {
@@ -73,6 +74,21 @@ public:
   virtual float value(const Vec3 &direction) const override;
 
   virtual Vec3 generate() const override;
+};
+
+class Charlie_pdf : public PDF {
+public:
+  Charlie_pdf(const Vec3 &normal, const Vec3 &view, float roughness,
+              const Vec3 &tangent, const Vec3 &bitangent);
+
+  virtual float value(const Vec3 &direction) const override;
+  virtual Vec3 generate() const override;
+
+private:
+  Vec3 n;      // 法线
+  Vec3 v;      // 视线方向 (指向外)
+  float alpha; // 粗糙度 (Roughness)
+  Vec3 T, B;   // 切线空间基向量 (右手系: T, B, N)
 };
 
 } // namespace tracer

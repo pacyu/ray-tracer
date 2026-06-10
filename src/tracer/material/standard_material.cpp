@@ -5,85 +5,109 @@ namespace material {
 
 bool StandardMaterial::scatter(const Ray &r_in, const hit_record &rec,
                                scatter_record &srec) const {
-  // 从贴图或基础颜色获取当前的 Albedo
+  // 纹理采样
   Vec3 current_albedo = albedo->value(rec.u, rec.v, rec.p);
 
-  float select_rand = tracer::math::random_float();
+  float current_roughness = roughness;
+  if (roughness_map) {
+    current_roughness = roughness_map->value(rec.u, rec.v, rec.p).x();
+  }
+  current_roughness = std::clamp(current_roughness, 0.01f, 1.0f);
 
-  // =================================================================
-  // 状态分支一：绝缘体透射/折射 (玻璃)
-  // =================================================================
-  if (select_rand < transmission) {
-    srec.is_specular = true;
-    srec.attenuation = current_albedo; // 染色玻璃
-
-    float etai = 1.0f;
-    float etat = ior;
-    if (!rec.front_face) {
-      std::swap(etai, etat);
-    }
-
-    Vec3 unit_dir = normalize(r_in.direction());
-    float cos_theta = std::min(dot(-unit_dir, rec.normal), 1.0f);
-
-    float fresnel = optics::fresnel_schlick(cos_theta, etai, etat);
-
-    Vec3 outbound_dir;
-    // 如果触发全反射或者随机概率小于菲涅尔反射项，时光线发生反射
-    if (fresnel > tracer::math::random_float()) {
-      outbound_dir = optics::reflect(unit_dir, rec.normal);
-    } else {
-      outbound_dir = optics::refract(unit_dir, rec.normal, etai / etat);
-    }
-
-    // 引入粗糙度扰动 (如果是完美光滑玻璃，roughness 为 0 则不抖动)
-    if (roughness > 0.0f) {
-      // random_in_unit_sphere 替换为你项目里的球体内随机向量函数
-      outbound_dir =
-          normalize(outbound_dir + roughness * math::random_in_unit_sphere());
-    }
-
-    srec.specular_ray = Ray(rec.p, outbound_dir);
-    return true;
+  float current_metallic = metallic;
+  if (metallic_map) {
+    Vec3 ks = metallic_map->value(rec.u, rec.v, rec.p);
+    current_metallic = (ks.x() + ks.y() + ks.z()) / 3.0f;
+    current_metallic = std::clamp(current_metallic, 0.0f, 1.0f);
   }
 
-  // =================================================================
-  // 状态分支二：镜面金属高光 (特指低粗糙度下的高金属性表面)
-  // =================================================================
-  // 当物体非常光滑且极具金属感时，我们将其视作 Specular 射线处理
-  if (select_rand < (transmission + metallic) && roughness < 0.05f) {
+  float current_alpha = alpha;
+  if (alpha_map) {
+    current_alpha = alpha_map->value(rec.u, rec.v, rec.p).x();
+    current_alpha = std::clamp(current_alpha, 0.0f, 1.0f);
+  }
+
+  // 法线贴图
+  Vec3 hit_normal = rec.normal;
+  if (normal_map) {
+    Vec3 tn = normal_map->value(rec.u, rec.v, rec.p);
+    tn = 2.0f * tn - Vec3(1.0f, 1.0f, 1.0f);
+    tn = normalize(tn);
+    // 需要 rec.tangent, rec.bitangent 提前计算
+    hit_normal = normalize(tn.x() * rec.tangent + tn.y() * rec.bitangent +
+                           tn.z() * rec.normal);
+  }
+
+  bool new_front_face = dot(r_in.direction(), hit_normal) < 0.0f;
+  if (double_sided && !new_front_face) {
+    hit_normal = -hit_normal;
+    new_front_face = !new_front_face;
+  }
+
+  float rand_val = math::random_float();
+
+  // 透明/折射分支
+  if (rand_val < current_alpha && current_alpha < 1.0f) {
     srec.is_specular = true;
     srec.attenuation = current_albedo;
 
-    Vec3 reflected = optics::reflect(normalize(r_in.direction()), rec.normal);
+    float etai = 1.0f, etat = ior;
+    if (!new_front_face)
+      std::swap(etai, etat);
+
+    Vec3 unit_dir = normalize(r_in.direction());
+    float cos_theta = std::min(dot(-unit_dir, hit_normal), 1.0f);
+    float fresnel = optics::fresnel_schlick(cos_theta, etai, etat);
+
+    Vec3 out_dir;
+    if (fresnel > math::random_float()) {
+      out_dir = optics::reflect(unit_dir, hit_normal);
+    } else {
+      out_dir = optics::refract(unit_dir, hit_normal, etai / etat);
+    }
+
+    if (current_roughness > 0.0f) {
+      out_dir = normalize(out_dir +
+                          current_roughness * math::random_in_unit_sphere());
+    }
+    srec.specular_ray = Ray(rec.p, out_dir);
+    return true;
+  }
+
+  // 完美镜面金属分支
+  if (current_metallic > 0.95f && current_roughness < 0.05f) {
+    srec.is_specular = true;
+    srec.attenuation = current_albedo;
+    Vec3 reflected = optics::reflect(normalize(r_in.direction()), hit_normal);
     srec.specular_ray = Ray(rec.p, reflected);
     return true;
   }
 
-  // =================================================================
-  // 状态分支三：粗糙微表面 / 漫反射混合 (走 PDF 重要性采样)
-  // =================================================================
-  // 包含传统塑料、粗糙金属、木材等，进入混和散射模型
+  // 漫反射 + 粗糙金属（混合 PDF
   srec.is_specular = false;
   srec.attenuation = current_albedo;
 
-  srec.pdf_ptr = std::make_unique<Cosine_pdf>(rec.normal);
+  Vec3 view_dir = normalize(-r_in.direction());
+  auto ggx = std::make_shared<GGX_pdf>(hit_normal, view_dir, current_roughness);
+  auto cosine = std::make_shared<Cosine_pdf>(hit_normal);
+
+  float blend = std::clamp(current_metallic, 0.0f, 1.0f);
+
+  srec.pdf_ptr = std::make_unique<Mixture_pdf>(ggx.get(), cosine.get(), blend);
 
   return true;
 }
 
-Vec3 StandardMaterial::scattering_pdf(const Ray &r_in, const hit_record &rec,
-                                      const Ray &scattered) const {
-  // 对于被视作纯镜面反射/折射的分支，不参与 scattering_pdf 的连续评级
-  // 只有粗糙表面和朗伯体漫反射需要返回对应的余弦半球 PDF
-  float cosine = dot(rec.normal, normalize(scattered.direction()));
-  if (cosine < 0.0f) {
-    // 如果散射光线跑到了表面下方，对于不透明物体其概率为 0
-    return Vec3(0.0f, 0.0f, 0.0f);
+float StandardMaterial::scattering_pdf(const Ray &r_in, const hit_record &rec,
+                                       const scatter_record &srec,
+                                       const Ray &scattered) const {
+  if (srec.is_specular)
+    return 0.0f;
+  if (srec.pdf_ptr) {
+    float pdf_val = srec.pdf_ptr->value(scattered.direction());
+    return pdf_val;
   }
-  // 标准的余弦半球散射 PDF = cos(theta) / pi
-  float pdf_val = cosine / math::TRACER_PI;
-  return Vec3(pdf_val, pdf_val, pdf_val);
+  return 0.0f;
 }
 
 } // namespace material

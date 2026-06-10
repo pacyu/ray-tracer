@@ -64,18 +64,24 @@ bool Triangle::hit(const Ray &r, float t_min, float t_max,
   rec.u = uv0.x() * w + uv1.x() * u + uv2.x() * v;
   rec.v = uv0.y() * w + uv1.y() * u + uv2.y() * v;
 
+  // 切线空间插值
+  const Vec3 &tangent0 = mesh_ptr->vertices[i0].tangent;
+  const Vec3 &tangent1 = mesh_ptr->vertices[i1].tangent;
+  const Vec3 &tangent2 = mesh_ptr->vertices[i2].tangent;
+  rec.tangent = unit_vector(w * tangent0 + u * tangent1 + v * tangent2);
+
+  const Vec3 &bitangent0 = mesh_ptr->vertices[i0].bitangent;
+  const Vec3 &bitangent1 = mesh_ptr->vertices[i1].bitangent;
+  const Vec3 &bitangent2 = mesh_ptr->vertices[i2].bitangent;
+  rec.bitangent = unit_vector(w * bitangent0 + u * bitangent1 + v * bitangent2);
+
+  // Gram-Schmidt 正交化，确保 tangent 垂直于法线
+  rec.tangent =
+      normalize(rec.tangent - dot(rec.tangent, rec.normal) * rec.normal);
+  rec.bitangent = cross(rec.normal, rec.tangent); // 重新计算副切线确保右手系
+
   // 确保法线始终与射线方向相对
   rec.set_face_normal(r, rec.normal);
-
-  float roughness = mesh_ptr->get_roughness(index, u, v, w);
-  if (roughness >= 0.f) {
-    rec.roughness = roughness;
-  } else {
-    float slope = std::sqrt(rec.normal.x() * rec.normal.x() +
-                            rec.normal.y() * rec.normal.y());
-
-    rec.roughness = std::clamp(slope, 0.02f, 0.3f);
-  }
 
   return true;
 }

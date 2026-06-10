@@ -19,6 +19,7 @@ public:
   std::shared_ptr<geometry::Mesh> take();
 
 private:
+  std::string dir;
   std::string source;
   ObjParser o_parser;
   ObjParser mtl_parser;

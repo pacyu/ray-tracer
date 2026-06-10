@@ -20,18 +20,29 @@ Lexer::Lexer(const std::string &src) : source(src) {
   reserved["Ka"] = Token(TokenType::AMBIENT, "Ka");
   reserved["Kd"] = Token(TokenType::DIFFUSE, "Kd");
   reserved["Ks"] = Token(TokenType::SPECULAR, "Ks");
+  reserved["Ke"] = Token(TokenType::EMISSION_COLOR, "Ke");
   reserved["Ns"] = Token(TokenType::SHININESS, "Ns");
+  reserved["Ni"] = Token(TokenType::INDEX_OF_REFRACTION, "Ni");
   reserved["d"] = Token(TokenType::OPACITY, "d");
   reserved["Tr"] = Token(TokenType::TRANSPARENCY, "Tr");
+  reserved["Tf"] = Token(TokenType::TRANSMISSION_FILTER_COLOR, "Tf");
+  reserved["illum"] = Token(TokenType::ILLUMINATION_MODEL, "illum");
+  reserved["sharpness"] = Token(TokenType::SHARPNESS, "sharpness");
 
   reserved["map_Kd"] = Token(TokenType::MAP_KD, "map_Kd");
-  reserved["map_Ks"] = Token(TokenType::MAP_NS, "map_Ks");
   reserved["map_Ka"] = Token(TokenType::MAP_KA, "map_Ka");
+  reserved["map_Ks"] = Token(TokenType::MAP_NS, "map_Ks");
+  reserved["map_Ke"] = Token(TokenType::MAP_KE, "map_Ke");
   reserved["map_Ns"] = Token(TokenType::MAP_NS, "map_Ns");
   reserved["map_d"] = Token(TokenType::MAP_D, "map_d");
+  reserved["map_Tr"] = Token(TokenType::MAP_TR, "map_Tr");
   reserved["map_bump"] = Token(TokenType::MAP_BUMP, "map_bump");
-  reserved["map_Ke"] = Token(TokenType::MAP_KE, "map_Ke");
+  reserved["bump"] = Token(TokenType::BUMP, "bump");
+  reserved["map_refl"] = Token(TokenType::MAP_REFL, "map_refl");
   reserved["refl"] = Token(TokenType::REFL, "refl");
+
+  reserved["disp"] = Token(TokenType::DISPLACEMENT, "disp");
+  reserved["decal"] = Token(TokenType::DECAL, "decal");
 }
 
 char Lexer::take() {

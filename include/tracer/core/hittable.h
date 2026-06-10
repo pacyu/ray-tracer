@@ -11,15 +11,15 @@ class Material;
 struct hit_record {
   Point3 p;
   Vec3 normal;
-  Vec2 tex_coord;
   std::shared_ptr<Material> mat_ptr;
   float t;
   float u;
   float v;
   bool front_face;
-  float roughness;
   uint32_t triangle_idx;
   float triangle_area;
+  Vec3 tangent;
+  Vec3 bitangent;
 
   void set_face_normal(const Ray &r, const Vec3 &outward_normal);
 };

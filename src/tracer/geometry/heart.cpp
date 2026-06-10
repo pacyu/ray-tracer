@@ -67,6 +67,26 @@ bool Heart::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
       rec.set_face_normal(r, unit_vector(normal));
       rec.p += rec.normal * 0.001f;
       rec.mat_ptr = mat_ptr;
+
+      Vec3 local = (rec.p - center) / rho;
+      float theta =
+          std::acos(std::clamp(local.y(), -1.0f, 1.0f)); // 仰角 0~π，y 向上
+      float phi = std::atan2(local.z(), local.x());      // 方位角 -π~π
+      // 映射到 [0,1] 范围：u 沿经线（phi），v 沿纬线（theta）
+      rec.u =
+          (phi + tracer::math::TRACER_PI) / (2.0f * tracer::math::TRACER_PI);
+      rec.v = theta / tracer::math::TRACER_PI;
+
+      Vec3 T_u = Vec3(-std::sin(phi), 0.0f, std::cos(phi));
+      Vec3 tangent = T_u - dot(T_u, rec.normal) * rec.normal;
+      if (tangent.squared_length() < 1e-6f) {
+        tangent = Vec3(1.0f, 0.0f, 0.0f) -
+                  dot(Vec3(1, 0, 0), rec.normal) * rec.normal;
+        if (tangent.squared_length() < 1e-6f)
+          tangent = Vec3(0.0f, 0.0f, 1.0f);
+      }
+      rec.tangent = normalize(tangent);
+      rec.bitangent = cross(rec.normal, rec.tangent);
       return true;
     }
 

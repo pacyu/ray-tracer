@@ -29,7 +29,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Dependencies (Linux)
         if: runner.os == 'Linux'
@@ -66,13 +66,13 @@ jobs:
           ./rayt scene.aur
 
       - name: Upload Result Image
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: rendered-scene-${{ matrix.os }}
           path: bin/*.png
 
       - name: Upload Compiled Binary for Release
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: compiled-binary-${{ matrix.os }}
           path: |

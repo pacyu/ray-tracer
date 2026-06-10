@@ -40,6 +40,8 @@ bool XYRect::hit(const Ray &r, float t0, float t1, hit_record &rec) const {
   rec.set_face_normal(r, Vec3(0, 0, 1));
   rec.mat_ptr = mat_ptr;
   rec.p = r.at(t);
+  rec.tangent = Vec3(1, 0, 0);
+  rec.bitangent = Vec3(0, 1, 0);
   return true;
 }
 
@@ -80,6 +82,8 @@ bool XZRect::hit(const Ray &r, float t0, float t1, hit_record &rec) const {
   rec.set_face_normal(r, Vec3(0, 1, 0));
   rec.mat_ptr = mat_ptr;
   rec.p = r.at(t);
+  rec.tangent = Vec3(1, 0, 0);
+  rec.bitangent = Vec3(0, 0, 1);
   return true;
 }
 
@@ -120,6 +124,8 @@ bool YZRect::hit(const Ray &r, float t0, float t1, hit_record &rec) const {
   rec.set_face_normal(r, Vec3(1, 0, 0));
   rec.mat_ptr = mat_ptr;
   rec.p = r.at(t);
+  rec.tangent = Vec3(0, 1, 0);
+  rec.bitangent = Vec3(0, 0, 1);
   return true;
 }
 

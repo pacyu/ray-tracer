@@ -18,24 +18,24 @@ int main() {
   auto sun_sphere = std::make_shared<geometry::Sphere>(
       Vec3(0.f, -15000.f, 1000.f), 300.f, sun);
 
-  auto cloth_mat =
-      std::make_shared<material::Cloth>(Vec3(0.8f, 0.1f, 0.1f), 0.1f);
+  auto plastic_mat = std::make_shared<material::Plastic>(
+      Vec3(0.8f, 0.05f, 0.05f), 0.02f, 1.5f);
 
-  float r = 100.0f;
+  float r = 200.0f;
   float y0 = -(r - lookat.y()) / 2.0f;
   float y1 = -y0;
   float z0 = -(r - lookat.z()) / 2.0f;
   float z1 = -z0;
 
-  auto test_cloth =
-      std::make_shared<geometry::YZRect>(y0, y1, z0, z1, 0.1f, cloth_mat);
+  auto test_plastic =
+      std::make_shared<geometry::YZRect>(y0, y1, z0, z1, 0.1f, plastic_mat);
 
   hittable_list world, lights;
-  world.add(test_cloth);
+  world.add(test_plastic);
 
   lights.add(sun_sphere);
   Camera camera(image_width, image_height, samples_per_pixel, max_depth,
-                "test_cloth.png", background, lookfrom, lookat, vup, 90.0f);
+                "test_plastic.png", background, lookfrom, lookat, vup, 90.0f);
   camera.render(world, lights, false);
   return 0;
 }

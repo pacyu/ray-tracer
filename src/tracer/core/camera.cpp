@@ -152,13 +152,14 @@ Color Camera::ray_color(const Ray &r,
   }
 
   Hittable_pdf light_ptr = Hittable_pdf(lights, rec.p);
-  Mixture_pdf p(&light_ptr, srec.pdf_ptr.get());
+  Mixture_pdf p(&light_ptr, srec.pdf_ptr.get(), 0.5f);
 
   Ray scattered = Ray(rec.p, p.generate());
-  auto pdf_val = p.value(scattered.direction());
+  float pdf_val = p.value(scattered.direction());
 
   return emitted +
-         srec.attenuation * rec.mat_ptr->scattering_pdf(r, rec, scattered) *
+         srec.attenuation *
+             rec.mat_ptr->scattering_pdf(r, rec, srec, scattered) *
              ray_color(scattered, background, world, lights, depth - 1) /
              pdf_val;
 }

@@ -12,6 +12,8 @@ struct Vertex {
   Vec3 vertex;
   Vec3 normal;
   Vec2 tex_coord;
+  Vec3 tangent;   // 切线 (沿 U 方向)
+  Vec3 bitangent; // 副切线 (沿 V 方向)
 };
 
 class Mesh : public hittable, public std::enable_shared_from_this<Mesh> {
@@ -54,6 +56,7 @@ public:
   virtual Vec3 random(const Vec3 &o) const override;
 
   void compute_smooth_normals();
+  void compute_tangents();
   void finalize();
   void build_bvh();
   void refit_blas();
@@ -62,8 +65,6 @@ private:
   AABB bbox;
 
   void build_area_cdf();
-  uint32_t build_recursive(uint32_t start, uint32_t end,
-                           const std::vector<Vec3> &tri_centroids);
   void refit_bvh();
   void refit_recursive(uint32_t node_idx);
   static bool ray_triangle_intersect(const Ray &r, const Vec3 &v0,

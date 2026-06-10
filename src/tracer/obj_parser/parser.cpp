@@ -39,10 +39,18 @@ Token ObjParser::expect(TokenType t_type) {
 }
 
 float ObjParser::make_number() {
+  expect(TokenType::NUMBER);
   Token token = opt();
   consume();
   float number = std::stof(std::string(token.lexeme));
   return number;
+}
+
+std::string ObjParser::make_string() {
+  expect(TokenType::IDENTIFIER);
+  Token token = opt();
+  consume();
+  return std::string(token.lexeme);
 }
 
 Vec3 ObjParser::make_vector3() {
@@ -55,42 +63,42 @@ Vec3 ObjParser::make_vector3() {
   return Vec3(x, y, z);
 }
 
-std::shared_ptr<SmoothNode> ObjParser::make_smooth() {
+std::unique_ptr<SmoothNode> ObjParser::make_smooth() {
   Token token = opt();
   if (token.type == TokenType::NUMBER) {
     int n = static_cast<int>(make_number());
-    return std::make_shared<SmoothNode>(n);
+    return std::make_unique<SmoothNode>(n);
   }
   consume();
-  return std::make_shared<SmoothNode>(std::string(token.lexeme));
+  return std::make_unique<SmoothNode>(std::string(token.lexeme));
 }
 
-std::shared_ptr<VertexNode> ObjParser::make_vertex() {
+std::unique_ptr<VertexNode> ObjParser::make_vertex() {
   expect(TokenType::NUMBER);
   float x = make_number();
   expect(TokenType::NUMBER);
   float y = make_number();
   expect(TokenType::NUMBER);
   float z = make_number();
-  return std::make_shared<VertexNode>(Vec3(x, y, z));
+  return std::make_unique<VertexNode>(Vec3(x, y, z));
 }
 
-std::shared_ptr<NormalNode> ObjParser::make_normal() {
+std::unique_ptr<NormalNode> ObjParser::make_normal() {
   expect(TokenType::NUMBER);
   float x = make_number();
   expect(TokenType::NUMBER);
   float y = make_number();
   expect(TokenType::NUMBER);
   float z = make_number();
-  return std::make_shared<NormalNode>(Vec3(x, y, z));
+  return std::make_unique<NormalNode>(Vec3(x, y, z));
 }
 
-std::shared_ptr<TextureCoordNode> ObjParser::make_texture_coord() {
+std::unique_ptr<TextureCoordNode> ObjParser::make_texture_coord() {
   expect(TokenType::NUMBER);
   float x = make_number();
   expect(TokenType::NUMBER);
   float y = make_number();
-  return std::make_shared<TextureCoordNode>(Vec2{x, y});
+  return std::make_unique<TextureCoordNode>(Vec2{x, y});
 }
 
 void ObjParser::make_face() {
@@ -142,7 +150,7 @@ void ObjParser::make_face() {
   face1.v[2].idx[1] = normal2;
   face1.v[2].idx[2] = normal3;
 
-  nodes.push_back(std::make_shared<FaceNode>(face1));
+  nodes.push_back(std::make_unique<FaceNode>(face1));
 
   // 如果接下来的 token 是数值类型，说明该面是一个四边形
   Token token = opt();
@@ -173,26 +181,40 @@ void ObjParser::make_face() {
     face2.v[2].idx[1] = normal3;
     face2.v[2].idx[2] = normal4;
 
-    nodes.push_back(std::make_shared<FaceNode>(face2));
+    nodes.push_back(std::make_unique<FaceNode>(face2));
   }
 }
 
-MtlLibNode ObjParser::make_mtllib() {
+std::unique_ptr<ObjectNode> ObjParser::make_object() {
   expect(TokenType::IDENTIFIER);
   Token token = opt();
   consume();
-  return MtlLibNode(std::string(token.lexeme));
+  return std::make_unique<ObjectNode>(std::string(token.lexeme));
 }
 
-std::shared_ptr<UseMtlNode> ObjParser::make_usemtl() {
+std::unique_ptr<GroupNode> ObjParser::make_group() {
   expect(TokenType::IDENTIFIER);
   Token token = opt();
   consume();
-  return std::make_shared<UseMtlNode>(std::string(token.lexeme));
+  return std::make_unique<GroupNode>(std::string(token.lexeme));
 }
 
-std::shared_ptr<TexParamsNode> ObjParser::make_newmtl() {
-  TexParams tex_params;
+std::unique_ptr<MtlLibNode> ObjParser::make_mtllib() {
+  expect(TokenType::IDENTIFIER);
+  Token token = opt();
+  consume();
+  return std::make_unique<MtlLibNode>(std::string(token.lexeme));
+}
+
+std::unique_ptr<UseMtlNode> ObjParser::make_usemtl() {
+  expect(TokenType::IDENTIFIER);
+  Token token = opt();
+  consume();
+  return std::make_unique<UseMtlNode>(std::string(token.lexeme));
+}
+
+std::unique_ptr<MaterialParamsNode> ObjParser::make_newmtl() {
+  MaterialParams tex_params;
   while (opt().type != TokenType::NEWMTL &&
          opt().type != TokenType::ENDOFFILE) {
     Token token = opt();
@@ -207,24 +229,54 @@ std::shared_ptr<TexParamsNode> ObjParser::make_newmtl() {
       tex_params.Ks = make_vector3();
     } else if (token.type == TokenType::SHININESS) {
       tex_params.Ns = make_number();
+    } else if (token.type == TokenType::NI) {
+      tex_params.Ni = make_number();
     } else if (token.type == TokenType::OPACITY) {
       tex_params.d = make_number();
+    } else if (token.type == TokenType::TRANSPARENCY) {
+      tex_params.Tr = make_number();
+    } else if (token.type == TokenType::TRANSMISSION_FILTER_COLOR) {
+      tex_params.Tf = make_vector3();
+    } else if (token.type == TokenType::SHARPNESS) {
+      tex_params.sharpness = make_number();
     } else if (token.type == TokenType::MAP_KD) {
-      token = opt();
-      tex_params.map_Kd = std::string(token.lexeme);
-      consume();
+      tex_params.map_Kd = make_string();
+    } else if (token.type == TokenType::MAP_KA) {
+      tex_params.map_Ka = make_string();
+    } else if (token.type == TokenType::MAP_KS) {
+      tex_params.map_Ks = make_string();
+    } else if (token.type == TokenType::MAP_KE) {
+      tex_params.map_Ke = make_string();
+    } else if (token.type == TokenType::MAP_NS) {
+      tex_params.map_Ns = make_string();
+    } else if (token.type == TokenType::MAP_D) {
+      tex_params.map_d = make_string();
+    } else if (token.type == TokenType::MAP_BUMP) {
+      tex_params.map_bump = make_string();
+    } else if (token.type == TokenType::BUMP) {
+      tex_params.bump = make_string();
+    } else if (token.type == TokenType::MAP_REFL) {
+      tex_params.map_refl = make_string();
+    } else if (token.type == TokenType::REFL) {
+      tex_params.refl = make_string();
+    } else if (token.type == TokenType::DISPLACEMENT) {
+      tex_params.disp = make_string();
+    } else if (token.type == TokenType::DECAL) {
+      tex_params.decal = make_string();
+    } else if (token.type == TokenType::ILLUMINATION_MODEL) {
+      tex_params.illum = static_cast<int>(make_number());
     } else {
       break;
     }
   }
 
-  return std::make_shared<TexParamsNode>(tex_params);
+  return std::make_unique<MaterialParamsNode>(tex_params);
 }
 
 void ObjParser::parse_mtl() {
   while (cursor < tokens.size()) {
     Token token = opt();
-    std::shared_ptr<ASTNode> node;
+    std::unique_ptr<ASTNode> node;
 
     consume();
 
@@ -235,63 +287,43 @@ void ObjParser::parse_mtl() {
     } else {
       continue;
     }
-    nodes.push_back(node);
+    nodes.push_back(std::move(node));
   }
 }
 
-void ObjParser::make_mesh() {
-  while (opt().type != TokenType::OBJECT ||
-         opt().type != TokenType::ENDOFFILE) {
-    Token token = opt();
-    std::shared_ptr<ASTNode> node;
+void ObjParser::parse() {
 
+  while (cursor < tokens.size()) {
+    Token token = opt();
+    std::unique_ptr<ASTNode> node;
     consume();
 
-    if (token.type == TokenType::SMOOTH) {
-      node = make_smooth();
+    if (token.type == TokenType::ENDOFFILE) {
+      break;
+    } else if (token.type == TokenType::MTLLIB) {
+      mtl_labels.push_back(make_mtllib());
+      continue;
     } else if (token.type == TokenType::VERTEX) {
       node = make_vertex();
     } else if (token.type == TokenType::TEXTURE_COORD) {
       node = make_texture_coord();
     } else if (token.type == TokenType::NORMAL) {
       node = make_normal();
+    } else if (token.type == TokenType::OBJECT) {
+      node = make_object();
+    } else if (token.type == TokenType::GROUP) {
+      node = make_group();
+    } else if (token.type == TokenType::USEMTL) {
+      node = make_usemtl();
+    } else if (token.type == TokenType::SMOOTH) {
+      node = make_smooth();
     } else if (token.type == TokenType::FACE) {
       make_face();
       continue;
-    } else if (token.type == TokenType::USEMTL) {
-      node = make_usemtl();
     } else {
       break;
     }
     nodes.push_back(std::move(node));
-  }
-}
-
-void ObjParser::parse() {
-  MeshNode mesh;
-  while (cursor < tokens.size()) {
-    Token token = opt();
-
-    if (token.type == TokenType::ENDOFFILE) {
-      break;
-    } else if (token.type == TokenType::OBJECT) {
-      consume();
-      mesh.mesh_name = std::string(opt().lexeme);
-      consume();
-      make_mesh();
-      mesh.nodes = std::move(nodes);
-      nodes.clear();
-    } else if (token.type == TokenType::MTLLIB) {
-      consume();
-      mtl_labels.push_back(std::make_unique<MtlLibNode>(make_mtllib()));
-      continue;
-    } else {
-      make_mesh();
-      mesh.mesh_name = "Object";
-      mesh.nodes = std::move(nodes);
-      nodes.clear();
-    }
-    meshes.push_back(std::make_unique<MeshNode>(mesh));
   }
 }
 

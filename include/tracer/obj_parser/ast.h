@@ -22,16 +22,43 @@ struct Face {
   Index v[3]; // vertex index, texture coord index, normal index
 };
 
-struct TexParams {
+struct MaterialParams {
   std::string mat_name;
-  Vec3 Ka;            // Ambient 颜色 - 环境光反射系数
-  Vec3 Kd;            // Diffuse 颜色 - 漫反射颜色
-  Vec3 Ks;            // Specular 颜色 - 高光颜色
-  float Ns;           // Shininess - 高光指数 / 光泽度
-  float d;            // Opacity = 不透明度
-  float Tr;           // Transparency - 透明度
-  int illum;          // 光照模型
-  std::string map_Kd; // 漫反射纹理
+  Vec3 Ka;                // Ambient 颜色 - 环境光反射系数
+  Vec3 Kd;                // Diffuse 颜色 - 漫反射颜色
+  Vec3 Ks;                // Specular 颜色 - 高光颜色
+  Vec3 Ke;                // Emissive 颜色 - 自发光颜色
+  float Ns = 32.0f;       // Shininess - 高光指数 / 光泽度
+  float Ni = 1.5f;        // 折射率
+  float d = 1.0f;         // Opacity = 不透明度
+  float Tr = 0.0f;        // Transparency - 透明度
+  Vec3 Tf;                // Transmission filter - 透射滤镜颜色
+  int illum = 2;          // 光照模型
+  float sharpness = 0.0f; // 反射贴图清晰度
+
+  // 标准纹理贴图
+  std::string map_Kd;   // 漫反射纹理
+  std::string map_Ka;   // 环境光纹理
+  std::string map_Ks;   // 高光纹理（可转金属度）
+  std::string map_Ke;   // 自发光纹理
+  std::string map_Ns;   // 光泽度纹理（转粗糙度）
+  std::string map_d;    // 不透明度纹理
+  std::string map_Tr;   // 透明度纹理（与 map_d 类似）
+  std::string map_bump; // 凹凸纹理（法线贴图或灰度凹凸）
+  std::string bump;     // 凹凸纹理（旧式，同 map_bump）
+  std::string map_refl; // 反射纹理
+  std::string refl;     // 反射贴图（旧式，同 map_refl）
+
+  // PBR 扩展纹理（金属度/粗糙度/AO 工作流）
+  std::string map_Pr; // 粗糙度贴图（Roughness）
+  std::string map_Pm; // 金属度贴图（Metallic）
+  std::string map_Po; // 环境光遮蔽贴图（AO）
+  std::string map_Ps; // 镜面反射贴图（Specular）
+  std::string map_Pe; // 自发光贴图（Emission，同 map_Ke）
+
+  // 高级贴图
+  std::string disp;  // 位移贴图（Displacement）
+  std::string decal; // 贴花贴图（Decal）
 };
 
 struct Value {
@@ -40,9 +67,9 @@ struct Value {
   Vec3 v_normal;
   Vec2 v_texture_coord;
   Face v_face;
-  std::vector<TexParams> v_params;
+  std::vector<MaterialParams> v_params;
+  std::string v_usemtl_name;
   std::string v_mat_path;
-  std::string v_mat_name;
 
   enum class ValueType {
     V_NUMBER,
@@ -51,6 +78,7 @@ struct Value {
     V_TEXTURE,
     V_FACE,
     V_TEX_PARAMS,
+    V_USEMTL_NAME,
     V_MAT_PATH,
     V_MAT_NAME
   } v_type;
@@ -61,15 +89,14 @@ struct ASTNode {
   virtual void evaluate(Value &) = 0;
 };
 
-class SmoothNode : public ASTNode {
+class MtlLibNode : public ASTNode {
 public:
-  void evaluate(Value &) override;
-  SmoothNode(const std::string &);
-  SmoothNode(int number);
+  virtual void evaluate(Value &) override;
+  MtlLibNode() {}
+  MtlLibNode(const std::string &);
 
 private:
-  int value = 0;
-  std::string str_value;
+  std::string value;
 };
 
 class VertexNode : public ASTNode {
@@ -102,6 +129,45 @@ private:
   Vec2 value;
 };
 
+class ObjectNode : public ASTNode {
+public:
+  void evaluate(Value &) override;
+  ObjectNode(const std::string &);
+
+private:
+  std::string value;
+};
+
+class GroupNode : public ASTNode {
+public:
+  void evaluate(Value &) override;
+  GroupNode(const std::string &);
+
+private:
+  std::string value;
+};
+
+class UseMtlNode : public ASTNode {
+public:
+  void evaluate(Value &) override;
+  UseMtlNode() {}
+  UseMtlNode(const std::string &);
+
+private:
+  std::string value;
+};
+
+class SmoothNode : public ASTNode {
+public:
+  void evaluate(Value &) override;
+  SmoothNode(const std::string &);
+  SmoothNode(int number);
+
+private:
+  int value = 0;
+  std::string str_value;
+};
+
 class FaceNode : public ASTNode {
 public:
   void evaluate(Value &) override;
@@ -112,42 +178,14 @@ private:
   Face value;
 };
 
-class MtlLibNode : public ASTNode {
-public:
-  virtual void evaluate(Value &) override;
-  MtlLibNode() {}
-  MtlLibNode(const std::string &);
-
-private:
-  std::string value;
-};
-
-class UseMtlNode : public ASTNode {
-public:
-  virtual void evaluate(Value &) override;
-  UseMtlNode() {}
-  UseMtlNode(const std::string &);
-
-private:
-  std::string value;
-};
-
-class TexParamsNode : public ASTNode {
+class MaterialParamsNode : public ASTNode {
 public:
   void evaluate(Value &) override;
-  TexParamsNode() {}
-  TexParamsNode(const TexParams &);
+  MaterialParamsNode() {}
+  MaterialParamsNode(const MaterialParams &);
 
 private:
-  TexParams value;
-};
-
-class MeshNode {
-public:
-  MeshNode() {}
-
-  std::string mesh_name;
-  std::vector<std::shared_ptr<ASTNode>> nodes;
+  MaterialParams value;
 };
 
 } // namespace obj_parser

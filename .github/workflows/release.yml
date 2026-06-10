@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # 1. 核心：从刚刚触发的或最近成功的 CI 编译流水线中下载 Windows 二进制
       - name: Download Windows Binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: compiled-binary-windows-latest
           path: win_bin/
@@ -29,7 +29,7 @@ jobs:
 
       # 2. 从 CI 编译流水线中下载 Linux 二进制
       - name: Download Linux Binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: compiled-binary-ubuntu-24.04
           path: linux_bin/

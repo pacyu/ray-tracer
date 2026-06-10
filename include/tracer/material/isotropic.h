@@ -16,8 +16,9 @@ public:
   virtual bool scatter(const Ray &r_in, const hit_record &rec,
                        scatter_record &srec) const override;
 
-  virtual Vec3 scattering_pdf(const Ray &r_in, const hit_record &rec,
-                              const Ray &scattered) const override;
+  virtual float scattering_pdf(const Ray &r_in, const hit_record &rec,
+                               const scatter_record &srec,
+                               const Ray &scattered) const override;
 
 private:
   std::shared_ptr<Texture> tex;

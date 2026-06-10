@@ -33,7 +33,7 @@ int main() {
   params.wind_dir = physics::Complex(1.0f, 0.0f); // 顺着 X 轴吹的风
   auto fft_solver = std::make_unique<physics::FFTOcean>(params);
 
-  std::cout << "[物理] 正在通过 FFTW 生成 " << params.N << "x" << params.N
+  std::cout << "[Build] 正在通过 FFTW 生成 " << params.N << "x" << params.N
             << " 离线海浪网格... " << std::endl;
   auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -43,7 +43,7 @@ int main() {
   ocean->finalize();
 
   auto end_time = std::chrono::high_resolution_clock::now();
-  std::cout << "[物理] 海浪与 BVH 构建完毕！用时: "
+  std::cout << "[Build] 海浪与 BVH 构建完毕！用时: "
             << std::chrono::duration_cast<std::chrono::seconds>(end_time -
                                                                 start_time)
                    .count()

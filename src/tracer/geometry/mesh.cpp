@@ -10,71 +10,69 @@ void Mesh::build_bvh() {
 
   std::vector<Vec3> tri_centroids(n);
   for (size_t i = 0; i < n; ++i) {
-    uint32_t i0 = indices[i * 3];
-    uint32_t i1 = indices[i * 3 + 1];
-    uint32_t i2 = indices[i * 3 + 2];
-    tri_centroids[i] =
-        (vertices[i0].vertex + vertices[i1].vertex + vertices[i2].vertex) /
-        3.0f;
+    const uint32_t *idx = &indices[i * 3];
+    tri_centroids[i] = (vertices[idx[0]].vertex + vertices[idx[1]].vertex +
+                        vertices[idx[2]].vertex) /
+                       3.0f;
   }
 
   nodes.clear();
   nodes.reserve(2 * n);
-  build_recursive(0, static_cast<uint32_t>(n), tri_centroids);
-}
 
-uint32_t Mesh::build_recursive(uint32_t start, uint32_t end,
-                               const std::vector<Vec3> &tri_centroids) {
-  uint32_t node_idx = static_cast<uint32_t>(nodes.size());
-  nodes.emplace_back();
+  auto build_recursive = [&](auto &self, uint32_t start,
+                             uint32_t end) -> uint32_t {
+    uint32_t node_idx = static_cast<uint32_t>(nodes.size());
+    nodes.emplace_back();
 
-  uint32_t count = end - start;
-  uint32_t first_tri_idx = tri_indices[start];
-  uint32_t f0 = indices[first_tri_idx * 3];
+    uint32_t count = end - start;
+    uint32_t first_tri_idx = tri_indices[start];
+    uint32_t f0 = indices[first_tri_idx * 3];
 
-  // 计算当前节点包围盒
-  AABB bbox(vertices[f0].vertex, vertices[f0].vertex);
-  AABB centroid_bbox(tri_centroids[first_tri_idx],
-                     tri_centroids[first_tri_idx]);
+    // 计算当前节点包围盒
+    AABB bbox(vertices[f0].vertex, vertices[f0].vertex);
+    AABB centroid_bbox(tri_centroids[first_tri_idx],
+                       tri_centroids[first_tri_idx]);
 
-  for (uint32_t i = start; i < end; ++i) {
-    uint32_t tri_idx = tri_indices[i];
-    bbox.expand(vertices[indices[tri_idx * 3]].vertex);
-    bbox.expand(vertices[indices[tri_idx * 3 + 1]].vertex);
-    bbox.expand(vertices[indices[tri_idx * 3 + 2]].vertex);
-    centroid_bbox.expand(tri_centroids[tri_idx]);
-  }
+    for (uint32_t i = start; i < end; ++i) {
+      uint32_t tri_idx = tri_indices[i];
+      bbox.expand(vertices[indices[tri_idx * 3]].vertex);
+      bbox.expand(vertices[indices[tri_idx * 3 + 1]].vertex);
+      bbox.expand(vertices[indices[tri_idx * 3 + 2]].vertex);
+      centroid_bbox.expand(tri_centroids[tri_idx]);
+    }
 
-  nodes[node_idx].bbox = bbox;
-  int axis = centroid_bbox.max_extent();
-  Vec3 extents = centroid_bbox.max - centroid_bbox.min;
+    nodes[node_idx].bbox = bbox;
+    int axis = centroid_bbox.max_extent();
+    Vec3 extents = centroid_bbox.max - centroid_bbox.min;
 
-  float max_axis_length = extents[axis];
+    float max_axis_length = extents[axis];
 
-  // 叶子节点设定
-  if (count <= 4 || max_axis_length < 1e-6f) {
-    nodes[node_idx].start = start;
-    nodes[node_idx].count = count;
-    nodes[node_idx].axis = 0;
+    // 叶子节点设定
+    if (count <= 4 || max_axis_length < 1e-6f) {
+      nodes[node_idx].start = start;
+      nodes[node_idx].count = count;
+      nodes[node_idx].axis = 0;
+      return node_idx;
+    }
+
+    uint32_t mid = start + count / 2;
+
+    std::nth_element(tri_indices.begin() + start, tri_indices.begin() + mid,
+                     tri_indices.begin() + end, [&](uint32_t a, uint32_t b) {
+                       return tri_centroids[a][axis] < tri_centroids[b][axis];
+                     });
+
+    uint32_t left_child = self(self, start, mid);
+    uint32_t right_child = self(self, mid, end);
+
+    nodes[node_idx].left = left_child;
+    nodes[node_idx].right = right_child;
+    nodes[node_idx].count = 0; // 标记为内部节点
+    nodes[node_idx].axis = static_cast<uint32_t>(axis);
+
     return node_idx;
-  }
-
-  uint32_t mid = start + count / 2;
-
-  std::nth_element(tri_indices.begin() + start, tri_indices.begin() + mid,
-                   tri_indices.begin() + end, [&](uint32_t a, uint32_t b) {
-                     return tri_centroids[a][axis] < tri_centroids[b][axis];
-                   });
-
-  uint32_t left_child = build_recursive(start, mid, tri_centroids);
-  uint32_t right_child = build_recursive(mid, end, tri_centroids);
-
-  nodes[node_idx].left = left_child;
-  nodes[node_idx].right = right_child;
-  nodes[node_idx].count = 0; // 标记为内部节点
-  nodes[node_idx].axis = static_cast<uint32_t>(axis);
-
-  return node_idx;
+  };
+  build_recursive(build_recursive, 0, static_cast<uint32_t>(n));
 }
 
 bool Mesh::ray_triangle_intersect(const Ray &r, const Vec3 &v0, const Vec3 &v1,
@@ -154,8 +152,6 @@ bool Mesh::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
   if (hit_anything) {
     rec.t = t_max;
     rec.p = r.at(t_max);
-    rec.u = best_u;
-    rec.v = best_v;
 
     const Vertex &v0 = vertices[indices[best_tri_idx * 3]];
     const Vertex &v1 = vertices[indices[best_tri_idx * 3 + 1]];
@@ -164,8 +160,21 @@ bool Mesh::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
     float w = 1.0f - best_u - best_v;
     rec.normal =
         normalize(w * v0.normal + best_u * v1.normal + best_v * v2.normal);
-    rec.tex_coord =
+
+    Vec2 tex_coord =
         w * v0.tex_coord + best_u * v1.tex_coord + best_v * v2.tex_coord;
+    rec.u = tex_coord.x();
+    rec.v = tex_coord.y();
+
+    rec.tangent =
+        normalize(w * v0.tangent + best_u * v1.tangent + best_v * v2.tangent);
+    rec.bitangent = normalize(w * v0.bitangent + best_u * v1.bitangent +
+                              best_v * v2.bitangent);
+
+    // 使用 Gram-Schmidt 使切线正交于法线
+    rec.tangent =
+        normalize(rec.tangent - dot(rec.tangent, rec.normal) * rec.normal);
+    rec.bitangent = cross(rec.normal, rec.tangent);
 
     rec.triangle_idx = best_tri_idx;
     rec.triangle_area = tri_area[best_tri_idx];
@@ -241,8 +250,58 @@ void Mesh::compute_smooth_normals() {
   }
 
   for (Vertex &v : vertices) {
-    v.normal =
-        (v.normal.squared_length() > 0) ? normalize(v.normal) : Vec3(0, 0, 1);
+    v.normal = (v.normal.squared_length() > 0.0f) ? normalize(v.normal)
+                                                  : Vec3(0.0f, 0.0f, 1.0f);
+  }
+}
+
+void Mesh::compute_tangents() {
+  // 为每个顶点初始化切线和副切线为零
+  std::vector<Vec3> tangents(vertices.size(), Vec3(0.0f, 0.0f, 0.0f));
+  std::vector<Vec3> bitangents(vertices.size(), Vec3(0.0f, 0.0f, 0.0f));
+
+  // 遍历所有三角形
+  for (uint32_t tri = 0; tri < indices.size(); tri += 3) {
+    const Vertex &v0 = vertices[indices[tri]];
+    const Vertex &v1 = vertices[indices[tri + 1]];
+    const Vertex &v2 = vertices[indices[tri + 2]];
+
+    // 边向量
+    Vec3 deltaPos1 = v1.vertex - v0.vertex;
+    Vec3 deltaPos2 = v2.vertex - v0.vertex;
+
+    // 纹理坐标差
+    Vec2 deltaUV1 = v1.tex_coord - v0.tex_coord;
+    Vec2 deltaUV2 = v2.tex_coord - v0.tex_coord;
+
+    float r =
+        1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
+    Vec3 tangent = (deltaPos1 * deltaUV2.y() - deltaPos2 * deltaUV1.y()) * r;
+    Vec3 bitangent = (deltaPos2 * deltaUV1.x() - deltaPos1 * deltaUV2.x()) * r;
+
+    // 累加贡献到三个顶点
+    uint32_t idx0 = indices[tri];
+    uint32_t idx1 = indices[tri + 1];
+    uint32_t idx2 = indices[tri + 2];
+    tangents[idx0] += tangent;
+    tangents[idx1] += tangent;
+    tangents[idx2] += tangent;
+    bitangents[idx0] += bitangent;
+    bitangents[idx1] += bitangent;
+    bitangents[idx2] += bitangent;
+  }
+
+  // 归一化并存储到 Vertex
+  for (size_t i = 0; i < vertices.size(); ++i) {
+    vertices[i].tangent = normalize(tangents[i]);
+    // 重新正交化（Gram-Schmidt）以确保 tangent 垂直于 normal
+    vertices[i].tangent = normalize(
+        vertices[i].tangent -
+        dot(vertices[i].tangent, vertices[i].normal) * vertices[i].normal);
+    vertices[i].bitangent = normalize(bitangents[i]);
+    // 或者直接计算 bitangent = cross(normal, tangent)
+    // vertices[i].bitangent = normalize(cross(vertices[i].normal,
+    // vertices[i].tangent));
   }
 }
 

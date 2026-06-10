@@ -23,7 +23,7 @@ public:
 
   virtual Color emitted(const Ray &r_in, const hit_record &rec, float u,
                         float v, const Point3 &p) const {
-    return Color(0, 0, 0);
+    return Color(0.0f, 0.0f, 0.0f);
   }
 
   virtual bool is_emitter() const { return false; }
@@ -31,9 +31,10 @@ public:
   virtual bool scatter(const Ray &r, const hit_record &rec,
                        scatter_record &srec) const = 0;
 
-  virtual Color scattering_pdf(const Ray &r_in, const hit_record &rec,
+  virtual float scattering_pdf(const Ray &r_in, const hit_record &rec,
+                               const scatter_record &srec,
                                const Ray &scattered) const {
-    return Color(0, 0, 0);
+    return 0.0f;
   }
 };
 

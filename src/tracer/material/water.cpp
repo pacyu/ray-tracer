@@ -64,10 +64,5 @@ bool Water::scatter(const Ray &r_in, const hit_record &rec,
   return true;
 }
 
-Vec3 Water::scattering_pdf(const Ray &r_in, const hit_record &rec,
-                           const Ray &scattered) const {
-  return Vec3(0.0f, 0.0f, 0.0f);
-}
-
 } // namespace material
 } // namespace tracer

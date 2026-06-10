@@ -1,5 +1,5 @@
 # 定义所有测试
-set(TEST_NAMES test_parser test_tracer test_ocean test_dynamic_ocean test_ripple test_cloth test_obj_parser)
+set(TEST_NAMES test_parser test_tracer test_ocean test_dynamic_ocean test_ripple test_metal test_glass test_cloth test_plastic test_glossy_plastic test_sphere test_obj_parser)
 
 foreach(t_name ${TEST_NAMES})
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${t_name}.cpp")

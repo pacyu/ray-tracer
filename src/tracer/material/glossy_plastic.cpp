@@ -14,29 +14,32 @@ bool GlossyPlastic::scatter(const Ray &r_in, const hit_record &rec,
         tracer::optics::reflect(unit_vector(r_in.direction()), rec.normal);
     srec.specular_ray = Ray(rec.p, reflected);
     srec.is_specular = true;
-    srec.attenuation = Color(1, 1, 1);
+    srec.attenuation = Color(1.0f, 1.0f, 1.0f);
   } else {
     srec.is_specular = false;
-    srec.attenuation = albedo;
+    srec.attenuation = albedo->value(rec.u, rec.v, rec.p);
     srec.pdf_ptr = std::make_unique<Cosine_pdf>(rec.normal);
   }
   return true;
 }
 
-Vec3 GlossyPlastic::scattering_pdf(const Ray &r_in, const hit_record &rec,
-                                   const Ray &scattered) const {
-  float cos_theta = dot(rec.normal, unit_vector(scattered.direction()));
+float GlossyPlastic::scattering_pdf(const Ray &r_in, const hit_record &rec,
+                                    const scatter_record &srec,
+                                    const Ray &scattered) const {
+  if (srec.is_specular)
+    return 0.0f;
+
+  float cos_theta = dot(rec.normal, normalize(scattered.direction()));
   if (cos_theta < 0.0f)
-    return Vec3(0.0f, 0.0f, 0.0f);
+    return 0.0f;
 
-  float F =
-      std::clamp(tracer::optics::schlick(
-                     dot(unit_vector(-r_in.direction()), rec.normal), ior),
-                 0.0f, 1.0f);
+  // 重新计算菲涅尔因子 F
+  float cos_in = dot(unit_vector(-r_in.direction()), rec.normal);
+  float F = std::clamp(tracer::optics::schlick(cos_in, ior), 0.0f, 1.0f);
 
-  // 混合 PDF：漫反射部分 (Cosine PDF) + 镜面部分
-  // 注意：如果是完美镜面，镜面部分的 PDF 是 Delta 分布，通常不直接加在 PDF
-  return (1.0f - F) * albedo;
+  // 漫反射分支的 PDF = (1 - F) * (cosθ / π)
+  float pdf_val = (1.0f - F) * (cos_theta / tracer::math::TRACER_PI);
+  return pdf_val;
 }
 
 } // namespace material

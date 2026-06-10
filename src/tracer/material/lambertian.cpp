@@ -11,17 +11,15 @@ bool Lambertian::scatter(const Ray &r, const hit_record &rec,
   return true;
 }
 
-Vec3 Lambertian::scattering_pdf(const Ray &r_in, const hit_record &rec,
-                                const Ray &scattered) const {
-  auto cosine = dot(rec.normal, unit_vector(scattered.direction()));
-  if (cosine < 0)
-    return Vec3(0, 0, 0);
-
-  // 获取纹理颜色 (Albedo)
-  Vec3 color = albedo->value(rec.u, rec.v, rec.p);
+float Lambertian::scattering_pdf(const Ray &r_in, const hit_record &rec,
+                                 const scatter_record &srec,
+                                 const Ray &scattered) const {
+  float cosine = dot(rec.normal, unit_vector(scattered.direction()));
+  if (cosine < 0.0f)
+    return 0.0f;
 
   // 返回 BRDF * cos(theta) = (color / PI) * cos
-  return color * (cosine / tracer::math::TRACER_PI);
+  return cosine / tracer::math::TRACER_PI;
 }
 
 } // namespace material

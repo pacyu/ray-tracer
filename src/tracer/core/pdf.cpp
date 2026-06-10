@@ -13,19 +13,18 @@ Vec3 Cosine_pdf::generate() const {
   return uvw.local(math::random_cosine_direction());
 }
 
-Mixture_pdf::Mixture_pdf(const PDF *p0, const PDF *p1) {
-  p[0] = p0;
-  p[1] = p1;
-}
+Mixture_pdf::Mixture_pdf(const PDF *p0, const PDF *p1, float blend)
+    : p{p0, p1}, blend(std::clamp(blend, 0.0f, 1.0f)) {}
 
 float Mixture_pdf::value(const Vec3 &direction) const {
   if (!p[0] || !p[1])
     return 0.0f;
-  return 0.5f * p[0]->value(direction) + 0.5f * p[1]->value(direction);
+  return blend * p[0]->value(direction) +
+         (1.0f - blend) * p[1]->value(direction);
 }
 
 Vec3 Mixture_pdf::generate() const {
-  if (math::random_float() < 0.5f)
+  if (math::random_float() < blend)
     return p[0]->generate();
   else
     return p[1]->generate();
@@ -90,6 +89,81 @@ Vec3 GGX_pdf::generate() const {
 
   // 根据视线 v 和微表面法线 h 得到反射方向 l
   return tracer::optics::reflect(-v, h);
+}
+
+Charlie_pdf::Charlie_pdf(const Vec3 &normal, const Vec3 &view, float roughness,
+                         const Vec3 &tangent, const Vec3 &bitangent)
+    : n(normal), v(view), alpha(roughness), T(tangent), B(bitangent) {
+  // 确保粗糙度有效
+  alpha = std::max(alpha, 0.01f);
+}
+
+Vec3 Charlie_pdf::generate() const {
+  // 1. 采样半程向量 h 的分布（Charlie 各向同性分布）
+  //    PDF of h: p_h(h) = (2 + 1/alpha) * (sinθ_h)^(1/alpha) / (2π)
+  //    转换为 θ_h 和 φ 采样：
+  float phi = 2.0f * math::TRACER_PI * math::random_float();
+  float sin_phi = std::sin(phi);
+  float cos_phi = std::cos(phi);
+
+  // 采样 sinθ_h: 令 u = sinθ_h^(1/alpha + 1), 则 sinθ_h = u^(alpha/(alpha+1))
+  float inv_alpha = 1.0f / alpha;
+  float exponent = 1.0f / (inv_alpha + 1.0f); // = alpha/(alpha+1)
+  float sin_theta = std::pow(math::random_float(), exponent);
+  float cos_theta = std::sqrt(1.0f - sin_theta * sin_theta);
+
+  // 局部坐标系中的半程向量 h_local
+  Vec3 h_local(sin_theta * cos_phi, sin_theta * sin_phi, cos_theta);
+
+  // 2. 将 h_local 转换到世界空间 (T, B, N)
+  Vec3 h_world = h_local.x() * T + h_local.y() * B + h_local.z() * n;
+  h_world = normalize(h_world);
+
+  // 3. 根据微表面理论: 反射方向 l = 2*(v·h)h - v
+  float v_dot_h = dot(v, h_world);
+  if (v_dot_h <= 0.0f) {
+    // 视线与半程向量背向，退化处理（返回镜面反射方向）
+    return normalize(2.0f * dot(v, n) * n - v);
+  }
+  Vec3 l_world = 2.0f * v_dot_h * h_world - v;
+  if (dot(l_world, n) <= 0.0f) {
+    // 若方向朝下，对称翻转到半球上方
+    l_world = -l_world;
+  }
+  return normalize(l_world);
+}
+
+float Charlie_pdf::value(const Vec3 &direction) const {
+  // 方向必须指向外半球
+  if (dot(direction, n) <= 0.0f)
+    return 0.0f;
+
+  // 根据微表面映射关系：给定 l，求出半程向量 h = normalize(v + l)
+  Vec3 l = normalize(direction);
+  Vec3 h = normalize(v + l);
+  float v_dot_h = dot(v, h);
+  if (v_dot_h <= 0.0f)
+    return 0.0f;
+
+  // 计算 h 的局部坐标 (相对于 N)
+  Vec3 h_local(dot(h, T), dot(h, B), dot(h, n));
+  float sin_theta_h_sq = h_local.x() * h_local.x() + h_local.y() * h_local.y();
+  float sin_theta_h = std::sqrt(sin_theta_h_sq);
+  float cos_theta_h = std::abs(h_local.z());
+
+  if (sin_theta_h < 1e-6f)
+    sin_theta_h = 1e-6f;
+
+  // 计算 p_h(h) = (2 + 1/alpha) * (sinθ_h)^(1/alpha) / (2π)
+  float inv_alpha = 1.0f / alpha;
+  float p_h = (2.0f + inv_alpha) * std::pow(sin_theta_h, inv_alpha) /
+              (2.0f * math::TRACER_PI);
+
+  // 变换雅可比: p(l) = p(h) / (4 * |v·h|)
+  float p_l = p_h / (4.0f * v_dot_h);
+  if (p_l < 1e-6f)
+    p_l = 1e-6f;
+  return p_l;
 }
 
 } // namespace tracer
