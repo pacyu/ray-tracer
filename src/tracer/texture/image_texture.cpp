@@ -11,8 +11,8 @@ ImageTexture::ImageTexture(const char *filepath) {
     width = 0;
     height = 0;
   } else {
-    width = image.cols;
-    height = image.rows;
+    width = image.cols - 1;
+    height = image.rows - 1;
     std::cout << "成功加载纹理: " << filepath << " [" << width << "x" << height
               << "]" << std::endl;
   }
@@ -25,19 +25,31 @@ Color ImageTexture::value(float u, float v, const Point3 &p) const {
   u = std::clamp(u, 0.0f, 1.0f);
   v = 1.0f - std::clamp(v, 0.0f, 1.0f);
 
-  int i = int(u * width);
-  int j = int(v * height);
+  float uf = u * width;
+  float vf = v * height;
 
-  if (i >= width)
-    i = width - 1;
-  if (j >= height)
-    j = height - 1;
+  int i0 = static_cast<int>(uf);
+  int j0 = static_cast<int>(vf);
+  int i1 = std::min(i0 + 1, width);
+  int j1 = std::min(j0 + 1, height);
 
-  cv::Vec3b pixel = image.at<cv::Vec3b>(j, i);
+  float du = uf - i0;
+  float dv = vf - j0;
 
-  float color_scale = 1.0f / 255.0f;
-  return Color(color_scale * pixel[2], color_scale * pixel[1],
-               color_scale * pixel[0]);
+  // 获取双线性插值后的颜色
+  auto get_pixel = [&](int x, int y) {
+    cv::Vec3b b = image.at<cv::Vec3b>(y, x);
+    return Color(b[2] / 255.0f, b[1] / 255.0f, b[0] / 255.0f);
+  };
+
+  Color c00 = get_pixel(i0, j0);
+  Color c10 = get_pixel(i1, j0);
+  Color c01 = get_pixel(i0, j1);
+  Color c11 = get_pixel(i1, j1);
+
+  Color color = (1 - du) * (1 - dv) * c00 + du * (1 - dv) * c10 +
+                (1 - du) * dv * c01 + du * dv * c11;
+  return color;
 }
 
 } // namespace texture

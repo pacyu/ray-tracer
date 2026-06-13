@@ -29,8 +29,9 @@ Color PhysicalSky::value(const Ray &r) const {
   return base_sky + sun_glare;
 }
 
-ImageBackground::ImageBackground(const std::string &filepath) {
-  // 读取全景图（建议使用高分辨率的云空全景图）
+ImageBackground::ImageBackground(const std::string &filepath,
+                                 const Vec3 &forward, const Vec3 &vup)
+    : forward(forward), vup(vup) {
   img = cv::imread(filepath, cv::IMREAD_ANYDEPTH | cv::IMREAD_COLOR);
   if (img.empty()) {
     std::cerr << "无法加载背景图片: " << filepath << "，切换至纯黑背景。"
@@ -38,37 +39,49 @@ ImageBackground::ImageBackground(const std::string &filepath) {
     width = 0;
     height = 0;
   } else {
-    width = img.cols;
-    height = img.rows;
+    width = img.cols - 1;
+    height = img.rows - 1;
     std::cout << "成功加载HDR: " << filepath << " [" << width << "x" << height
               << "]" << std::endl;
   }
+
+  // 构建正交基 (Orthonormal Basis)
+  right = unit_vector(cross(forward, vup)); // 右方向
+  up = cross(right, forward);
 }
 
-Color ImageBackground::value(const Ray &r) const {
+Color ImageBackground::value(const Ray &r_in) const {
   if (img.empty())
     return Color(0, 0, 0);
 
-  Vec3 d = unit_vector(r.direction());
-  float phi = std::atan2(d.y(), d.x());
-  float theta = std::acos(std::clamp(d.z(), -1.0f, 1.0f));
+  Vec3 d = unit_vector(r_in.direction());
 
+  Vec3 local_d = Vec3(dot(d, right), dot(d, forward), dot(d, up));
+  float phi = std::atan2(-local_d.y(), local_d.x());
+  float theta = std::acos(std::clamp(local_d.z(), -1.0f, 1.0f));
+
+  float rotation_offset = 0.35f;
   float u = (phi + math::TRACER_PI) / (2.0f * math::TRACER_PI);
   float v = theta / math::TRACER_PI;
+  u = fmod(u + rotation_offset, 1.0f);
 
-  float uf = u * (width - 1);
-  float vf = v * (height - 1);
+  float uf = u * width;
+  float vf = v * height;
   int i = static_cast<int>(uf);
   int j = static_cast<int>(vf);
   float du = uf - i;
   float dv = vf - j;
 
   auto get_pixel = [&](int x, int y) {
-    x = std::clamp(x, 0, width - 1);
-    y = std::clamp(y, 0, height - 1);
-    cv::Vec3f bgr = img.at<cv::Vec3f>(y, x);
-    // 关键：线性化处理 (Gamma 2.2 还原)
-    return Color(bgr[2], bgr[1], bgr[0]);
+    x = std::clamp(x, 0, width);
+    y = std::clamp(y, 0, height);
+    if (img.depth() == CV_32F) {
+      cv::Vec3f bgr = img.at<cv::Vec3f>(y, x);
+      return Color(bgr[2], bgr[1], bgr[0]);
+    } else {
+      cv::Vec3b bgr = img.at<cv::Vec3b>(y, x);
+      return Color(bgr[2] / 255.0f, bgr[1] / 255.0f, bgr[0] / 255.0f);
+    }
   };
 
   Color c00 = get_pixel(i, j);

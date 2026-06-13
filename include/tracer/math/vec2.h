@@ -8,13 +8,13 @@ struct Vec2 {
 
   float e[2] = {0.0f, 0.0f};
 
-  float x() { return e[0]; }
+  const float x() const { return e[0]; }
 
-  float y() { return e[1]; }
+  const float y() const { return e[1]; }
 };
 
 inline Vec2 operator+(const Vec2 &v1, const Vec2 &v2) {
-  return Vec2(v1.e[0] + v2.e[0], v1.e[1] * v2.e[1]);
+  return Vec2(v1.e[0] + v2.e[0], v1.e[1] + v2.e[1]);
 }
 
 inline Vec2 operator*(float t, const Vec2 &v) {

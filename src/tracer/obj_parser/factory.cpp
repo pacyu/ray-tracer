@@ -80,6 +80,7 @@ void Object::builder() {
     float spec_brightness =
         0.2126f * param.Ks[0] + 0.7152f * param.Ks[1] + 0.0722f * param.Ks[2];
     float metallic = std::clamp(spec_brightness, 0.0f, 1.0f);
+    
     // 不透明度 alpha：优先使用 d，否则用 1-Tr
     float alpha = 1.0f;
     if (param.d != 1.0f)
@@ -131,7 +132,6 @@ void Object::builder() {
     }
 
     // 自发光 emissive
-  
     if (!param.map_Ke.empty()) {
       mat->emissive_map = std::make_shared<texture::ImageTexture>(
           (dir + "/" + param.map_Ke).c_str());
@@ -220,6 +220,8 @@ void Object::builder() {
             vertices[vertex_index],
             normal_index < normals.size() ? normals[normal_index]
                                           : Vec3(0.0f, 0.0f, 1.0f),
+            Vec3(0, 0, 0),
+            Vec3(0, 0, 0),
             texture_index < texture_coords.size()
                 ? texture_coords[texture_index]
                 : Vec2(),

@@ -36,13 +36,13 @@ float schlick(float cosine, float ref_idx) {
   return r0 + (1.f - r0) * std::pow((1.f - cosine), 5.f);
 }
 
-float D_GGX(float NoH, float alpha) {
+float distribution_ggx(float NoH, float alpha) {
   float a2 = alpha * alpha;
   float denom = NoH * NoH * (a2 - 1.0f) + 1.0f;
   return a2 / (tracer::math::TRACER_PI * denom * denom);
 }
 
-float G_Smith(float NoV, float NoL, float alpha) {
+float geometry_smith(float NoV, float NoL, float alpha) {
   float k = alpha * 0.5f;
   float g1 = NoV / (NoV * (1 - k) + k);
   float g2 = NoL / (NoL * (1 - k) + k);
@@ -55,6 +55,11 @@ float fresnel_schlick(float cos_theta, float etai, float etat) {
 
   // Schlick 近似
   return r0 + (1.0f - r0) * std::pow(1.0f - cos_theta, 5.0f);
+}
+
+Vec3 fresnel_schlick(float cos_theta, Vec3 F0) {
+  return F0 + (Vec3(1.0f, 1.0f, 1.0f) - F0) *
+                  std::pow(std::clamp(1.0f - cos_theta, 0.0f, 1.0f), 5.0f);
 }
 
 } // namespace optics

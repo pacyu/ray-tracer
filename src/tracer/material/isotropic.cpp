@@ -6,7 +6,7 @@ namespace material {
 bool Isotropic::scatter(const Ray &r_in, const hit_record &rec,
                         scatter_record &srec) const {
   srec.attenuation = tex->value(rec.u, rec.v, rec.p);
-  srec.pdf_ptr = std::make_unique<Sphere_pdf>();
+  srec.pdf_ptr = std::make_shared<Sphere_pdf>();
   srec.is_specular = false;
   return true;
 }

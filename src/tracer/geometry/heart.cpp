@@ -132,14 +132,17 @@ float Heart::pdf_value(const Point3 &o, const Vec3 &v) const {
 }
 
 Vec3 Heart::random(const Point3 &o) const {
-  Vec3 direction = center - o;
-  auto distance_squared = direction.squared_length();
+  float r1 = math::random_float();
+  float r2 = math::random_float();
+  float z = 1.0f - 2.0f * r1;
+  float phi = 2.0f * math::TRACER_PI * r2;
+  float r = sqrt(std::max(0.0f, 1.0f - z * z));
+  float x = cos(phi) * r;
+  float y = sin(phi) * r;
 
-  // 构建正交基用于生成球面上随机点
-  // 这里简化处理：直接在心形的“包围球”内采样
   float radius = rho * 1.5f;
-
-  return tracer::math::random_to_sphere(radius, distance_squared);
+  // 返回心形中心附近的表面点坐标
+  return center + radius * Vec3(x, y, z);
 }
 
 } // namespace geometry

@@ -11,19 +11,13 @@ int main() {
   const int image_height = 600;
   const int samples_per_pixel = 128;
   const int max_depth = 8;
-  Vec3 lookfrom(0.0f, 150.0f, 50.0f);
+  Vec3 lookfrom(0.0f, 250.0f, 50.0f);
   Vec3 lookat(0.0f, 0.0f, 2.0f);
   Vec3 vup(0.0f, 0.0f, 1.0f);
+  Vec3 forward = unit_vector(lookat - lookfrom);
 
   std::shared_ptr<Background> background = std::make_shared<ImageBackground>(
-      "../textures/autumn_field_puresky_4k.hdr");
-
-  auto water_mat = std::make_shared<material::Water>(1.333f, 0.05f);
-  //   auto water_mat =
-  //       std::make_shared<material::Metal>(Vec3(0.5294f, 0.8078f, 0.9216f),
-  //       0.8f);
-  auto sun_mat =
-      std::make_shared<material::DiffuseLight>(Vec3(15.0f, 15.0f, 15.0f));
+      "../textures/autumn_field_puresky_4k.hdr", forward, vup);
 
   physics::OceanParams params;
   params.N = 1024;                                // 分辨率
@@ -37,6 +31,10 @@ int main() {
             << " 离线海浪网格... " << std::endl;
   auto start_time = std::chrono::high_resolution_clock::now();
 
+  auto water_mat = std::make_shared<material::Water>(1.333f, 0.05f);
+  //   auto water_mat =
+  //       std::make_shared<material::Metal>(Vec3(0.5294f, 0.8078f, 0.9216f),
+  //       0.8f);
   auto ocean =
       std::make_shared<geometry::Ocean>(&*fft_solver, water_mat, 12.0f, 60.0f);
   ocean->update_at_time(0.0f);
@@ -50,15 +48,25 @@ int main() {
             << " s" << std::endl;
 
   hittable_list world, lights;
+
   auto sea_floor_mat =
       std::make_shared<material::Lambertian>(Vec3(0.01f, 0.01f, 0.02f));
-  auto light = std::make_shared<geometry::Sphere>(Vec3(0.0f, 0.0f, 1000.0f),
-                                                  30.0f, sun_mat);
+  auto sun_mat =
+      std::make_shared<material::DiffuseLight>(Vec3(15.0f, 15.0f, 15.0f));
+  auto light = std::make_shared<geometry::Sphere>(Vec3(0.0f, -3000.0f, 1000.0f),
+                                                  300.0f, sun_mat);
+  //   auto glow_mat =
+  //       std::make_shared<material::SunGlow>(Vec3(1.0f, 0.9f,
+  //       0.7f), 15.0f, 5.0f);
+  //   auto light_glow_shell = std::make_shared<geometry::Sphere>(
+  //       Vec3(0.0f, -3000.0f, 1000.0f), 450.0f, glow_mat);
+
   lights.add(light);
-  world.add(light);
+  //   world.add(light);
+  //   world.add(light_glow_shell);
   world.add(ocean);
   world.add(std::make_shared<geometry::XYRect>(
-      -1000.0f, 1000.0f, -1000.0f, 1000.0f, -180.0f, sea_floor_mat));
+      -1000.0f, 1000.0f, -1000.0f, 1000.0f, -500.0f, sea_floor_mat));
 
   BVH bvh(world);
 

@@ -7,7 +7,7 @@ bool Lambertian::scatter(const Ray &r, const hit_record &rec,
                          scatter_record &srec) const {
   srec.is_specular = false;
   srec.attenuation = albedo->value(rec.u, rec.v, rec.p);
-  srec.pdf_ptr = std::make_unique<Cosine_pdf>(Cosine_pdf(rec.normal));
+  srec.pdf_ptr = std::make_shared<Cosine_pdf>(rec.normal);
   return true;
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "tracer/core/hittable.h"
-#include "tracer/math/math.h"
 #include "tracer/core/onb.h"
+#include "tracer/math/math.h"
 #include "tracer/math/optics.h"
 #include "tracer/math/sampling.h"
 
@@ -29,14 +29,15 @@ public:
 
 class Mixture_pdf : public PDF {
 public:
-  Mixture_pdf(const PDF *p0, const PDF *p1, float blend);
+  Mixture_pdf(std::shared_ptr<PDF> p0, std::shared_ptr<PDF> p1);
+  Mixture_pdf(std::shared_ptr<PDF> p0, std::shared_ptr<PDF> p1, float blend);
 
   virtual float value(const Vec3 &direction) const override;
 
   virtual Vec3 generate() const override;
 
 public:
-  const PDF *p[2];
+  std::shared_ptr<PDF> p0, p1;
   float blend;
 };
 

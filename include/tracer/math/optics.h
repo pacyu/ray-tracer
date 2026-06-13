@@ -13,11 +13,13 @@ bool refract(const Vec3 &v, const Vec3 &n, float ni_over_nt, Vec3 &refracted);
 
 float schlick(float cosine, float ref_idx);
 
-float D_GGX(float NoH, float alpha);
+float distribution_ggx(float NoH, float alpha);
 
-float G_Smith(float NoV, float NoL, float alpha);
+float geometry_smith(float NoV, float NoL, float alpha);
 
 float fresnel_schlick(float cos_theta, float etai, float etat);
+
+Vec3 fresnel_schlick(float cos_theta, Vec3 F0);
 
 } // namespace optics
 } // namespace tracer

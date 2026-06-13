@@ -45,4 +45,9 @@ int AABB::max_extent() const {
   return 2;
 }
 
+float AABB::surface_area() const {
+  Vec3 d = max - min;
+  return 2.0f * (d.x() * d.y() + d.x() * d.z() + d.y() * d.z());
+}
+
 } // namespace tracer

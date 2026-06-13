@@ -37,6 +37,11 @@ if(NOT FFTW3f_FOUND)
     )
 endif()
 find_package(OpenMP REQUIRED)
+if(MSVC AND TARGET OpenMP::OpenMP_CXX)
+    set_target_properties(OpenMP::OpenMP_CXX PROPERTIES
+        INTERFACE_COMPILE_OPTIONS "/openmp:llvm"
+    )
+endif()
 find_package(OpenCV REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)

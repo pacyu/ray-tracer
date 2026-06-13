@@ -14,7 +14,7 @@ struct scatter_record {
   Ray specular_ray;
   bool is_specular;
   Color attenuation;
-  std::unique_ptr<PDF> pdf_ptr;
+  std::shared_ptr<PDF> pdf_ptr;
 };
 
 class Material {

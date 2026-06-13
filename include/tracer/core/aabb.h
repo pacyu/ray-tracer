@@ -9,6 +9,7 @@ public:
   AABB(const Point3 &a, const Point3 &b) : min(a), max(b) {}
 
   bool hit(const Ray &r, float tmin, float tmax) const;
+  
   static AABB surrounding_box(AABB box0, AABB box1);
 
   void expand(const Vec3 &point);
@@ -16,6 +17,8 @@ public:
   void expand(const AABB &box);
 
   int max_extent() const;
+
+  float surface_area() const;
 
   Point3 min, max;
 };

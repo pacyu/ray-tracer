@@ -14,16 +14,15 @@ float XYRect::pdf_value(const Point3 &origin, const Vec3 &v) const {
     return 0;
 
   auto area = (x1 - x0) * (y1 - y0);
-  auto distance_squared = rec.t * rec.t * v.squared_length();
-  auto cosine = fabs(dot(v, rec.normal) / v.length());
+  auto distance_squared = rec.t * rec.t;
+  auto cosine = fabs(dot(v, rec.normal));
 
   return distance_squared / (cosine * area);
 }
 
 Vec3 XYRect::random(const Point3 &origin) const {
-  auto random_point = Point3(tracer::math::random_float(x0, x1),
-                             tracer::math::random_float(y0, y1), k);
-  return random_point - origin;
+  return Point3(tracer::math::random_float(x0, x1),
+                tracer::math::random_float(y0, y1), k);
 }
 
 bool XYRect::hit(const Ray &r, float t0, float t1, hit_record &rec) const {
@@ -37,7 +36,7 @@ bool XYRect::hit(const Ray &r, float t0, float t1, hit_record &rec) const {
   rec.u = (x - x0) / (x1 - x0);
   rec.v = (y - y0) / (y1 - y0);
   rec.t = t;
-  rec.set_face_normal(r, Vec3(0, 0, 1));
+  rec.set_face_normal(r, is_flipped ? Vec3(0, 0, -1) : Vec3(0, 0, 1));
   rec.mat_ptr = mat_ptr;
   rec.p = r.at(t);
   rec.tangent = Vec3(1, 0, 0);
@@ -56,16 +55,15 @@ float XZRect::pdf_value(const Point3 &origin, const Vec3 &v) const {
     return 0;
 
   auto area = (x1 - x0) * (z1 - z0);
-  auto distance_squared = rec.t * rec.t * v.squared_length();
-  auto cosine = fabs(dot(v, rec.normal) / v.length());
+  auto distance_squared = rec.t * rec.t;
+  auto cosine = fabs(dot(v, rec.normal));
 
   return distance_squared / (cosine * area);
 }
 
 Vec3 XZRect::random(const Point3 &origin) const {
-  auto random_point = Point3(tracer::math::random_float(x0, x1), k,
-                             tracer::math::random_float(z0, z1));
-  return random_point - origin;
+  return Point3(tracer::math::random_float(x0, x1), k,
+                tracer::math::random_float(z0, z1));
 }
 
 bool XZRect::hit(const Ray &r, float t0, float t1, hit_record &rec) const {
@@ -79,7 +77,7 @@ bool XZRect::hit(const Ray &r, float t0, float t1, hit_record &rec) const {
   rec.u = (x - x0) / (x1 - x0);
   rec.v = (z - z0) / (z1 - z0);
   rec.t = t;
-  rec.set_face_normal(r, Vec3(0, 1, 0));
+  rec.set_face_normal(r, is_flipped ? Vec3(0, -1, 0) : Vec3(0, 1, 0));
   rec.mat_ptr = mat_ptr;
   rec.p = r.at(t);
   rec.tangent = Vec3(1, 0, 0);
@@ -98,16 +96,15 @@ float YZRect::pdf_value(const Point3 &origin, const Vec3 &v) const {
     return 0;
 
   auto area = (y1 - y0) * (z1 - z0);
-  auto distance_squared = rec.t * rec.t * v.squared_length();
-  auto cosine = fabs(dot(v, rec.normal) / v.length());
+  auto distance_squared = rec.t * rec.t;
+  auto cosine = fabs(dot(v, rec.normal));
 
   return distance_squared / (cosine * area);
 }
 
 Vec3 YZRect::random(const Point3 &origin) const {
-  auto random_point = Point3(k, tracer::math::random_float(y0, y1),
-                             tracer::math::random_float(z0, z1));
-  return random_point - origin;
+  return Point3(k, tracer::math::random_float(y0, y1),
+                tracer::math::random_float(z0, z1));
 }
 
 bool YZRect::hit(const Ray &r, float t0, float t1, hit_record &rec) const {
@@ -121,7 +118,7 @@ bool YZRect::hit(const Ray &r, float t0, float t1, hit_record &rec) const {
   rec.u = (y - y0) / (y1 - y0);
   rec.v = (z - z0) / (z1 - z0);
   rec.t = t;
-  rec.set_face_normal(r, Vec3(1, 0, 0));
+  rec.set_face_normal(r, is_flipped ? Vec3(-1, 0, 0) : Vec3(1, 0, 0));
   rec.mat_ptr = mat_ptr;
   rec.p = r.at(t);
   rec.tangent = Vec3(0, 1, 0);

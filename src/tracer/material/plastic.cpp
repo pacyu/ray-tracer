@@ -25,7 +25,7 @@ bool Plastic::scatter(const Ray &r_in, const hit_record &rec,
     // 基底漫反射 (Diffuse/Base)
     srec.is_specular = false;
     srec.attenuation = albedo->value(rec.u, rec.v, rec.p);
-    srec.pdf_ptr = std::make_unique<Cosine_pdf>(rec.normal);
+    srec.pdf_ptr = std::make_shared<Cosine_pdf>(rec.normal);
   }
   return true;
 }

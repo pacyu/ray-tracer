@@ -58,10 +58,11 @@ Ray Camera::get_ray(float u, float v) const {
 }
 
 void Camera::render(const hittable &world, const hittable &lights,
-                    bool visual_bvh) {
+                    bool visual_bvh = false) {
   cv::Mat img = cv::Mat::zeros(cv::Size(image_width, image_height), CV_8UC3);
 
   auto start = std::chrono::steady_clock::now();
+  int completed_rows = 0;
 
 #pragma omp parallel for schedule(dynamic, 1)
   for (int j = image_height - 1; j >= 0; --j) {
@@ -83,8 +84,7 @@ void Camera::render(const hittable &world, const hittable &lights,
           float heat = static_cast<float>(r.bvh_hit_count) / 50.0f;
           pixel += Color(heat, 0.0f, 0.0f); // R 红色通道代表热力
         } else {
-          pixel +=
-              ray_color(r, std::move(background), world, lights, max_depth);
+          pixel += ray_color(r, background, world, lights, max_depth);
         }
       }
       pixel /= static_cast<float>(samples_per_pixel);
@@ -113,13 +113,25 @@ void Camera::render(const hittable &world, const hittable &lights,
                     static_cast<uchar>(256 * std::clamp(g, 0.f, 0.999f)),
                     static_cast<uchar>(256 * std::clamp(r, 0.f, 0.999f)));
     }
-    if (omp_get_thread_num() == 0 && j % 10 == 0) {
-      auto now = std::chrono::steady_clock::now();
-      std::chrono::duration<float> elapsed = now - start;
-      float progress = (float)(image_height - j) / image_height;
-      float remaining = (elapsed.count() / progress) - elapsed.count();
-      printf("\r渲染进度: %.2f%% | 已用时间: %.1fs | 预计剩余: %.1fs    ",
-             progress * 100, elapsed.count(), remaining);
+
+    int local_completed;
+#pragma omp atomic capture
+    {
+      completed_rows++;
+      local_completed = completed_rows;
+    }
+
+    if (local_completed % 2 == 0 || local_completed == image_height) {
+#pragma omp critical
+      {
+        auto now = std::chrono::steady_clock::now();
+        std::chrono::duration<float> elapsed = now - start;
+        float progress = (float)local_completed / image_height;
+        float remaining = (elapsed.count() / progress) - elapsed.count();
+        printf("\r渲染进度: %.2f%% | 已用时间: %.1fs | 预计剩余: %.1fs  ",
+               progress * 100, elapsed.count(),
+               remaining > 0.0f ? remaining : 0.0f);
+      }
     }
   }
   printf("\n");
@@ -131,7 +143,7 @@ Color Camera::ray_color(const Ray &r,
                         const hittable &world, const hittable &lights,
                         int depth) {
   if (depth <= 0)
-    return Color(0, 0, 0);
+    return Color(0.0f, 0.0f, 0.0f);
 
   hit_record rec;
   bool hit_surface = world.hit(r, 0.001f, tracer::math::INF, rec);
@@ -147,15 +159,19 @@ Color Camera::ray_color(const Ray &r,
     return emitted;
 
   if (srec.is_specular) {
-    return srec.attenuation *
-           ray_color(srec.specular_ray, background, world, lights, depth - 1);
+    return emitted + srec.attenuation * ray_color(srec.specular_ray, background,
+                                                  world, lights, depth - 1);
   }
 
-  Hittable_pdf light_ptr = Hittable_pdf(lights, rec.p);
-  Mixture_pdf p(&light_ptr, srec.pdf_ptr.get(), 0.5f);
+  std::shared_ptr<Hittable_pdf> light_ptr =
+      std::make_shared<Hittable_pdf>(lights, rec.p);
+  Mixture_pdf p(light_ptr, srec.pdf_ptr);
 
   Ray scattered = Ray(rec.p, p.generate());
   float pdf_val = p.value(scattered.direction());
+  if (pdf_val < 1e-4f || std::isnan(pdf_val) || std::isinf(pdf_val)) {
+    return emitted;
+  }
 
   return emitted +
          srec.attenuation *

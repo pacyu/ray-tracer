@@ -8,11 +8,13 @@ int main() {
   const int image_height = 600;
   const int samples_per_pixel = 128;
   const int max_depth = 50;
-  std::shared_ptr<Background> background = std::make_shared<ImageBackground>(
-      "../textures/kloppenheim_07_puresky_4k.hdr");
   Vec3 lookfrom(1000.0f, 1000.0f, 50.0f);
   Vec3 lookat(0.0f, 0.0f, 2.0f);
   Vec3 vup(0.0f, 0.0f, 1.0f);
+  Vec3 forward = unit_vector(lookat - lookfrom);
+
+  std::shared_ptr<Background> background = std::make_shared<ImageBackground>(
+      "../textures/kloppenheim_07_puresky_4k.hdr", forward, vup);
 
   auto sun = std::make_shared<material::DiffuseLight>(Vec3(15.f, 15.f, 15.f));
   auto sun_sphere = std::make_shared<geometry::Sphere>(

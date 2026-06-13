@@ -33,7 +33,6 @@ bool StandardMaterial::scatter(const Ray &r_in, const hit_record &rec,
     Vec3 tn = normal_map->value(rec.u, rec.v, rec.p);
     tn = 2.0f * tn - Vec3(1.0f, 1.0f, 1.0f);
     tn = normalize(tn);
-    // 需要 rec.tangent, rec.bitangent 提前计算
     hit_normal = normalize(tn.x() * rec.tangent + tn.y() * rec.bitangent +
                            tn.z() * rec.normal);
   }
@@ -83,17 +82,15 @@ bool StandardMaterial::scatter(const Ray &r_in, const hit_record &rec,
     return true;
   }
 
-  // 漫反射 + 粗糙金属（混合 PDF
+  // 漫反射 + 粗糙金属（混合 PDF）
   srec.is_specular = false;
   srec.attenuation = current_albedo;
 
   Vec3 view_dir = normalize(-r_in.direction());
   auto ggx = std::make_shared<GGX_pdf>(hit_normal, view_dir, current_roughness);
   auto cosine = std::make_shared<Cosine_pdf>(hit_normal);
-
   float blend = std::clamp(current_metallic, 0.0f, 1.0f);
-
-  srec.pdf_ptr = std::make_unique<Mixture_pdf>(ggx.get(), cosine.get(), blend);
+  srec.pdf_ptr = std::make_shared<Mixture_pdf>(ggx, cosine, blend);
 
   return true;
 }
@@ -104,8 +101,7 @@ float StandardMaterial::scattering_pdf(const Ray &r_in, const hit_record &rec,
   if (srec.is_specular)
     return 0.0f;
   if (srec.pdf_ptr) {
-    float pdf_val = srec.pdf_ptr->value(scattered.direction());
-    return pdf_val;
+    return srec.pdf_ptr->value(scattered.direction());
   }
   return 0.0f;
 }

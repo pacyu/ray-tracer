@@ -11,9 +11,10 @@ int main() {
   Vec3 lookfrom(0.0f, 30.0f, 35.0f);
   Vec3 lookat(0.0f, 0.0f, 2.0f);
   Vec3 vup(0.0f, 0.0f, 1.0f);
+  Vec3 forward = unit_vector(lookat - lookfrom);
 
   std::shared_ptr<Background> background = std::make_shared<ImageBackground>(
-      "../textures/autumn_field_puresky_4k.hdr");
+      "../textures/autumn_field_puresky_4k.hdr", forward, vup);
 
   physics::OceanParams params;
   params.N = 256;                                 // 分辨率
@@ -23,9 +24,10 @@ int main() {
   params.wind_dir = physics::Complex(1.0f, 1.0f); // 顺着 X 轴吹的风
   auto fft_solver = std::make_unique<physics::FFTOcean>(params);
 
-  // auto water_mat = std::make_shared<Water>(1.333f, 0.05f);
-  auto water_mat =
-      std::make_shared<material::Metal>(Vec3(0.5294f, 0.8078f, 0.9216f), 0.8f);
+  auto water_mat = std::make_shared<material::Water>();
+  //   auto water_mat =
+  //       std::make_shared<material::Metal>(Vec3(0.5294f, 0.8078f, 0.9216f),
+  //       0.8f);
   auto sun_mat =
       std::make_shared<material::DiffuseLight>(Vec3(15.0f, 15.0f, 15.0f));
   auto light = std::make_shared<geometry::Sphere>(Vec3(0.0f, 0.0f, 1000.0f),

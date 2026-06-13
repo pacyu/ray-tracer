@@ -3,6 +3,233 @@
 namespace tracer {
 namespace geometry {
 
+namespace {
+
+constexpr int NUM_BUCKETS = 12;
+
+struct BucketInfo {
+  int count = 0;
+  AABB bounds;
+  bool initialized = false;
+
+  void safe_expand(const AABB &b) {
+    if (!initialized) {
+      bounds = b;
+      initialized = true;
+    } else {
+      bounds.expand(b);
+    }
+  }
+};
+
+struct BVHBuilder {
+  Mesh &mesh;
+  const std::vector<Vec3> &tri_centroids;
+
+  // 构造时直接绑定 Mesh 引用，内部函数可任意访问所有网格数据
+  BVHBuilder(Mesh &m, const std::vector<Vec3> &centroids)
+      : mesh(m), tri_centroids(centroids) {}
+
+  uint32_t build_recursive(uint32_t start, uint32_t end, int depth,
+                           uint32_t &node_count) {
+    uint32_t node_idx = node_count++;
+
+    uint32_t count = end - start;
+
+    // 阶段 A：计算当前节点包围盒
+    AABB bbox, centroid_bbox;
+    compute_bounds(start, end, bbox, centroid_bbox);
+    mesh.nodes[node_idx].bbox = bbox;
+
+    int axis = centroid_bbox.max_extent();
+    float max_axis_length = centroid_bbox.max[axis] - centroid_bbox.min[axis];
+
+    // 阶段 B：评估基础叶子节点终止条件
+    if (count <= 8 || max_axis_length < 1e-6f || depth > 48) {
+      return make_leaf_node(node_idx, start, count);
+    }
+
+    // 阶段 C：运行 Binned SAH 算法寻找最佳切分桶
+    int best_split_bucket = -1;
+    float min_cost =
+        evaluate_sah(start, end, axis, max_axis_length, centroid_bbox.min[axis],
+                     bbox, best_split_bucket);
+
+    // 阶段 D：SAH 代价守卫，如果不值得切分，强制做成叶子
+    if (count <= 4 && min_cost >= static_cast<float>(count)) {
+      return make_leaf_node(node_idx, start, count);
+    }
+
+    // 阶段 E：根据最优桶执行网格内存数据重排
+    uint32_t mid =
+        partition_triangles(start, end, axis, max_axis_length,
+                            centroid_bbox.min[axis], best_split_bucket);
+
+    // 阶段 F：递归左右子树
+    uint32_t left_child = build_recursive(start, mid, depth + 1, node_count);
+    uint32_t right_child = build_recursive(mid, end, depth + 1, node_count);
+
+    // 填充内部节点信息
+    mesh.nodes[node_idx].left = left_child;
+    mesh.nodes[node_idx].right = right_child;
+    mesh.nodes[node_idx].count = 0; // 0 表示内部节点
+    mesh.nodes[node_idx].axis = static_cast<uint32_t>(axis);
+
+    return node_idx;
+  }
+
+private:
+  void compute_bounds(uint32_t start, uint32_t end, AABB &bbox,
+                      AABB &centroid_bbox) {
+    uint32_t first_tri_idx = mesh.tri_indices[start];
+    const uint32_t *f_idx = &mesh.indices[first_tri_idx * 3];
+
+    bbox = AABB(mesh.vertices[f_idx[0]].vertex, mesh.vertices[f_idx[0]].vertex);
+    centroid_bbox =
+        AABB(tri_centroids[first_tri_idx], tri_centroids[first_tri_idx]);
+
+    for (uint32_t i = start; i < end; ++i) {
+      uint32_t tri_idx = mesh.tri_indices[i];
+      const uint32_t *idx = &mesh.indices[tri_idx * 3];
+      bbox.expand(mesh.vertices[idx[0]].vertex);
+      bbox.expand(mesh.vertices[idx[1]].vertex);
+      bbox.expand(mesh.vertices[idx[2]].vertex);
+      centroid_bbox.expand(tri_centroids[tri_idx]);
+    }
+  }
+
+  uint32_t make_leaf_node(uint32_t node_idx, uint32_t start, uint32_t count) {
+    mesh.nodes[node_idx].start = start;
+    mesh.nodes[node_idx].count = count;
+    mesh.nodes[node_idx].axis = 0;
+    return node_idx;
+  }
+
+  float evaluate_sah(uint32_t start, uint32_t end, int axis,
+                     float max_axis_length, float min_centroid_axis,
+                     const AABB &node_bbox, int &out_best_bucket) {
+    BucketInfo buckets[NUM_BUCKETS];
+
+    // 1. 填桶
+    for (uint32_t i = start; i < end; ++i) {
+      uint32_t tri_idx = mesh.tri_indices[i];
+      const uint32_t *idx = &mesh.indices[tri_idx * 3];
+
+      AABB tri_bounds(mesh.vertices[idx[0]].vertex,
+                      mesh.vertices[idx[0]].vertex);
+      tri_bounds.expand(mesh.vertices[idx[1]].vertex);
+      tri_bounds.expand(mesh.vertices[idx[2]].vertex);
+
+      float offset =
+          (tri_centroids[tri_idx][axis] - min_centroid_axis) / max_axis_length;
+      int b = static_cast<int>(offset * NUM_BUCKETS);
+      if (b == NUM_BUCKETS)
+        b = NUM_BUCKETS - 1;
+      if (b < 0)
+        b = 0; // 防御性激进安全机制
+
+      buckets[b].count++;
+      buckets[b].safe_expand(tri_bounds);
+    }
+
+    // 2. 完美的动态规划扫描（前缀和/后缀和优化，不仅准确而且极快）
+    AABB left_boxes[NUM_BUCKETS];
+    AABB right_boxes[NUM_BUCKETS];
+    int left_counts[NUM_BUCKETS];
+    int right_counts[NUM_BUCKETS];
+
+    // 正向扫描（左侧累加）
+    AABB current_left_box;
+    int current_left_count = 0;
+    bool left_init = false;
+    for (int i = 0; i < NUM_BUCKETS; ++i) {
+      if (buckets[i].initialized) {
+        if (!left_init) {
+          current_left_box = buckets[i].bounds;
+          left_init = true;
+        } else {
+          current_left_box.expand(buckets[i].bounds);
+        }
+        current_left_count += buckets[i].count;
+      }
+      left_boxes[i] = current_left_box;
+      left_counts[i] = current_left_count;
+    }
+
+    // 反向扫描（右侧累加）
+    AABB current_right_box;
+    int current_right_count = 0;
+    bool right_init = false;
+    for (int i = NUM_BUCKETS - 1; i >= 0; --i) {
+      if (buckets[i].initialized) {
+        if (!right_init) {
+          current_right_box = buckets[i].bounds;
+          right_init = true;
+        } else {
+          current_right_box.expand(buckets[i].bounds);
+        }
+        current_right_count += buckets[i].count;
+      }
+      right_boxes[i] = current_right_box;
+      right_counts[i] = current_right_count;
+    }
+
+    // 3. 计算各个划分面的最小代价
+    float min_cost = math::INF;
+    out_best_bucket = -1;
+    float inv_node_area = 1.0f / node_bbox.surface_area();
+
+    // NUM_BUCKETS 个桶共有 NUM_BUCKETS - 1 个划分面
+    for (int i = 0; i < NUM_BUCKETS - 1; ++i) {
+      if (left_counts[i] > 0 && right_counts[i + 1] > 0) {
+        // SAH 代价公式：Cost = 常数(通常是 traversal_cost=0.125 或 1.0) +
+        // (AL*NL + AR*NR) / A_total 这里采用经典的 PBRT 权重常数
+        float cost =
+            0.5f + (left_counts[i] * left_boxes[i].surface_area() +
+                    right_counts[i + 1] * right_boxes[i + 1].surface_area()) *
+                       inv_node_area;
+        if (cost < min_cost) {
+          min_cost = cost;
+          out_best_bucket = i;
+        }
+      }
+    }
+    return min_cost;
+  }
+
+  uint32_t partition_triangles(uint32_t start, uint32_t end, int axis,
+                               float max_axis_length, float min_centroid_axis,
+                               int best_split_bucket) {
+    auto mid_iter = std::partition(
+        mesh.tri_indices.begin() + start, mesh.tri_indices.begin() + end,
+        [&](uint32_t tri_idx) {
+          float offset = (tri_centroids[tri_idx][axis] - min_centroid_axis) /
+                         max_axis_length;
+          int b = static_cast<int>(offset * NUM_BUCKETS);
+          if (b == NUM_BUCKETS)
+            b = NUM_BUCKETS - 1;
+          return b <= best_split_bucket;
+        });
+
+    // 使用 std::distance 计算出来的 mid 是整个数组的绝对索引位置
+    uint32_t mid = static_cast<uint32_t>(
+        std::distance(mesh.tri_indices.begin(), mid_iter));
+
+    // 退化保护：如果划分失败（mid 触及了区间的两端），Fallback 到中位数对半切
+    if (mid <= start || mid >= end) {
+      mid = start + (end - start) / 2;
+      std::nth_element(
+          mesh.tri_indices.begin() + start, mesh.tri_indices.begin() + mid,
+          mesh.tri_indices.begin() + end, [&](uint32_t a, uint32_t b) {
+            return tri_centroids[a][axis] < tri_centroids[b][axis];
+          });
+    }
+    return mid;
+  }
+};
+
+} // namespace
+
 void Mesh::build_bvh() {
   size_t n = indices.size() / 3;
   tri_indices.resize(n);
@@ -17,68 +244,18 @@ void Mesh::build_bvh() {
   }
 
   nodes.clear();
-  nodes.reserve(2 * n);
+  nodes.resize(2 * n);
+  uint32_t node_count = 0;
 
-  auto build_recursive = [&](auto &self, uint32_t start,
-                             uint32_t end) -> uint32_t {
-    uint32_t node_idx = static_cast<uint32_t>(nodes.size());
-    nodes.emplace_back();
-
-    uint32_t count = end - start;
-    uint32_t first_tri_idx = tri_indices[start];
-    uint32_t f0 = indices[first_tri_idx * 3];
-
-    // 计算当前节点包围盒
-    AABB bbox(vertices[f0].vertex, vertices[f0].vertex);
-    AABB centroid_bbox(tri_centroids[first_tri_idx],
-                       tri_centroids[first_tri_idx]);
-
-    for (uint32_t i = start; i < end; ++i) {
-      uint32_t tri_idx = tri_indices[i];
-      bbox.expand(vertices[indices[tri_idx * 3]].vertex);
-      bbox.expand(vertices[indices[tri_idx * 3 + 1]].vertex);
-      bbox.expand(vertices[indices[tri_idx * 3 + 2]].vertex);
-      centroid_bbox.expand(tri_centroids[tri_idx]);
-    }
-
-    nodes[node_idx].bbox = bbox;
-    int axis = centroid_bbox.max_extent();
-    Vec3 extents = centroid_bbox.max - centroid_bbox.min;
-
-    float max_axis_length = extents[axis];
-
-    // 叶子节点设定
-    if (count <= 4 || max_axis_length < 1e-6f) {
-      nodes[node_idx].start = start;
-      nodes[node_idx].count = count;
-      nodes[node_idx].axis = 0;
-      return node_idx;
-    }
-
-    uint32_t mid = start + count / 2;
-
-    std::nth_element(tri_indices.begin() + start, tri_indices.begin() + mid,
-                     tri_indices.begin() + end, [&](uint32_t a, uint32_t b) {
-                       return tri_centroids[a][axis] < tri_centroids[b][axis];
-                     });
-
-    uint32_t left_child = self(self, start, mid);
-    uint32_t right_child = self(self, mid, end);
-
-    nodes[node_idx].left = left_child;
-    nodes[node_idx].right = right_child;
-    nodes[node_idx].count = 0; // 标记为内部节点
-    nodes[node_idx].axis = static_cast<uint32_t>(axis);
-
-    return node_idx;
-  };
-  build_recursive(build_recursive, 0, static_cast<uint32_t>(n));
+  BVHBuilder builder(*this, tri_centroids);
+  builder.build_recursive(0, static_cast<uint32_t>(n), 0, node_count);
+  nodes.resize(node_count);
 }
 
 bool Mesh::ray_triangle_intersect(const Ray &r, const Vec3 &v0, const Vec3 &v1,
                                   const Vec3 &v2, float &t, float &u,
                                   float &v) {
-  const float EPS = 1e-8f;
+  const float EPS = 1e-9f;
   Vec3 e1 = v1 - v0;
   Vec3 e2 = v2 - v0;
   Vec3 h = cross(r.direction(), e2);
@@ -104,7 +281,9 @@ bool Mesh::ray_triangle_intersect(const Ray &r, const Vec3 &v0, const Vec3 &v1,
 bool Mesh::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
   if (nodes.empty())
     return false;
-
+  // static std::atomic<long long> total_tri_tests{0};
+  // static std::atomic<long long> total_rays{0};
+  // total_rays++;
   uint32_t stack[64];
   uint32_t top = 0;
   stack[top++] = 0;
@@ -121,6 +300,7 @@ bool Mesh::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
       continue;
 
     if (node.count > 0) { // 叶子节点
+      // total_tri_tests += node.count;
       for (uint32_t i = node.start; i < node.start + node.count; ++i) {
         uint32_t tri_idx = tri_indices[i];
         float t, u, v;
@@ -148,7 +328,13 @@ bool Mesh::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
       }
     }
   }
-
+  // if (total_rays % 100000 == 0) {
+  //   float avg = (float)total_tri_tests / total_rays;
+  //   printf("Avg tris per ray: %.1f\n", avg);
+  //   std::cout << "[Ray Debug] Origin: " << r.origin().x()
+  //             << " Dir: " << r.direction().x() << " SceneBounds: ["
+  //             << bbox.min.x() << ", " << bbox.max.x() << "]" << std::endl;
+  // }
   if (hit_anything) {
     rec.t = t_max;
     rec.p = r.at(t_max);
@@ -168,12 +354,7 @@ bool Mesh::hit(const Ray &r, float t_min, float t_max, hit_record &rec) const {
 
     rec.tangent =
         normalize(w * v0.tangent + best_u * v1.tangent + best_v * v2.tangent);
-    rec.bitangent = normalize(w * v0.bitangent + best_u * v1.bitangent +
-                              best_v * v2.bitangent);
 
-    // 使用 Gram-Schmidt 使切线正交于法线
-    rec.tangent =
-        normalize(rec.tangent - dot(rec.tangent, rec.normal) * rec.normal);
     rec.bitangent = cross(rec.normal, rec.tangent);
 
     rec.triangle_idx = best_tri_idx;
@@ -205,17 +386,19 @@ float Mesh::pdf_value(const Vec3 &o, const Vec3 &v) const {
   if (!rec.mat_ptr)
     return 0.0f;
 
+  float area = rec.triangle_area;
   float cos_theta = fabs(dot(v, rec.normal));
+
   if (cos_theta < 1e-6f)
     return 0.0f;
 
   float d2 = rec.t * rec.t;
-  return d2 / (total_area * cos_theta);
+  return d2 / (area * cos_theta) * (1.0f / total_area);
 }
 
 Vec3 Mesh::random(const Vec3 &o) const {
   if (tri_cdf.empty() || total_area <= 0.0f)
-    return Vec3(0, 0, 1);
+    return Vec3(0.0f, 0.0f, 1.0f);
 
   float r = math::random_float() * total_area;
   auto it = std::upper_bound(tri_cdf.begin(), tri_cdf.end(), r);
@@ -232,8 +415,7 @@ Vec3 Mesh::random(const Vec3 &o) const {
   float v = r2 * sqrt_r1;
   float w = 1.0f - u - v;
 
-  Vec3 point = u * v0 + v * v1 + w * v2;
-  return normalize(point - o);
+  return u * v0 + v * v1 + w * v2;
 }
 
 void Mesh::compute_smooth_normals() {
@@ -258,13 +440,16 @@ void Mesh::compute_smooth_normals() {
 void Mesh::compute_tangents() {
   // 为每个顶点初始化切线和副切线为零
   std::vector<Vec3> tangents(vertices.size(), Vec3(0.0f, 0.0f, 0.0f));
-  std::vector<Vec3> bitangents(vertices.size(), Vec3(0.0f, 0.0f, 0.0f));
 
   // 遍历所有三角形
   for (uint32_t tri = 0; tri < indices.size(); tri += 3) {
-    const Vertex &v0 = vertices[indices[tri]];
-    const Vertex &v1 = vertices[indices[tri + 1]];
-    const Vertex &v2 = vertices[indices[tri + 2]];
+    uint32_t idx0 = indices[tri];
+    uint32_t idx1 = indices[tri + 1];
+    uint32_t idx2 = indices[tri + 2];
+
+    const Vertex &v0 = vertices[idx0];
+    const Vertex &v1 = vertices[idx1];
+    const Vertex &v2 = vertices[idx2];
 
     // 边向量
     Vec3 deltaPos1 = v1.vertex - v0.vertex;
@@ -274,34 +459,31 @@ void Mesh::compute_tangents() {
     Vec2 deltaUV1 = v1.tex_coord - v0.tex_coord;
     Vec2 deltaUV2 = v2.tex_coord - v0.tex_coord;
 
-    float r =
-        1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
+    float det = deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x();
+
+    if (std::abs(det) < 1e-8f)
+      continue;
+
+    float r = 1.0f / det;
     Vec3 tangent = (deltaPos1 * deltaUV2.y() - deltaPos2 * deltaUV1.y()) * r;
-    Vec3 bitangent = (deltaPos2 * deltaUV1.x() - deltaPos1 * deltaUV2.x()) * r;
 
     // 累加贡献到三个顶点
-    uint32_t idx0 = indices[tri];
-    uint32_t idx1 = indices[tri + 1];
-    uint32_t idx2 = indices[tri + 2];
     tangents[idx0] += tangent;
     tangents[idx1] += tangent;
     tangents[idx2] += tangent;
-    bitangents[idx0] += bitangent;
-    bitangents[idx1] += bitangent;
-    bitangents[idx2] += bitangent;
   }
 
   // 归一化并存储到 Vertex
   for (size_t i = 0; i < vertices.size(); ++i) {
-    vertices[i].tangent = normalize(tangents[i]);
-    // 重新正交化（Gram-Schmidt）以确保 tangent 垂直于 normal
-    vertices[i].tangent = normalize(
-        vertices[i].tangent -
-        dot(vertices[i].tangent, vertices[i].normal) * vertices[i].normal);
-    vertices[i].bitangent = normalize(bitangents[i]);
-    // 或者直接计算 bitangent = cross(normal, tangent)
-    // vertices[i].bitangent = normalize(cross(vertices[i].normal,
-    // vertices[i].tangent));
+    Vec3 n = vertices[i].normal;
+    Vec3 t = tangents[i];
+    if (t.squared_length() < 1e-12f) {
+      vertices[i].tangent = Vec3(1.0f, 0.0f, 0.0f); // 默认切线
+    } else {
+      // 重新正交化（Gram-Schmidt）以确保 tangent 垂直于 normal
+      vertices[i].tangent = normalize(t - dot(t, n) * n);
+    }
+    vertices[i].bitangent = normalize(cross(n, vertices[i].tangent));
   }
 }
 
@@ -335,6 +517,8 @@ void Mesh::finalize() {
   }
   bbox = AABB(min_p, max_p);
 
+  compute_smooth_normals();
+  compute_tangents();
   build_area_cdf();
   build_bvh();
 }

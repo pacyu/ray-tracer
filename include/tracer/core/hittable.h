@@ -33,17 +33,17 @@ public:
 
   virtual std::shared_ptr<Material> get_material() const { return nullptr; }
 
-  virtual float pdf_value(const Point3 &o, const Vec3 &v) const { return 0.0; }
+  virtual float pdf_value(const Point3 &o, const Vec3 &v) const { return 0.0f; }
 
-  virtual Vec3 random(const Vec3 &o) const { return Vec3(1, 0, 0); }
+  virtual Vec3 random(const Vec3 &o) const { return Vec3(1.0f, 0.0f, 0.0f); }
 
   virtual void refit(float t0, float t1) {}
 };
 
-class flip_face : public hittable {
+class FlipFace : public hittable {
 public:
-  flip_face() = default;
-  flip_face(std::shared_ptr<hittable> p) : ptr(p) {}
+  FlipFace() = default;
+  FlipFace(std::shared_ptr<hittable> p) : ptr(p) {}
 
   virtual bool hit(const Ray &r, float t_min, float t_max,
                    hit_record &rec) const override;

@@ -557,12 +557,14 @@ BasicType CameraNode::evaluate(std::shared_ptr<Environment> env) {
                spp.t_integer, depth.t_integer, name.t_string,
                std::make_shared<PhysicalSky>(bg.t_vector3), from.t_vector3,
                at.t_vector3, vup.t_vector3, fov.t_float));
-  else if (bg.tag == BasicType::T_STRING)
-    return BasicType(
-        Camera(shape.t_pair.first->t_integer, shape.t_pair.second->t_integer,
-               spp.t_integer, depth.t_integer, name.t_string,
-               std::make_shared<ImageBackground>(bg.t_string), from.t_vector3,
-               at.t_vector3, vup.t_vector3, fov.t_float));
+  else if (bg.tag == BasicType::T_STRING) {
+    Vec3 forward = unit_vector(at.t_vector3 - from.t_vector3);
+    return BasicType(Camera(
+        shape.t_pair.first->t_integer, shape.t_pair.second->t_integer,
+        spp.t_integer, depth.t_integer, name.t_string,
+        std::make_shared<ImageBackground>(bg.t_string, forward, vup.t_vector3),
+        from.t_vector3, at.t_vector3, vup.t_vector3, fov.t_float));
+  }
   return BasicType(Camera(shape.t_pair.first->t_integer,
                           shape.t_pair.second->t_integer, spp.t_integer,
                           depth.t_integer, name.t_string,

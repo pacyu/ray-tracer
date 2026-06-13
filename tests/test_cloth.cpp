@@ -7,12 +7,14 @@ int main() {
   const int image_width = 1200;
   const int image_height = 600;
   const int samples_per_pixel = 128;
-  const int max_depth = 50;
-  std::shared_ptr<Background> background = std::make_shared<ImageBackground>(
-      "../textures/kloppenheim_07_puresky_4k.hdr");
+  const int max_depth = 8;
   Vec3 lookfrom(100.0f, 100.0f, 20.0f);
   Vec3 lookat(0.0f, 0.0f, 0.0f);
   Vec3 vup(0.0f, 0.0f, 1.0f);
+  Vec3 forward = unit_vector(lookat - lookfrom);
+
+  std::shared_ptr<Background> background = std::make_shared<ImageBackground>(
+      "../textures/kloppenheim_07_puresky_4k.hdr", forward, vup);
 
   auto sun = std::make_shared<material::DiffuseLight>(Vec3(15.f, 15.f, 15.f));
   auto sun_sphere = std::make_shared<geometry::Sphere>(
@@ -21,7 +23,7 @@ int main() {
   auto cloth_mat =
       std::make_shared<material::Cloth>(Vec3(0.8f, 0.1f, 0.1f), 0.1f);
 
-  float r = 100.0f;
+  float r = 200.0f;
   float y0 = -(r - lookat.y()) / 2.0f;
   float y1 = -y0;
   float z0 = -(r - lookat.z()) / 2.0f;

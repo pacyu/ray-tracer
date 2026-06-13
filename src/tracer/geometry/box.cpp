@@ -8,17 +8,17 @@ Box::Box(const Point3 &p0, const Point3 &p1, std::shared_ptr<Material> mat_ptr)
   sides.add(std::make_shared<XYRect>(p0.x(), p1.x(), p0.y(), p1.y(), p1.z(),
                                      mat_ptr));
   sides.add(std::make_shared<XYRect>(p0.x(), p1.x(), p0.y(), p1.y(), p0.z(),
-                                     mat_ptr));
+                                     mat_ptr, true));
 
   sides.add(std::make_shared<XZRect>(p0.x(), p1.x(), p0.z(), p1.z(), p1.y(),
                                      mat_ptr));
   sides.add(std::make_shared<XZRect>(p0.x(), p1.x(), p0.z(), p1.z(), p0.y(),
-                                     mat_ptr));
+                                     mat_ptr, true));
 
   sides.add(std::make_shared<YZRect>(p0.y(), p1.y(), p0.z(), p1.z(), p1.x(),
                                      mat_ptr));
   sides.add(std::make_shared<YZRect>(p0.y(), p1.y(), p0.z(), p1.z(), p0.x(),
-                                     mat_ptr));
+                                     mat_ptr, true));
 }
 
 bool Box::bounding_box(float t0, float t1, AABB &output_box) const {

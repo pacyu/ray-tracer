@@ -36,6 +36,7 @@ Token ObjParser::expect(TokenType t_type) {
     return opt();
   }
   exception_message(t_type, opt().type);
+  return Token();
 }
 
 float ObjParser::make_number() {
@@ -98,6 +99,8 @@ std::unique_ptr<TextureCoordNode> ObjParser::make_texture_coord() {
   float x = make_number();
   expect(TokenType::NUMBER);
   float y = make_number();
+  if (opt().type == TokenType::NUMBER)
+    consume();
   return std::make_unique<TextureCoordNode>(Vec2{x, y});
 }
 
@@ -227,9 +230,11 @@ std::unique_ptr<MaterialParamsNode> ObjParser::make_newmtl() {
       tex_params.Kd = make_vector3();
     } else if (token.type == TokenType::SPECULAR) {
       tex_params.Ks = make_vector3();
+    } else if (token.type == TokenType::EMISSION_COLOR) {
+      tex_params.Ke = make_vector3();
     } else if (token.type == TokenType::SHININESS) {
       tex_params.Ns = make_number();
-    } else if (token.type == TokenType::NI) {
+    } else if (token.type == TokenType::INDEX_OF_REFRACTION) {
       tex_params.Ni = make_number();
     } else if (token.type == TokenType::OPACITY) {
       tex_params.d = make_number();
@@ -266,7 +271,7 @@ std::unique_ptr<MaterialParamsNode> ObjParser::make_newmtl() {
     } else if (token.type == TokenType::ILLUMINATION_MODEL) {
       tex_params.illum = static_cast<int>(make_number());
     } else {
-      break;
+      continue;
     }
   }
 
@@ -292,7 +297,6 @@ void ObjParser::parse_mtl() {
 }
 
 void ObjParser::parse() {
-
   while (cursor < tokens.size()) {
     Token token = opt();
     std::unique_ptr<ASTNode> node;
@@ -321,7 +325,7 @@ void ObjParser::parse() {
       make_face();
       continue;
     } else {
-      break;
+      continue;
     }
     nodes.push_back(std::move(node));
   }

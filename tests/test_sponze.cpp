@@ -1,3 +1,4 @@
+#include "tracer/obj_parser/factory.h"
 #include "tracer/tracer.h"
 #include <chrono>
 #include <iostream>
@@ -9,16 +10,19 @@ int main() {
   const int image_height = 600;
   const int samples_per_pixel = 128;
   const int max_depth = 8;
-  Vec3 lookfrom(3.0f, 3.0f, 3.0f);
-  Vec3 lookat(0.0f, 0.0f, 0.0f);
-  Vec3 vup(0.0f, 0.0f, 1.0f);
+
+  Vec3 lookfrom(0.0f, 800.0f, 500.0f);
+  Vec3 lookat(0.0f, 800.0f, 0.0f);
+  Vec3 vup(0.0f, 1.0f, 0.0f);
+  Vec3 forward = unit_vector(lookat - lookfrom);
+
+  std::shared_ptr<Background> background = std::make_shared<ImageBackground>(
+      "../textures/autumn_field_puresky_4k.hdr", forward, vup);
 
   hittable_list world;
   hittable_list lights;
 
-  std::shared_ptr<Background> background = std::make_shared<ImageBackground>(
-      "../textures/autumn_field_puresky_4k.hdr");
-  obj_parser::Object obj("../models/free-datsun-280z/Datsun_280Z.obj");
+  obj_parser::Object obj("../models/sponza/sponza.obj");
 
   std::shared_ptr<geometry::Mesh> mesh = obj.take();
   size_t vn = mesh->indices.size();
@@ -27,12 +31,15 @@ int main() {
   auto start_time = std::chrono::high_resolution_clock::now();
 
   mesh->finalize();
-  auto car = std::make_shared<transform::RotateZ>(
-      std::make_shared<transform::RotateX>(
-          std::make_shared<transform::Translate>(mesh, Vec3(0.f, 0.f, 0.f)),
-          -90.f),
-      -120.f);
-  world.add(car);
+  AABB box;
+  if (mesh->bounding_box(0, 0, box)) {
+    std::cout << "Sponza Min: " << box.min << std::endl;
+    std::cout << "Sponza Max: " << box.max << std::endl;
+  }
+    world.add(std::make_shared<transform::Translate>(
+        std::make_shared<transform::RotateY>(mesh, 90.0f),
+        Vec3(0.0f, 0.0f, 0.0f)));
+//   world.add(mesh);
 
   auto end_time = std::chrono::high_resolution_clock::now();
   std::cout << "[Build] BVH 构建完毕！用时: "
@@ -43,15 +50,15 @@ int main() {
 
   auto sun_mat =
       std::make_shared<material::DiffuseLight>(Vec3(15.0f, 15.0f, 15.0f));
-  auto light = std::make_shared<geometry::Sphere>(Vec3(0.0f, 0.0f, 1000.0f),
-                                                  30.0f, sun_mat);
+  auto light = std::make_shared<geometry::Sphere>(Vec3(0.0f, 1500.0f, -3000.0f),
+                                                  300.0f, sun_mat);
 
   lights.add(light);
 
   BVH bvh(world);
 
   Camera camera(image_width, image_height, samples_per_pixel, max_depth,
-                "test_obj_image.png", background, lookfrom, lookat, vup, 45.0f);
+                "test_sponze.png", background, lookfrom, lookat, vup, 90.0f);
   camera.render(bvh, lights, false);
   return 0;
 }

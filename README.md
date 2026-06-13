@@ -12,18 +12,129 @@
 
 ---
 
-![Car's model](/examples/test_obj_image.png)
+![sponze's model](/examples/test_sponze.png)
+![Car's model](/examples/test_car.png)
 ![Water material](/examples/test_ocean.png)
 ![Dynamics ocean](/examples/output.gif)
 ![Taubin's heart](/examples/image.png)
 
 ---
 
-## Latest Updates (2026.06.09)
+## Latest Updates (2026.06.14)
 
-- **性能优化**: 为了提升Mesh模型的构建性能和渲染性能，重构了 `Mesh`，使用更紧凑的 BVH 结构进行加速，并且只存储索引，这样无论是速度还是内存占用都大大减少。
+- **修复了许多问题**:
+  1. obj 解析器的已知问题修复，不过有些属性暂时没有利用，比如 `s、o、g`，解析了他们，但没有使用，尤其是 `o、g` 的名字，暂时忽略他们的用处，`s` 可能有些用，用于标记一些面共享顶点？但暂时没有处理。
+  2. 修复了 Mesh 的各种问题，尤其是因为 `pdf_value` 和 `random` 导致的问题，所以修改了所有 `hittable` 的相关接口。
+  3. 将 Mesh 内部的 BVH 构建算法升级为了 SAH 算法。
+  4. 修复 `Cloth` 材质无法正确渲染，纯黑色的原因，因为原先的写法会导致 srec.pdf_ptr 在 scattering_pdf 中变成悬空指针。
+  5. 修复了 `Plastic`、`Glossy Plastic` 的黑噪点问题。
+  6. 修复了背景贴图方向问题，背景贴图应该无关于相机 Up 方向，所以矫正为无论是 Y-Up 还是 Z-Up 永远都是正确的方向。
+  7. 修复 Vec2 `+` 重载计算错误，第二个分量计算不小心写成了 `*`，导致 `Mesh` 的纹理计算老是有问题，现已修复。
+- **已知问题**:
+  1. `Dielectric` 材质应用在 `Box` 会失效，失效主要是指颜色会失效，无论如何设置颜色、密度、折射率，Box 都是透明无色的，排查过所有问题：每个面的法向量设置、hit 反转法向量、光线步进 delta、射线检测的容差精度等等，全都测试过，依然无效，暂时无法解决。
+  2. `sponza` 场景虽然能渲染，但仍存在有一些问题，比如墙的纹理不太对、存在一些白噪点。
 
-`Datsun_280Z.obj`渲染信息：
+`Datsun_280z` 渲染信息:
+
+```bash
+成功加载HDR: ../textures/autumn_field_puresky_4k.hdr [4096x2048]
+正在解析材质: Datsun_280z.mtl
+材质解析完成!
+正在加载模型: ../models/free-datsun-280z/Datsun_280Z.obj
+模型加载完成!
+模型顶点个数: 320460, 面数量: 106820
+[Build] 开始构建 BVH ...
+[Build] BVH 构建完毕！用时: 0 s
+渲染进度: 100.00% | 已用时间: 9.5s | 预计剩余: 0.0s  
+```
+
+`sponza` 渲染信息:
+
+```bash
+成功加载HDR: ../textures/autumn_field_puresky_4k.hdr [4096x2048]
+正在解析材质: sponza.mtl
+材质解析完成!
+正在加载模型: ../models/sponza/sponza.obj
+成功加载纹理: ../models/sponza/textures\sponza_thorn_diff.png [512x512]
+成功加载纹理: ../models/sponza/textures\sponza_thorn_diff.png [512x512]
+成功加载纹理: ../models/sponza/textures\sponza_thorn_ddn.png [256x256]
+成功加载纹理: ../models/sponza/textures\sponza_thorn_mask.png [512x512]
+成功加载纹理: ../models/sponza/textures\vase_round.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_round.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_round_ddn.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_plant.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_plant.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_plant_NRM.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_plant_mask.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_plant.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_plant.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_plant_mask.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\background.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\background.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\background_ddn.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\gi_flag.png [128x128]
+成功加载纹理: ../models/sponza/textures\gi_flag.png [128x128]
+成功加载纹理: ../models/sponza/textures\spnza_bricks_a_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\spnza_bricks_a_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\spnza_bricks_a_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_arch_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_arch_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_ceiling_a_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_ceiling_a_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_column_a_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_column_a_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_column_a_ddn.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_floor_a_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_floor_a_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_column_c_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_column_c_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_column_c_ddn.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_details_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_details_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_column_b_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_column_b_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_column_b_ddn.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_flagpole_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_flagpole_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_fabric_green_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_fabric_green_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_fabric_blue_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_fabric_blue_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_fabric_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_fabric_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_curtain_blue_diff.png [2048x2048]
+成功加载纹理: ../models/sponza/textures\sponza_curtain_blue_diff.png [2048x2048]
+成功加载纹理: ../models/sponza/textures\sponza_curtain_diff.png [2048x2048]
+成功加载纹理: ../models/sponza/textures\sponza_curtain_diff.png [2048x2048]
+成功加载纹理: ../models/sponza/textures\sponza_curtain_green_diff.png [2048x2048]
+成功加载纹理: ../models/sponza/textures\sponza_curtain_green_diff.png [2048x2048]
+成功加载纹理: ../models/sponza/textures\chain_texture.png [256x1024]
+成功加载纹理: ../models/sponza/textures\chain_texture.png [256x1024]
+成功加载纹理: ../models/sponza/textures\chain_texture_ddn.png [256x1024]
+成功加载纹理: ../models/sponza/textures\chain_texture_mask.png [256x1024]
+成功加载纹理: ../models/sponza/textures\vase_hanging.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_hanging.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_dif.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\vase_dif.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\lion.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\lion.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\lion_ddn.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_roof_diff.png [1024x1024]
+成功加载纹理: ../models/sponza/textures\sponza_roof_diff.png [1024x1024]
+模型加载完成!
+模型顶点个数: 786828, 面数量: 262276
+[Build] 开始构建 BVH ...
+Sponza Min: (-1920.95, -126.442, -1182.81)
+Sponza Max: (1799.91, 1429.43, 1105.43)
+[Build] BVH 构建完毕！用时: 0 s
+渲染进度: 100.00% | 已用时间: 658.8s | 预计剩余: 0.0s 
+```
+
+## Updates (2026.06.09)
+
+- **性能优化**: 为了提升Mesh模型的构建性能和渲染性能，重构了 `Mesh`，使用更紧凑的 `BVH` 结构进行加速，并且只存储索引，这样无论是速度还是内存占用都大大减少。
+
+`Datsun_280Z.obj`渲染信息（修复: 该数量不正确，我发现是因为最初没完全理清 `obj` 格式，导致解析器重复添加了多遍模型的所有数据导致的，不过，虽然不对，就当做压力测试了，该问题已修复）：
 
 ```bash
 成功加载HDR: ../textures/autumn_field_puresky_4k.hdr [4096x2048]

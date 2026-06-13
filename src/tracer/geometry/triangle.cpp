@@ -165,8 +165,7 @@ Vec3 Triangle::random(const Vec3 &o) const {
   // 映射到物理 3D 空间点 P
   Vec3 random_point = bary.x() * v0 + bary.y() * v1 + bary.z() * v2;
 
-  // 返回从观察点 o 指向该随机点的方向向量
-  return random_point - o;
+  return random_point;
 }
 
 } // namespace geometry

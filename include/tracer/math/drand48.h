@@ -26,24 +26,27 @@ public:
 
 // 基础的 [0, 1) 浮点随机数
 inline float random_float() {
-  std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
+  static thread_local std::uniform_real_distribution<float> distribution(0.0f,
+                                                                         1.0f);
   return distribution(RandomEngine::get_instance());
 }
 
 // 指定范围的随机数
 inline float random_float(float min, float max) {
-  std::uniform_real_distribution<float> distribution(min, max);
+  static thread_local std::uniform_real_distribution<float> distribution(min,
+                                                                         max);
   return distribution(RandomEngine::get_instance());
 }
 
 // 正态分布
 inline float normal_dist(float mean, float stddev) {
-  std::normal_distribution<float> distribution(mean, stddev);
+  static thread_local std::normal_distribution<float> distribution(mean,
+                                                                   stddev);
   return distribution(RandomEngine::get_instance());
 }
 
 inline int random_int(int min, int max) {
-  std::uniform_int_distribution<int> distribution(min, max);
+  static thread_local std::uniform_int_distribution<int> distribution(min, max);
   return distribution(RandomEngine::get_instance());
 }
 

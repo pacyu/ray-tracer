@@ -13,7 +13,7 @@ struct Index {
   uint32_t idx[3] = {0};
   bool operator==(const Index &other) const {
     return idx[0] == other.idx[0] && idx[1] == other.idx[1] &&
-           idx[1] == other.idx[1];
+           idx[2] == other.idx[2];
   }
 };
 

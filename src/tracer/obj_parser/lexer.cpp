@@ -82,7 +82,10 @@ Token Lexer::peek_number() {
   while (isdigit(take()) || take() == '.' || take() == '-') {
     consume();
   }
-  return Token(TokenType::NUMBER, source.substr(pos, cursor - pos));
+  if (take() == ' ' || take() == '\n' || take() == '/' || take() == EOF)
+    return Token(TokenType::NUMBER, source.substr(pos, cursor - pos));
+  cursor = pos;
+  return peek_identifier();
 }
 
 Token Lexer::peek_identifier() {

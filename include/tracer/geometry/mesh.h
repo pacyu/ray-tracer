@@ -8,12 +8,12 @@
 namespace tracer {
 namespace geometry {
 
-struct Vertex {
+struct alignas(16) Vertex {
   Vec3 vertex;
   Vec3 normal;
-  Vec2 tex_coord;
   Vec3 tangent;   // 切线 (沿 U 方向)
   Vec3 bitangent; // 副切线 (沿 V 方向)
+  Vec2 tex_coord;
 };
 
 class Mesh : public hittable, public std::enable_shared_from_this<Mesh> {

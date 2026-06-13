@@ -27,8 +27,12 @@ public:
   cv::Mat img;
   int width;
   int height;
+  Vec3 vup;
+  Vec3 forward;
+  Vec3 right;
+  Vec3 up;
 
-  ImageBackground(const std::string &filepath);
+  ImageBackground(const std::string &, const Vec3 &, const Vec3 &);
 
   virtual Color value(const Ray &r) const override;
 };

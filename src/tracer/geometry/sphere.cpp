@@ -66,11 +66,16 @@ float Sphere::pdf_value(const Point3 &o, const Vec3 &v) const {
 }
 
 Vec3 Sphere::random(const Point3 &o) const {
-  Vec3 direction = center - o;
-  auto distance_squared = direction.squared_length();
-  onb uvw;
-  uvw.build_from_w(direction);
-  return uvw.local(tracer::math::random_to_sphere(radius, distance_squared));
+  float r1 = math::random_float();
+  float r2 = math::random_float();
+
+  float z = 1.0f - 2.0f * r1;
+  float phi = 2.0f * math::TRACER_PI * r2;
+  float x = cos(phi) * sqrt(1.0f - z * z);
+  float y = sin(phi) * sqrt(1.0f - z * z);
+
+  Vec3 point_on_sphere = center + radius * Vec3(x, y, z);
+  return point_on_sphere;
 }
 
 } // namespace geometry

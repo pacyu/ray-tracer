@@ -2,5 +2,5 @@
 build/*
 bin/*.exe
 bin/*.png
-bin/*.pbd
+bin/*.pdb
 lib/*

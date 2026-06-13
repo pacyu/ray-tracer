@@ -11,8 +11,9 @@ namespace geometry {
 class XYRect : public hittable {
 public:
   XYRect(float x0, float x1, float y0, float y1, float k,
-         std::shared_ptr<Material> m)
-      : x0(x0), x1(x1), y0(y0), y1(y1), k(k), mat_ptr(m) {}
+         std::shared_ptr<Material> m, bool is_flipped = false)
+      : x0(x0), x1(x1), y0(y0), y1(y1), k(k), mat_ptr(m),
+        is_flipped(is_flipped) {}
 
   virtual bool hit(const Ray &r, float t0, float t1,
                    hit_record &rec) const override;
@@ -30,13 +31,15 @@ public:
 
   std::shared_ptr<Material> mat_ptr;
   float x0, x1, y0, y1, k;
+  bool is_flipped;
 };
 
 class XZRect : public hittable {
 public:
   XZRect(float x0, float x1, float z0, float z1, float k,
-         std::shared_ptr<Material> m)
-      : x0(x0), x1(x1), z0(z0), z1(z1), k(k), mat_ptr(m) {}
+         std::shared_ptr<Material> m, bool is_flipped = false)
+      : x0(x0), x1(x1), z0(z0), z1(z1), k(k), mat_ptr(m),
+        is_flipped(is_flipped) {}
 
   virtual bool hit(const Ray &r, float t0, float t1,
                    hit_record &rec) const override;
@@ -54,13 +57,15 @@ public:
 
   std::shared_ptr<Material> mat_ptr;
   float x0, x1, z0, z1, k;
+  bool is_flipped;
 };
 
 class YZRect : public hittable {
 public:
   YZRect(float y0, float y1, float z0, float z1, float k,
-         std::shared_ptr<Material> m)
-      : y0(y0), y1(y1), z0(z0), z1(z1), k(k), mat_ptr(m) {}
+         std::shared_ptr<Material> m, bool is_flipped = false)
+      : y0(y0), y1(y1), z0(z0), z1(z1), k(k), mat_ptr(m),
+        is_flipped(is_flipped) {}
 
   virtual bool hit(const Ray &r, float t0, float t1,
                    hit_record &rec) const override;
@@ -78,6 +83,7 @@ public:
 
   std::shared_ptr<Material> mat_ptr;
   float y0, y1, z0, z1, k;
+  bool is_flipped;
 };
 
 } // namespace geometry
