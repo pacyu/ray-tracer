@@ -16,7 +16,7 @@
 ![Car's model](/examples/test_car.png)
 ![Water material](/examples/test_ocean.png)
 ![Dynamics ocean](/examples/output.gif)
-![Dynamics ocean](/examples/output1.gif)
+![Dynamics ocean1](/examples/output1.gif)
 ![Taubin's heart](/examples/image.png)
 
 ---
