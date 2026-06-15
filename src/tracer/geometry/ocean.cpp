@@ -7,35 +7,38 @@ Ocean::Ocean(physics::FFTOcean *fft_solver, std::shared_ptr<Material> water_mat,
              float lambda, float height_scale)
     : m_simulator(fft_solver), lambda(lambda), height_scale(height_scale) {
   this->materials.push_back(water_mat);
-  int N = fft_solver->N;
+  int Nx = fft_solver->Nx;
+  int Ny = fft_solver->Ny;
+  grid_num = Nx * Ny;
 
-  vertices.resize(N * N);
-  slope_x.resize(N * N, 0.0f);
-  slope_y.resize(N * N, 0.0f);
+  vertices.resize(grid_num);
+  slope_x.resize(grid_num, 0.0f);
+  slope_y.resize(grid_num, 0.0f);
 
-  int num_triangles = (N - 1) * (N - 1) * 2;
+  int num_triangles = (Nx - 1) * (Ny - 1) * 2;
   this->indices.reserve(num_triangles * 3);
   this->material_indices.reserve(num_triangles);
 
-  float grid_spacing = fft_solver->L / N;
+  float dx = fft_solver->Lx / Nx;
+  float dy = fft_solver->Ly / Ny;
 
   // 初始状态：创建一个平整的网格，不依赖 fft_solver 的实时数据
 #pragma omp parallel for schedule(static)
-  for (int idx = 0; idx < N * N; ++idx) {
-    float px = (idx % N) * grid_spacing - fft_solver->L / 2.0f;
-    float py = (idx / N) * grid_spacing - fft_solver->L / 2.0f;
+  for (int idx = 0; idx < grid_num; ++idx) {
+    float px = (idx % Nx) * dx - fft_solver->Lx * 0.5f;
+    float py = (idx / Nx) * dy - fft_solver->Ly * 0.5f;
     vertices[idx].vertex = Vec3(px, py, 0.0f); // 初始高度为 0
     vertices[idx].normal = Vec3(0, 0, 1);      // 初始法线向上
     vertices[idx].tex_coord =
-        Vec2(static_cast<float>(px) / N, static_cast<float>(py) / N);
+        Vec2(static_cast<float>(px) / Nx, static_cast<float>(py) / Ny);
   }
 
-  for (int y = 0; y < N - 1; ++y) {
-    for (int x = 0; x < N - 1; ++x) {
-      int i0 = y * N + x;
-      int i1 = y * N + (x + 1);
-      int i2 = (y + 1) * N + x;
-      int i3 = (y + 1) * N + (x + 1);
+  for (int y = 0; y < Ny - 1; ++y) {
+    for (int x = 0; x < Nx - 1; ++x) {
+      int i0 = y * Nx + x;
+      int i1 = y * Nx + (x + 1);
+      int i2 = (y + 1) * Nx + x;
+      int i3 = (y + 1) * Nx + (x + 1);
 
       // 三角形 1
       this->indices.push_back(i0);
@@ -78,16 +81,17 @@ std::shared_ptr<Material> Ocean::get_material() const {
 void Ocean::update_at_time(float time) {
   m_simulator->solve(time);
 
-  int N = m_simulator->N;
-  float grid_spacing = m_simulator->L / N;
-  int grids_num = N * N;
+  int Nx = m_simulator->Nx;
+  int Ny = m_simulator->Ny;
+  float dx = m_simulator->Lx / Nx;
+  float dy = m_simulator->Ly / Ny;
 
 #pragma omp parallel for schedule(static)
-  for (int idx = 0; idx < grids_num; ++idx) {
-    int x = idx % N;
-    int y = idx / N;
-    float orig_x = x * grid_spacing - m_simulator->L / 2.0f;
-    float orig_y = y * grid_spacing - m_simulator->L / 2.0f;
+  for (int idx = 0; idx < grid_num; ++idx) {
+    int x = idx % Nx;
+    int y = idx / Nx;
+    float orig_x = x * dx - m_simulator->Lx * 0.5f;
+    float orig_y = y * dy - m_simulator->Ly * 0.5f;
 
     float px = orig_x + m_simulator->dx[idx] * lambda;
     float py = orig_y + m_simulator->dy[idx] * lambda;
@@ -112,12 +116,10 @@ void Ocean::update_at_time(float time) {
 
     // 叉积算出精确法线
     Vec3 precise_normal = unit_vector(cross(tangent_x, tangent_y));
-    if (precise_normal.z() < 0)
-      precise_normal = -precise_normal;
 
     vertices[idx].normal = precise_normal;
     this->vertices[idx].tex_coord =
-        Vec2(static_cast<float>(x) / N, static_cast<float>(y) / N);
+        Vec2(static_cast<float>(x) / Nx, static_cast<float>(y) / Ny);
   }
 
   this->refit_blas();

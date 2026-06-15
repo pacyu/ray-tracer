@@ -13,7 +13,7 @@ ImageTexture::ImageTexture(const char *filepath) {
   } else {
     width = image.cols - 1;
     height = image.rows - 1;
-    std::cout << "成功加载纹理: " << filepath << " [" << width << "x" << height
+    std::cout << "成功加载纹理: " << filepath << " [" << width + 1 << "x" << height + 1
               << "]" << std::endl;
   }
 }

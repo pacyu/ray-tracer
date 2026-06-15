@@ -32,15 +32,15 @@ int main() {
   Vec3 w = unit_vector(lookfrom - lookat);
   Vec3 u = unit_vector(cross(vup, w));
 
-  float r = 300.0f;       // 稍微增大一点半径
-  float spacing = 800.0f; // 保持足够的间距防止重叠
+  float r = 250.0f;       // 稍微增大一点半径
+  float spacing = 500.0f; // 保持足够的间距防止重叠
 
   auto plastic_sphere = std::make_shared<geometry::Sphere>(
       lookat - 2 * u * spacing, r, plastic_mat);
   auto glossy_sphere = std::make_shared<geometry::Sphere>(
-      lookat - u * spacing / 2.0f, r, glossy_mat);
+      lookat - u * spacing / 1.5f, r, glossy_mat);
   auto glass_sphere = std::make_shared<geometry::Sphere>(
-      lookat + u * spacing / 2.0f, r, glass_mat);
+      lookat + u * spacing / 1.5f, r, glass_mat);
   auto metal_sphere = std::make_shared<geometry::Sphere>(
       lookat + 2 * u * spacing, r, metal_mat);
 
@@ -52,7 +52,7 @@ int main() {
 
   lights.add(sun_sphere);
   Camera camera(image_width, image_height, samples_per_pixel, max_depth,
-                "test_sphere.png", background, lookfrom, lookat, vup, 90.0f);
+                "test_sphere.png", background, lookfrom, lookat, vup, 60.0f);
   camera.render(world, lights, false);
   return 0;
 }

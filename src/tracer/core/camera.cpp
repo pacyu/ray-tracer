@@ -4,8 +4,7 @@ namespace tracer {
 
 Camera::Camera()
     : image_width(600), image_height(600), samples_per_pixel(128), max_depth(8),
-      output_name("image.png"),
-      background(std::make_shared<PhysicalSky>(Vec3(0, 0, 0))),
+      output_name("image.png"), background(std::make_shared<Background>()),
       lookfrom(Vec3(1000, 0, 0)), lookat(Vec3(0, 0, 0)), vup(Vec3(0, 0, 1)),
       vfov(40.0) {
   aspect_ratio =

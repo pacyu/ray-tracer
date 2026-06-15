@@ -1,9 +1,10 @@
 #pragma once
 #include "fftw3.h"
-#include "tracer/math/math.h"
 #include "tracer/math/drand48.h"
+#include "tracer/math/math.h"
 #include <complex>
 #include <vector>
+
 
 namespace tracer {
 namespace physics {
@@ -11,8 +12,7 @@ namespace physics {
 using Complex = std::complex<float>;
 
 struct OceanParams {
-  int N;            // 分辨率，如 512, 1024 (必须是 2 的幂)
-  float L;          // 物理世界海面的大小，如 1000.0f 米
+  float Lx, Ly;
   float wind_speed; // 风速
   float A;          // 振幅常数
   Complex wind_dir; // 风向单位向量
@@ -20,12 +20,12 @@ struct OceanParams {
 
 class FFTOcean {
 public:
-  int N;
-  float L;
+  int Nx, Ny;
+  int resolution;
+  float Lx, Ly;
 
   // 频域数据
   std::vector<Complex> h0_tilde;
-  std::vector<Complex> h0_tilde_conj;
 
   // 时域置换场（用于变形三角形网格）
   std::vector<float> dx;
@@ -39,7 +39,7 @@ public:
   std::vector<float> dx_dy;
   std::vector<float> dy_dx;
 
-  FFTOcean(const OceanParams &params);
+  FFTOcean(int nx, int ny, const OceanParams &params);
   ~FFTOcean();
 
   // 根据时间 t 更新海浪网格

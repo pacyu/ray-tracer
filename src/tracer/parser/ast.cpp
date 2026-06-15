@@ -115,16 +115,18 @@ HeartNode::HeartNode(std::shared_ptr<ASTNode> center,
     : center_expr(std::move(center)), rho_expr(std::move(rho)),
       material_expr(std::move(mat)), rot_expr(std::move(rot)) {}
 
-OceanNode::OceanNode(std::shared_ptr<ASTNode> n, std::shared_ptr<ASTNode> l,
+OceanNode::OceanNode(std::shared_ptr<ASTNode> nx, std::shared_ptr<ASTNode> ny,
+                     std::shared_ptr<ASTNode> lx, std::shared_ptr<ASTNode> ly,
                      std::shared_ptr<ASTNode> wind_speed,
                      std::shared_ptr<ASTNode> wind_dir,
                      std::shared_ptr<ASTNode> a, std::shared_ptr<ASTNode> mat,
                      std::shared_ptr<ASTNode> lam,
                      std::shared_ptr<ASTNode> height)
-    : n_expr(std::move(n)), l_expr(std::move(l)),
-      speed_expr(std::move(wind_speed)), dir_expr(std::move(wind_dir)),
-      a_expr(std::move(a)), mat_expr(std::move(mat)),
-      lambda_expr(std::move(lam)), height_expr(std::move(height)) {}
+    : nx_expr(std::move(nx)), ny_expr(std::move(ny)), lx_expr(std::move(lx)),
+      ly_expr(std::move(ly)), speed_expr(std::move(wind_speed)),
+      dir_expr(std::move(wind_dir)), a_expr(std::move(a)),
+      mat_expr(std::move(mat)), lambda_expr(std::move(lam)),
+      height_expr(std::move(height)) {}
 
 MeshNode::MeshNode(std::shared_ptr<ASTNode> mode_path,
                    std::shared_ptr<ASTNode> pos, std::shared_ptr<ASTNode> rot)
@@ -406,7 +408,7 @@ BasicType BoxNode::evaluate(std::shared_ptr<Environment> env) {
   Vec3 dist = bmax.t_vector3 - bmin.t_vector3;
   std::shared_ptr<hittable> box =
       std::make_shared<geometry::Box>(Vec3(0, 0, 0), dist, mat.t_material);
-  box = std::make_shared<transform::Translate>(box, bmin.t_vector3);
+
   if (rot_expr) {
     BasicType rot = rot_expr->evaluate(env);
     float x = rot.t_vector3.x();
@@ -419,6 +421,7 @@ BasicType BoxNode::evaluate(std::shared_ptr<Environment> env) {
     if (z != 0.f)
       box = std::make_shared<transform::RotateZ>(box, z);
   }
+  box = std::make_shared<transform::Translate>(box, bmin.t_vector3);
   return BasicType(box);
 }
 
@@ -437,7 +440,7 @@ BasicType HeartNode::evaluate(std::shared_ptr<Environment> env) {
   BasicType mat = material_expr->evaluate(env);
   std::shared_ptr<hittable> heart = std::make_shared<geometry::Heart>(
       Vec3(0, 0, 0), rho.t_float, mat.t_material);
-  heart = std::make_shared<transform::Translate>(heart, center.t_vector3);
+
   if (rot_expr) {
     BasicType rot = rot_expr->evaluate(env);
     float x = rot.t_vector3.x();
@@ -450,26 +453,31 @@ BasicType HeartNode::evaluate(std::shared_ptr<Environment> env) {
     if (z != 0.f)
       heart = std::make_shared<transform::RotateZ>(heart, z);
   }
+  heart = std::make_shared<transform::Translate>(heart, center.t_vector3);
   return BasicType(heart);
 }
 
 BasicType OceanNode::evaluate(std::shared_ptr<Environment> env) {
-  BasicType n = n_expr->evaluate(env);
-  BasicType l = l_expr->evaluate(env);
+  BasicType nx = nx_expr->evaluate(env);
+  BasicType ny = ny_expr->evaluate(env);
+  BasicType lx = lx_expr->evaluate(env);
+  BasicType ly = ly_expr->evaluate(env);
   BasicType wind_speed = speed_expr->evaluate(env);
   BasicType wind_dir = dir_expr->evaluate(env);
   BasicType a = a_expr->evaluate(env);
   BasicType mat = mat_expr->evaluate(env);
   BasicType lambda = lambda_expr->evaluate(env);
   BasicType height = height_expr->evaluate(env);
+  int nx_ = static_cast<int>(nx.t_float);
+  int ny_ = static_cast<int>(ny.t_float);
   physics::OceanParams params;
-  params.N = static_cast<int>(n.t_float);
-  params.L = l.t_float;
+  params.Lx = lx.t_float;
+  params.Ly = ly.t_float;
   params.wind_speed = wind_speed.t_float;
   params.wind_dir = physics::Complex(wind_dir.t_pair.first->t_float,
                                      wind_dir.t_pair.second->t_float);
   params.A = a.t_float;
-  auto simulator = std::make_unique<physics::FFTOcean>(params);
+  auto simulator = std::make_unique<physics::FFTOcean>(nx_, ny_, params);
   return BasicType(std::make_shared<geometry::Ocean>(
       &*simulator, mat.t_material, lambda.t_float, height.t_float));
 }
@@ -479,7 +487,7 @@ BasicType MeshNode::evaluate(std::shared_ptr<Environment> env) {
   BasicType position = position_expr->evaluate(env);
   obj_parser::Object obj(model_path.t_string);
   std::shared_ptr<hittable> mesh = obj.take();
-  mesh = std::make_shared<transform::Translate>(mesh, position.t_vector3);
+
   if (rot_expr) {
     BasicType rot = rot_expr->evaluate(env);
     float x = rot.t_vector3.x();
@@ -492,6 +500,7 @@ BasicType MeshNode::evaluate(std::shared_ptr<Environment> env) {
     if (z != 0.f)
       mesh = std::make_shared<transform::RotateZ>(mesh, z);
   }
+  mesh = std::make_shared<transform::Translate>(mesh, position.t_vector3);
   return BasicType(mesh);
 }
 

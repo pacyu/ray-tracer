@@ -23,7 +23,7 @@ int main() {
   auto plastic_mat = std::make_shared<material::Plastic>(
       Vec3(0.8f, 0.05f, 0.05f), 0.02f, 1.5f);
 
-  float r = 200.0f;
+  float r = 80.0f;
   float y0 = -(r - lookat.y()) / 2.0f;
   float y1 = -y0;
   float z0 = -(r - lookat.z()) / 2.0f;
@@ -37,7 +37,7 @@ int main() {
 
   lights.add(sun_sphere);
   Camera camera(image_width, image_height, samples_per_pixel, max_depth,
-                "test_plastic.png", background, lookfrom, lookat, vup, 90.0f);
+                "test_plastic.png", background, lookfrom, lookat, vup, 60.0f);
   camera.render(world, lights, false);
   return 0;
 }

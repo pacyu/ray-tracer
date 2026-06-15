@@ -43,7 +43,7 @@ box = Box ((100, -150, -277), (200, -50, -50), blue, (0, 0, 45.0))
 
 sphere = Sphere ((100, 100, -200), 80.0, glass)
 
-img_sphere = Sphere ((120, 10, -80), 100.0, img_texture)
+img_sphere = Sphere ((-130, 120, 0), 100.0, img_texture)
 
 boll = Sphere ((-100, 0, -200), 80.0, glass)
 

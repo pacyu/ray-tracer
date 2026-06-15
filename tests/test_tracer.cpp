@@ -36,12 +36,9 @@ static void test_tracer() {
   world.add(
       std::make_shared<geometry::XYRect>(0.f, 555.f, 0.f, 555.f, 555.f, gray));
 
-  //   std::shared_ptr<hittable> heart =
-  //       std::make_shared<geometry::Heart>(Point3(0.f, 0.f, 0.f), 120.f, red);
-  //   heart = std::make_shared<transform::Translate>(heart,
-  //                                                  Point3(278.f, 278.f,
-  //                                                  278.f));
-  //   world.add(heart);
+  std::shared_ptr<hittable> heart = std::make_shared<geometry::Heart>(
+      Point3(278.f, 278.f, 278.f), 120.f, red);
+  world.add(heart);
 
   std::shared_ptr<hittable> sphere = std::make_shared<geometry::Sphere>(
       Point3(400.f, 130.f, 250.f), 80.f, blue);
@@ -54,9 +51,9 @@ static void test_tracer() {
   world.add(boll);
 
   std::shared_ptr<hittable> box = std::make_shared<geometry::Box>(
-      Point3(0.f, 0.f, 10.f), Point3(100.f, 100.f, 150.f), blue);
+      Point3(0.f, 0.f, 0.f), Point3(100.f, 100.f, 100.f), blue);
   box = std::make_shared<transform::RotateZ>(box, -30.f);
-  box = std::make_shared<transform::Translate>(box, Point3(230.f, 0.f, 65.f));
+  box = std::make_shared<transform::Translate>(box, Point3(230.f, 0.f, 0.f));
   world.add(box);
 
   auto light = std::make_shared<geometry::XYRect>(113.f, 443.f, 127.f, 432.f,

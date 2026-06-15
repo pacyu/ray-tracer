@@ -309,8 +309,10 @@ std::shared_ptr<ASTNode> Parser::parse_heart() {
 
 std::shared_ptr<ASTNode> Parser::parse_ocean() {
   expect_token({TokenType::LeftParen});
-  std::shared_ptr<ASTNode> n = parse_expression(Precedence::NONE);
-  std::shared_ptr<ASTNode> l = parse_expression(Precedence::NONE);
+  std::shared_ptr<ASTNode> nx = parse_expression(Precedence::NONE);
+  std::shared_ptr<ASTNode> ny = parse_expression(Precedence::NONE);
+  std::shared_ptr<ASTNode> lx = parse_expression(Precedence::NONE);
+  std::shared_ptr<ASTNode> ly = parse_expression(Precedence::NONE);
   std::shared_ptr<ASTNode> wind_speed = parse_expression(Precedence::NONE);
   std::shared_ptr<ASTNode> wind_dir = parse_expression(Precedence::NONE);
   std::shared_ptr<ASTNode> a = parse_expression(Precedence::NONE);
@@ -318,7 +320,7 @@ std::shared_ptr<ASTNode> Parser::parse_ocean() {
   std::shared_ptr<ASTNode> lam = parse_expression(Precedence::NONE);
   std::shared_ptr<ASTNode> height = parse_expression(Precedence::NONE);
   std::shared_ptr<OceanNode> ocean = std::make_shared<OceanNode>(
-      n, l, wind_speed, wind_dir, a, mat, lam, height);
+      nx, ny, lx, ly, wind_speed, wind_dir, a, mat, lam, height);
   expect_token({TokenType::RightParen});
   return ocean;
 }

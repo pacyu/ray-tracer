@@ -138,7 +138,7 @@ float Triangle::pdf_value(const Vec3 &o, const Vec3 &v) const {
   const Vec3 &v2 = mesh_ptr->vertices[i2].vertex;
 
   // 计算三角形面积 Area = 0.5 * |(v1 - v0) x (v2 - v0)|
-  float area = 0.5f * cross(v1 - v0, v2 - v0).length();
+  float A = 0.5f * cross(v1 - v0, v2 - v0).length();
 
   float distance_squared = rec.t * rec.t * v.squared_length();
   float cosine = std::abs(dot(v, rec.normal) / v.length());
@@ -147,7 +147,7 @@ float Triangle::pdf_value(const Vec3 &o, const Vec3 &v) const {
     return 0.0f;
 
   // 立体角 PDF = 距离平方 / (面积 * cos(theta))
-  return distance_squared / (cosine * area);
+  return distance_squared / (cosine * A);
 }
 
 Vec3 Triangle::random(const Vec3 &o) const {

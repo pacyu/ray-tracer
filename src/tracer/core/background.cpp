@@ -41,7 +41,7 @@ ImageBackground::ImageBackground(const std::string &filepath,
   } else {
     width = img.cols - 1;
     height = img.rows - 1;
-    std::cout << "成功加载HDR: " << filepath << " [" << width << "x" << height
+    std::cout << "成功加载HDR: " << filepath << " [" << width + 1 << "x" << height + 1
               << "]" << std::endl;
   }
 
@@ -60,7 +60,7 @@ Color ImageBackground::value(const Ray &r_in) const {
   float phi = std::atan2(-local_d.y(), local_d.x());
   float theta = std::acos(std::clamp(local_d.z(), -1.0f, 1.0f));
 
-  float rotation_offset = 0.35f;
+  float rotation_offset = 0.5f;
   float u = (phi + math::TRACER_PI) / (2.0f * math::TRACER_PI);
   float v = theta / math::TRACER_PI;
   u = fmod(u + rotation_offset, 1.0f);

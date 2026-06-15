@@ -58,11 +58,10 @@ float Sphere::pdf_value(const Point3 &o, const Vec3 &v) const {
   if (!this->hit(Ray(o, v), 0.001f, tracer::math::INF, rec))
     return 0.0f;
 
-  float cos_theta_max =
-      sqrt(1.0f - radius * radius / (center - o).squared_length());
-  float solid_angle = 2.0f * tracer::math::TRACER_PI * (1.0f - cos_theta_max);
-
-  return 1.0f / solid_angle;
+  float A = 4.0f * tracer::math::TRACER_PI * radius * radius;
+  float d2 = rec.t * rec.t;
+  float cos_theta = fabs(dot(v, rec.normal));
+  return d2 / (cos_theta * A);
 }
 
 Vec3 Sphere::random(const Point3 &o) const {

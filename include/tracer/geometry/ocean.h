@@ -7,6 +7,7 @@ namespace geometry {
 
 class Ocean : public Mesh {
 public:
+  int grid_num;
   std::vector<float> slope_x;
   std::vector<float> slope_y;
   physics::FFTOcean *m_simulator;
@@ -21,8 +22,8 @@ public:
   void update_at_time(float time);
 
 private:
-  float lambda = 12.0f;
-  float height_scale = 60.f;
+  float lambda = 1.0f;
+  float height_scale = 0.8f;
 };
 
 } // namespace geometry

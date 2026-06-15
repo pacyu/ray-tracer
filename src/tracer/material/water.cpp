@@ -10,7 +10,7 @@ bool Water::scatter(const Ray &r_in, const hit_record &rec,
   Vec3 v = -incident;                            // 视线方向 (指向外部)
 
   float etai = 1.0f, etat = ior;
-  bool is_front_face = dot(incident, n) < 0;
+  bool is_front_face = dot(incident, n) < 0.0f;
 
   // 默认情况下，如果光线在空气中飞行击中水面，能量不衰减
   Vec3 attenuation(1.0f, 1.0f, 1.0f);
@@ -18,14 +18,16 @@ bool Water::scatter(const Ray &r_in, const hit_record &rec,
   if (!is_front_face) {
     n = -n;
     std::swap(etai, etat);
-
-    // 定义水体的吸收系数 (Absorption Coefficient)
-    // R, G, B 分别对应红、绿、蓝光的吸收率。红光最高，蓝光最低。
-    Vec3 absorption_coefficient(5.0f, 2.0f, 0.5f);
-
+    // R, G, B 分别对应红、绿、蓝光的吸收率。
     attenuation = Vec3(std::exp(-absorption_coefficient.x() * rec.t),
                        std::exp(-absorption_coefficient.y() * rec.t),
                        std::exp(-absorption_coefficient.z() * rec.t));
+  } else {
+    float sea_floor_z = -10.0f;
+    float depth = std::max(0.0f, -rec.p.z() - sea_floor_z);
+    attenuation = Vec3(std::exp(-absorption_coefficient.x() * depth),
+                       std::exp(-absorption_coefficient.y() * depth),
+                       std::exp(-absorption_coefficient.z() * depth));
   }
 
   float alpha = std::max(0.001f, roughness * roughness);
@@ -54,7 +56,8 @@ bool Water::scatter(const Ray &r_in, const hit_record &rec,
   } else {
     Vec3 refracted;
     if (tracer::optics::refract(incident, h, etai / etat, refracted)) {
-      srec.specular_ray = Ray(rec.p - n * 0.001f, refracted);
+      Vec3 offset = is_front_face ? -n : n;
+      srec.specular_ray = Ray(rec.p + offset * 0.001f, refracted);
     } else {
       Vec3 reflected = tracer::optics::reflect(incident, h);
       srec.specular_ray = Ray(rec.p + n * 0.001f, reflected);

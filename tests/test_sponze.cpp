@@ -11,8 +11,8 @@ int main() {
   const int samples_per_pixel = 128;
   const int max_depth = 8;
 
-  Vec3 lookfrom(0.0f, 800.0f, 500.0f);
-  Vec3 lookat(0.0f, 800.0f, 0.0f);
+  Vec3 lookfrom(0.0f, 200.0f, -700.0f);
+  Vec3 lookat(0.0f, 200.0f, 0.0f);
   Vec3 vup(0.0f, 1.0f, 0.0f);
   Vec3 forward = unit_vector(lookat - lookfrom);
 
@@ -36,10 +36,10 @@ int main() {
     std::cout << "Sponza Min: " << box.min << std::endl;
     std::cout << "Sponza Max: " << box.max << std::endl;
   }
-    world.add(std::make_shared<transform::Translate>(
-        std::make_shared<transform::RotateY>(mesh, 90.0f),
-        Vec3(0.0f, 0.0f, 0.0f)));
-//   world.add(mesh);
+  world.add(std::make_shared<transform::Translate>(
+      std::make_shared<transform::RotateY>(mesh, 90.0f),
+      Vec3(0.0f, 0.0f, 0.0f)));
+  //   world.add(mesh);
 
   auto end_time = std::chrono::high_resolution_clock::now();
   std::cout << "[Build] BVH 构建完毕！用时: "
@@ -50,15 +50,15 @@ int main() {
 
   auto sun_mat =
       std::make_shared<material::DiffuseLight>(Vec3(15.0f, 15.0f, 15.0f));
-  auto light = std::make_shared<geometry::Sphere>(Vec3(0.0f, 1500.0f, -3000.0f),
+  auto light = std::make_shared<geometry::Sphere>(Vec3(0.0f, 2000.0f, 0.0f),
                                                   300.0f, sun_mat);
 
   lights.add(light);
-
+  world.add(light);
   BVH bvh(world);
 
   Camera camera(image_width, image_height, samples_per_pixel, max_depth,
-                "test_sponze.png", background, lookfrom, lookat, vup, 90.0f);
+                "test_sponze.png", background, lookfrom, lookat, vup, 60.0f);
   camera.render(bvh, lights, false);
   return 0;
 }

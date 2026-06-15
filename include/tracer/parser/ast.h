@@ -21,7 +21,6 @@
 #include <unordered_map>
 #include <vector>
 
-
 namespace tracer {
 namespace parser {
 
@@ -409,11 +408,12 @@ public:
 
 class OceanNode : public ASTNode {
 private:
-  std::shared_ptr<ASTNode> n_expr, l_expr, speed_expr, dir_expr, a_expr,
-      mat_expr, lambda_expr, height_expr;
+  std::shared_ptr<ASTNode> nx_expr, ny_expr, lx_expr, ly_expr, speed_expr,
+      dir_expr, a_expr, mat_expr, lambda_expr, height_expr;
 
 public:
   OceanNode(std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
+            std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
             std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
             std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>,
             std::shared_ptr<ASTNode>, std::shared_ptr<ASTNode>);

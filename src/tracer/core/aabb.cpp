@@ -26,6 +26,8 @@ AABB AABB::surrounding_box(AABB box0, AABB box1) {
                      std::max(box0.max.z(), box1.max.z())));
 }
 
+const Point3 AABB::centroid() const { return (min + max) * 0.5f; }
+
 void AABB::expand(const Vec3 &point) {
   min = Vec3::min(min, point);
   max = Vec3::max(max, point);

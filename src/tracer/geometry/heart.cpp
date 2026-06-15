@@ -121,14 +121,32 @@ float Heart::pdf_value(const Point3 &o, const Vec3 &v) const {
   if (!this->hit(Ray(o, v), 0.001f, tracer::math::INF, rec))
     return 0;
 
-  // 1. 计算心形的近似包围球（基于中心和 rho）
-  // 心形大约占据半径为 1.5 * rho 的空间
   float radius = rho * 1.5f;
-  auto cos_theta_max =
-      sqrt(1 - radius * radius / (center - o).squared_length());
-  auto solid_angle = 2 * tracer::math::TRACER_PI * (1 - cos_theta_max);
+  float A = 4.0f * math::TRACER_PI * radius * radius;
+  Vec3 oc = o - center;
+  float a = dot(v, v);
+  float b = 2.0f * dot(oc, v);
+  float c = dot(oc, oc) - radius * radius;
+  float discriminant = b * b - 4 * a * c;
+  if (discriminant <= 0.0f)
+    return 0.0f;
 
-  return 1 / solid_angle;
+  float sqrt_d = sqrt(discriminant);
+  float t = (-b - sqrt_d) / (2.0f * a);
+  if (t < 0.001f)
+    t = (-b + sqrt_d) / (2.0f * a);
+  if (t < 0.001f)
+    return 0.0f;
+
+  Point3 Q = o + t * v; // 球面上的交点
+  Vec3 w = Q - o;       // 从 o 指向 Q 的向量
+  float d2 = w.squared_length();
+  float cos_theta = fabs(dot(normalize(w), normalize(Q - center)));
+  
+  if (cos_theta < 1e-6f)
+    return 0.0f;
+
+  return d2 / (A * cos_theta);
 }
 
 Vec3 Heart::random(const Point3 &o) const {

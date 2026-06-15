@@ -13,11 +13,11 @@ float XYRect::pdf_value(const Point3 &origin, const Vec3 &v) const {
   if (!this->hit(Ray(origin, v), 0.001f, tracer::math::INF, rec))
     return 0;
 
-  auto area = (x1 - x0) * (y1 - y0);
-  auto distance_squared = rec.t * rec.t;
-  auto cosine = fabs(dot(v, rec.normal));
+  float A = (x1 - x0) * (y1 - y0);
+  float distance_squared = rec.t * rec.t;
+  float cosine = fabs(dot(v, rec.normal));
 
-  return distance_squared / (cosine * area);
+  return distance_squared / (cosine * A);
 }
 
 Vec3 XYRect::random(const Point3 &origin) const {
@@ -54,11 +54,11 @@ float XZRect::pdf_value(const Point3 &origin, const Vec3 &v) const {
   if (!this->hit(Ray(origin, v), 0.001f, tracer::math::INF, rec))
     return 0;
 
-  auto area = (x1 - x0) * (z1 - z0);
-  auto distance_squared = rec.t * rec.t;
-  auto cosine = fabs(dot(v, rec.normal));
+  float A = (x1 - x0) * (z1 - z0);
+  float distance_squared = rec.t * rec.t;
+  float cosine = fabs(dot(v, rec.normal));
 
-  return distance_squared / (cosine * area);
+  return distance_squared / (cosine * A);
 }
 
 Vec3 XZRect::random(const Point3 &origin) const {
@@ -95,11 +95,11 @@ float YZRect::pdf_value(const Point3 &origin, const Vec3 &v) const {
   if (!this->hit(Ray(origin, v), 0.001f, tracer::math::INF, rec))
     return 0;
 
-  auto area = (y1 - y0) * (z1 - z0);
-  auto distance_squared = rec.t * rec.t;
-  auto cosine = fabs(dot(v, rec.normal));
+  float A = (y1 - y0) * (z1 - z0);
+  float distance_squared = rec.t * rec.t;
+  float cosine = fabs(dot(v, rec.normal));
 
-  return distance_squared / (cosine * area);
+  return distance_squared / (cosine * A);
 }
 
 Vec3 YZRect::random(const Point3 &origin) const {

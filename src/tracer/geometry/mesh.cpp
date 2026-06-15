@@ -386,14 +386,14 @@ float Mesh::pdf_value(const Vec3 &o, const Vec3 &v) const {
   if (!rec.mat_ptr)
     return 0.0f;
 
-  float area = rec.triangle_area;
+  float A = rec.triangle_area;
   float cos_theta = fabs(dot(v, rec.normal));
 
   if (cos_theta < 1e-6f)
     return 0.0f;
 
   float d2 = rec.t * rec.t;
-  return d2 / (area * cos_theta) * (1.0f / total_area);
+  return d2 / (A * cos_theta) * (1.0f / total_area);
 }
 
 Vec3 Mesh::random(const Vec3 &o) const {
@@ -516,8 +516,16 @@ void Mesh::finalize() {
     max_p = Vec3::max(max_p, v.vertex);
   }
   bbox = AABB(min_p, max_p);
-
-  compute_smooth_normals();
+  bool need_smooth = true;
+  for (const auto &v : vertices) {
+    if (v.normal.squared_length() > 0.0f) {
+      need_smooth = false;
+      break;
+    }
+  }
+  if (need_smooth) {
+    compute_smooth_normals();
+  }
   compute_tangents();
   build_area_cdf();
   build_bvh();

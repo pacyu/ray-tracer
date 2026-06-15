@@ -7,7 +7,7 @@ int main() {
   const int image_width = 1200;
   const int image_height = 600;
   const int samples_per_pixel = 128;
-  const int max_depth = 50;
+  const int max_depth = 8;
   Vec3 lookfrom(100.0f, 100.0f, 20.0f);
   Vec3 lookat(0.0f, 0.0f, 0.0f);
   Vec3 vup(0.0f, 0.0f, 1.0f);
@@ -23,7 +23,7 @@ int main() {
   auto metal_mat =
       std::make_shared<material::Metal>(Color(0.06f, 0.32f, 0.73f), 0.1f);
 
-  float r = 200.0f;
+  float r = 80.0f;
   float y0 = -(r - lookat.y()) / 2.0f;
   float y1 = -y0;
   float z0 = -(r - lookat.z()) / 2.0f;
@@ -37,7 +37,7 @@ int main() {
 
   lights.add(sun_sphere);
   Camera camera(image_width, image_height, samples_per_pixel, max_depth,
-                "test_metal.png", background, lookfrom, lookat, vup, 90.0f);
+                "test_metal.png", background, lookfrom, lookat, vup, 60.0f);
   camera.render(world, lights, false);
   return 0;
 }
