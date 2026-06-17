@@ -27,5 +27,6 @@
 #include "tracer/texture/solid_color.h"
 #include "tracer/transform/rotate.h"
 #include "tracer/transform/translate.h"
+#include "tracer/utils/timer.h"
 #include "tracer/volume/constant_medium.h"
 #include "tracer/volume/medium.h"
